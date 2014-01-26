@@ -1,0 +1,163 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/easyvalidator/css/validate.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/easy_validator.pack.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/jquery.bgiframe.min.js"></script>
+<base target="_self">
+<title>修改电子文件服务器</title>
+<script>
+	function closepage() {
+		window.returnValue="ok";
+		window.close();
+	}
+	
+$(function() {
+		
+		//获取传来的值
+		var result = '${result }';
+		
+		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
+		if (result != "") {
+			alert(result);
+			window.dialogArguments.location.reload();
+		}
+		//如果返回了对象
+		var serverType = '${docserver.servertype}';
+		if (serverType != "") {
+			//服务器类型为local,显示local的form
+			if (serverType == "LOCAL") {
+				$("#ftpform").css("display","none");
+				$('#localform').removeAttr("style");
+				$("#servertype_l").val("LOCAL");
+			}
+			else if (serverType == "FTP") {
+				$("#localform").css("display","none");
+				$('#ftpform').removeAttr("style");
+				$("#servertype_f").val("FTP");
+			}
+			else {
+				
+			}
+		}
+		else {
+			$("#servertype_l").val("LOCAL");
+		}
+	})
+</script>
+</head>
+<body>
+	<form id="localform" action="update.do" method="post">
+		<table id="testTable" cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr >
+	                <td class="biaoti" colspan="2">修改服务器</td>
+	                <td>&nbsp;</td>
+	            </tr>
+				<tr class="tr1">
+					<td class="txt1">服务器类型 :</td>
+					<td>
+						<c:if test="${docserver.servertype=='LOCAL' }">
+							服务器本地目录
+						</c:if>
+						<input name="servertype" type="hidden" id="servername" value="${docserver.servertype }"  />
+						<input name="id" type="hidden" id="" value="${docserver.id }"  />
+					</td>
+				</tr>
+				<tr >
+					<td class="txt1">服务器名称 :</td>
+					<td>
+						<input name="servername" type="text" id="servername" value="${docserver.servername }" reg="^.+$" tip="服务器名称[必须填写] " />
+					</td>
+				</tr>
+				<tr >
+					<td class="txt1">服务器路径 :</td>
+					<td>
+						<input name="serverpath" type="text" id="serverpath" value="${docserver.serverpath }" reg="^.+$" tip="服务器路径[必须填写] " />
+					</td>
+				</tr>
+				<tr >
+					<td class="txt1">服务器描述 :</td>
+					<td>
+						<input name="servermemo" type="text" id="servermemo" value="${docserver.servermemo }" tip="服务器描述[不必须填写] " />
+					</td>
+				</tr>
+				<tr >
+					<td class="caozuo" colspan="2">
+						<input type="submit" value="保存" class="save" />
+						<input type="button" value="关闭" class="close" onclick="closepage()">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<form id="ftpform" style="display: none;" action="update.do" method="post">
+		<table id="testTable" cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr >
+	                <td class="biaoti" colspan="2">添加服务器</td>
+	                <td>&nbsp;</td>
+	            </tr>
+				<tr class="tr1">
+					<td class="txt1">服务器类型 :</td>
+					<td>
+						<c:if test="${docserver.servertype=='FTP' }">
+								FTP服务器
+						</c:if>
+						<input name="servertype" type="hidden" id="servername" value="${docserver.servertype }"  />
+						<input name="id" type="hidden" id="" value="${docserver.id }"  />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">服务器名称 :</td>
+					<td>
+						<input name="servername" type="text" id="servername" value="${docserver.servername }" reg="^.+$" tip="服务器名称[必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">
+						服务器IP :</td>
+					<td>
+						<input name="serverip" type="text" id="serverip" value="${docserver.serverip }" reg="^.+$" tip="服务器IP地址[必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">FTP帐户 :</td>
+					<td>
+						<input name="ftpuser" type="text" id="ftpuser" value="${docserver.ftpuser }" reg="^.+$" tip="FTP服务器登录帐户名[必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">FTP密码 :</td>
+					<td>
+						<input name="ftppassword" type="text" id="ftppassword" value="${docserver.ftppassword }" reg="^.+$" tip="FTP服务器登录密码[必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">FTP端口 :</td>
+					<td>
+						<input name="serverport" type="text" id="serverport" value="${docserver.serverport }" reg="^.+$" value="21" tip="FTP服务器端口[必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="txt1">服务器描述 :</td>
+					<td>
+						<input name="servermemo" type="text" id="servermemo" value="${docserver.servermemo }" tip="服务器描述[不必须填写] " />
+					</td>
+				</tr>
+				<tr>
+					<td class="caozuo" colspan="2">
+						<input type="submit" value="保存" class="save"/>
+						<input type="button" value="关闭" class="close" onclick="closepage()">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+</html>

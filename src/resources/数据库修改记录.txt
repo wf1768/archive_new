@@ -1,0 +1,63 @@
+20131028 
+数据库改变记录，升级时用到。
+
+1、各表id字段，统一修改为id
+
+2、去掉sys_account_org （帐户与组关联表）
+   （1）在sys_account表增加orgid（varchar 40）
+    (2) 通过sql语句将帐户与组重新关联（通过帐户表的orgid）
+       update sys_account a set a.orgid = (select o.orgid from sys_account_org o where a.id = o.accountid) 
+    (3) 删除sys_account_org
+    
+3、去掉sys_account_role (帐户与角色关联表)
+	(1) 在sys_account表增加roleid(varchar 40)
+	(2) 通过sql语句将帐户与角色重新对映
+		update sys_account a set a.roleid = (select r.roleid from sys_account_role r where a.id = r.accountid) 
+	(3) 删除sys_account_role表
+
+4、去掉sys_org_role表
+   （1）在sys_org表增加字段roleid
+    （2）通过sql语句将组与角色重新关联
+    （3）删除sys_org_role表
+5、去掉sys_tree_templet表	
+	(1)在sys_tree表增加templetid字段
+	（2）通过sql语句，将树与档案类型的关联对应
+	（3）删除sys_tree_templet表
+
+6、删除sys_doc表多余字段 
+7、关于集团版本的设计
+	（1）、组和帐户的管理
+		如果帐户的角色有系统设置－》帐户管理的权限，那么打开帐户管理时，能看到自己所属组下的帐户组，可以新建组，新建帐户。也就是帐户可以管理自己组下的帐户和组。
+	（2）、角色的管理
+		可以新建角色，可以给自己管理的组和帐户赋予角色。角色表要增加字段（orgid），创建新角色时，赋予当前帐户所属组的id，这样这些新建角色，就只对这个组。给组下的组和帐户赋予角色时，只列出当前帐户所属组的id对应角色。
+	（3）、档案类型
+		档案类型表sys_templet增加字段,(orgid)，orgid用来：当当前帐户的角色有系统设置－》档案库管理时，只列出当前帐户所属组的档案类型，可以新建档案类型，修改档案类型的字段等。在设置帐户组或帐户权限时，要增加开发赋予组或帐户档案类型文件夹的权限。
+	（4）、组表增加三个字段，orgindex（自增，用来生成node）  treenode（存储node） 
+	(5) 增加sys_orgowner表。为集团版本的组织结构。组的所有者。id    orgid   accountid关联
+8、在帐户组、帐户表与树节点关联表增加filter（text）字段，用来存储数据访问权限。
+9、增加表sys_init 表。用来存储系统各种配置,
+	id （varchar 40）
+	initkey （varchar 200）
+	initvalue （varchar 500)
+	initkeymemo
+
+	存储以下内容大概
+	（1）采用数据库
+		database
+	（2）索引文件地址
+		luceneurl
+	（3）openoffice路径
+		openofficeurl
+	(4)执行office转换bat文件
+		serviceurl
+
+10、收藏夹表增加帐户id字段。
+
+//暂时取消rolegroup表。用org来作为组织机构
+11、创建sys_rolegroup表，作为角色组表，集团版本时，依靠该表来区分上下级管理员创建角色范围.
+
+	(1)增加表sys_rolegroup
+	(2)初始化第一条数据
+	(3)sys_role表增加字段groupid 关联的
+	
+12、
