@@ -164,12 +164,14 @@
 				<tr class="textCt ertr  hui title1">
 					<td><p>#</p></td>
 					<td><p>集团机构名称</p></td>
+					<td><p>管理者</p></td>
 					<td><p>操作</p></td>
 				</tr>
 				<c:forEach items="${childList}" varStatus="i" var="item">
 					<tr class="textCt ertr  ">
 						<td>${i.index+1 }</td>
-						<td>${item.orgname}</td>
+						<td>${item['orgname']}</td>
+						<td>${item['ownerString']}</td>
 						<td>
 							<a href="javascript:;" onclick="status('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/group_key.png" />

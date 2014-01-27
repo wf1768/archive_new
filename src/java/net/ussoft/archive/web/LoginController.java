@@ -80,6 +80,12 @@ public class LoginController extends BaseConstroller {
 		Sys_account res = accountService.login(account);
 		
 		if (null != res) {
+			//这里要判断帐户的状态，如果为不启用，就拒绝访问
+			if (res.getAccountstate() == 0) {
+				modelMap.put("result", "您的帐户已被禁用，请与管理员联系。");
+				return new ModelAndView("login",modelMap);
+			}
+		
 			//用户登录成功，将用户实体存入session
 			CommonUtils.setSessionAttribute(request, Constants.user_in_session, res);
 			//获取帐户角色能访问的功能
