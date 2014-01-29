@@ -1,6 +1,5 @@
 package net.ussoft.archive.service;
 
-import java.util.HashMap;
 import java.util.List;
 
 import net.ussoft.archive.model.Sys_function;
@@ -13,7 +12,7 @@ public interface IRoleService {
 	 * @param id
 	 * @return
 	 */
-	public Sys_role selectById(String id);
+	public Sys_role getById(String id);
 	
 	/**
 	 * 获取全部信息

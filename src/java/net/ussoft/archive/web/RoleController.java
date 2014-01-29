@@ -154,7 +154,7 @@ public class RoleController extends BaseConstroller {
 			return null;
 		}
 		//获取对象
-		Sys_role role = roleService.selectById(id);
+		Sys_role role = roleService.getById(id);
 		modelMap.put("role", role);
 		return new ModelAndView("/view/system/role/edit",modelMap);
 	}
@@ -248,7 +248,7 @@ public class RoleController extends BaseConstroller {
 	
 	private ModelMap getAccountMap(String roleid,ModelMap modelMap) {
 		//获取当前角色
-		Sys_role role = roleService.selectById(roleid);
+		Sys_role role = roleService.getById(roleid);
 		modelMap.put("role", role);
 		//获取对象
 		Sys_account account = new Sys_account();

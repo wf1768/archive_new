@@ -63,7 +63,13 @@
 
 
 	function add(){
-		var url = "add.do?time="+Date.parse(new Date());
+		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+		var nodes = treeObj.getSelectedNodes();
+		if (nodes.length != 1) {
+			alert("请选择左侧集团组织机构树，再创建下级单位。");
+			return;
+		}
+		var url = "add.do?parentid="+nodes[0].id+"&time="+Date.parse(new Date());
 		var whObj = { width: 340, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
 		//window.location.reload(true); // 刷新窗体
@@ -118,6 +124,18 @@
 		var whObj = { width: 740, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
 	}
+	
+	function move(id) {
+		var url = "move.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 440, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
+	
+	function setowner(id) {
+		var url = "setowner.do?orgid="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 740, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
 
 
 </script>
@@ -149,7 +167,7 @@
         	<div  class="caozuo_right">
         	<ul>
                 <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
-                    添加角色</a>
+                    添加组织机构</a>
                 </li>
                 <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
                     刷新列表</a>
@@ -177,23 +195,25 @@
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/group_key.png" />
 								帐户组
 							</a>
-							<a href="javascript:;" onclick="searchAccount('${item.id}')" class="juse">
+							<a href="javascript:;" onclick="setowner('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
-								帐户
+								管理者
 							</a>
-							<c:if test="${item.orgname != '超级帐户' }">
-								<a href="#" onclick="edit('${item.id}')" class="juse">
-									<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
-									修改
-								</a>
-								<a href="javascript:;" onclick="del('${item.id}')" class="juse">
-									<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_delete.png" />
-									删除
-								</a>
-							</c:if>
+							<a href="#" onclick="edit('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
+								修改
+							</a>
+							<a href="javascript:;" onclick="del('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_delete.png" />
+								删除
+							</a>
 							<a href="#" onclick="auth('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/key_add.png" />
 								赋权
+							</a>
+							<a href="#" onclick="move('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_refresh.png" />
+								移动
 							</a>
 						</td>
 					</tr>

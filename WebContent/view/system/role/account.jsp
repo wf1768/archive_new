@@ -41,30 +41,30 @@ caption {
 	})
 	
 	function updateAccount(roleid,accountid) {
-	if (accountid == "" || roleid == "") {
-		alert("没有获得要移除角色的帐户，请重新尝试，或与管理员联系。");
-		return;
+		if (accountid == "" || roleid == "") {
+			alert("没有获得要移除角色的帐户，请重新尝试，或与管理员联系。");
+			return;
+		}
+		
+		if (confirm("确定要移除选择的帐户角色吗？")) {
+		    $.ajax({
+		        async : true,
+		        url : "${pageContext.request.contextPath}/role/updateAccount.do",
+		        type : 'post',
+		        data:{roleid:roleid,accountid:accountid},
+		        dataType : 'text',
+		        success : function(data) {
+		            if (data == "success") {
+		            	alert("更新完毕。");
+		            	
+		            } else {
+		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
+		            }
+		            window.location.reload(true);
+		        }
+		    });
+		}
 	}
-	
-	if (confirm("确定要移除选择的帐户角色吗？")) {
-	    $.ajax({
-	        async : true,
-	        url : "${pageContext.request.contextPath}/role/updateAccount.do",
-	        type : 'post',
-	        data:{roleid:roleid,accountid:accountid},
-	        dataType : 'text',
-	        success : function(data) {
-	            if (data == "success") {
-	            	alert("更新完毕。");
-	            	
-	            } else {
-	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-	            }
-	            window.location.reload(true);
-	        }
-	    });
-	}
-}
 	
 </script>
 <title>查看被赋予[${role.rolename }]角色的帐户</title>

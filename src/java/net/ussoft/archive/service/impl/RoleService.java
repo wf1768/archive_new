@@ -36,7 +36,7 @@ public class RoleService implements IRoleService {
 	private FunctionDao functionDao;
 
 	@Override
-	public Sys_role selectById(String id) {
+	public Sys_role getById(String id) {
 		return roleDao.get(id);
 	}
 

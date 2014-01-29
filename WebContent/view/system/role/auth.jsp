@@ -34,7 +34,7 @@
 		check: {
 			enable: true
 		},
-		 view:{
+		view:{
 			dblClickExpand:false,
 			showLine: true,
 			selectedMulti: false

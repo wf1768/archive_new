@@ -72,7 +72,7 @@ public class OrgService implements IOrgService {
 	
 	@Transactional("txManager")
 	@Override
-	public Sys_org insertOne(Sys_org org) {
+	public Sys_org insert(Sys_org org) {
 		orgDao.save(org);
 		return org;
 	}
@@ -149,7 +149,7 @@ public class OrgService implements IOrgService {
 		
 		String strResult = "";
 		for(int i=0;i<idList.size();i++){
-		   strResult += idList.get(i) +",";
+		   strResult += "'"+idList.get(i) +"',";
 		}
 		//去掉最后多出来的逗号。
 		strResult = strResult.substring(0,strResult.length()-1);
@@ -189,6 +189,10 @@ public class OrgService implements IOrgService {
 		return orgs;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#getChildList(java.lang.String)
+	 */
 	@Override
 	public List<HashMap<String, String>> getChildList(String orgid) {
 		List<HashMap<String, String>> resultList = new ArrayList();
@@ -225,6 +229,66 @@ public class OrgService implements IOrgService {
 		}
 		
 		return resultList;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#move(java.lang.String, java.lang.String)
+	 */
+	@Transactional("txManager")
+	@Override
+	public Boolean move(String id, String targetid) {
+		//取出目标父节点对象
+		Sys_org targetOrg = orgDao.get(targetid);
+		//取出要移动的组对象
+		Sys_org org = orgDao.get(id);
+		if (targetOrg == null || org == null) {
+			return false;
+		}
+		//获取旧的treenode
+		String oldTreenodeString = org.getTreenode();
+		//计算新的treenode
+		String newTreenodeString = targetOrg.getTreenode() + "#" + org.getOrgindex();
+
+		//更新组的父节点id和treenode
+		org.setParentid(targetOrg.getId());
+		org.setTreenode(newTreenodeString);
+		org = orgDao.update(org);
+		
+		//更新子节点的treenode
+
+		List<Object> values = new ArrayList<Object>();
+		values.add(newTreenodeString + "#");
+		values.add(oldTreenodeString + "#%");
+		String sql = "update sys_org set treenode = CONCAT(?,orgindex) where treenode like ?";
+		
+		int num = orgDao.update(sql, values);
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#getowner(java.lang.String)
+	 */
+	@Override
+	public List<Sys_account> getowner(String orgid) {
+		
+		String sql = "select * from sys_account where id in (select accountid from sys_orgowner where orgid=?)";
+		List<Object> values = new ArrayList<Object>();
+		values.add(orgid);
+		List<Sys_account> accounts = accountDao.search(sql, values);
+		return accounts;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#getAccounts(java.lang.String)
+	 */
+	@Override
+	public List<Sys_account> getAccounts(String orgid) {
+		Sys_account account = new Sys_account();
+		account.setOrgid(orgid);
+		return accountDao.search(account);
 	}
 
 }

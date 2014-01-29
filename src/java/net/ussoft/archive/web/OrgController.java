@@ -1,13 +1,17 @@
 package net.ussoft.archive.web;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
-import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.service.IEncryService;
@@ -29,8 +33,6 @@ public class OrgController extends BaseConstroller {
 	private IOrgService orgService;
 	@Resource
 	private IEncryService encryService;
-	
-	
 	
 	/**
 	 * 组列表
@@ -88,25 +90,6 @@ public class OrgController extends BaseConstroller {
 				}
 				if (isowner) {
 					childList = orgService.getChildList(orgid);
-//					Sys_org org = new Sys_org();
-//					if (orgid != null) {
-//						org.setParentid(orgid);
-//					}
-//					
-//					pageBean.setIsPage(false);
-//					pageBean.setOrderBy("CONVERT(orgname USING gbk)");
-//					pageBean = orgService.list(org,pageBean);
-//					
-//					HashMap<String, String> childMap = new HashMap<String, String>();
-//					//将child的组，填充所有者
-//					if (pageBean.getList().size() > 0) {
-//						List<Sys_org> list = pageBean.getList();
-//						for (Sys_org sys_org : list) {
-//							childMap.put("id", sys_org.getId());
-//							childMap.put("orgname", sys_org.getOrgname());
-//							
-//						}
-//					}
 				}
 				
 			}
@@ -123,6 +106,169 @@ public class OrgController extends BaseConstroller {
 		modelMap.put("orgList", orgList);
 		
 		return new ModelAndView("/view/auth/org/list",modelMap);
+	}
+	
+	/**
+	 * 打开添加页面
+	 * @return
+	 */
+	@RequestMapping(value="/add",method=RequestMethod.GET)
+	public String add(String parentid,ModelMap modelMap) {
+		modelMap.put("parentid", parentid);
+		return "/view/group/org/add";
+	}
+	
+	@RequestMapping(value="/save",method=RequestMethod.POST)
+	public void save(Sys_org org,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (org == null ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		org.setId(UUID.randomUUID().toString());
+		org = orgService.insert(org);
+		
+		if (org == null ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		//重新获取org实体，因为自增长的orgindex没有获得。
+		org = orgService.getById(org.getId());
+		//更新treenode
+		//获取父节点的treenode
+		Sys_org parOrg = orgService.getById(org.getParentid());
+		if (parOrg != null) {
+			String treenodeString = parOrg.getTreenode() + "#" + org.getOrgindex();
+			org.setTreenode(treenodeString);
+			orgService.update(org);
+		}
+		out.print(result);
+	}
+	
+	/**
+	 * 打开编辑页面
+	 * @param id
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/edit",method=RequestMethod.GET)
+	public ModelAndView edit(String id,ModelMap modelMap) {
+		//判断id是否存在
+		if (id == null || id.equals("")) {
+			return null;
+		}
+		//获取对象
+		Sys_org org = orgService.getById(id);
+		modelMap.put("org", org);
+		return new ModelAndView("/view/group/org/edit",modelMap);
+	}
+	
+	/**
+	 * 执行更新
+	 * @param id
+	 * @param value
+	 * @param modelMap
+	 * @return
+	 * @throws IOException 
+	 */
+	@RequestMapping(value="/update",method=RequestMethod.POST)
+	public void update(Sys_org org,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (org == null ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		int num = orgService.update(org);
+		if (num <= 0 ) {
+			result = "failure";
+		}
+		out.print(result);
+	}
+	
+	/**
+	 * 打开移动组页面
+	 * @param id
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/move",method=RequestMethod.GET)
+	public ModelAndView move(String id,ModelMap modelMap) {
+		Sys_account account = super.getSessionAccount();
+		List<Sys_org> orgList = orgService.orgownerList(account.getId());
+		
+		String orgListString = JSON.toJSONString(orgList);
+		modelMap.put("orgList", orgListString);
+		
+		Sys_org org = orgService.getById(id);
+		
+		modelMap.put("org", org);
+		return new ModelAndView("/view/group/org/move",modelMap);
+	}
+	/**
+	 * 保存移动组
+	 * @param id
+	 * @param targetid
+	 * @param request
+	 * @param response
+	 * @throws IOException 
+	 */
+	@RequestMapping(value="/movesave",method=RequestMethod.POST)
+	public void movesave(String id,String targetid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (id == null || id.equals("") || targetid == null || targetid.equals("")) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		Boolean b = orgService.move(id, targetid);
+		
+		if (!b) {
+			result = "failure";
+		}
+		
+		out.print(result);
+	}
+	
+	/**
+	 * 集团版设置组的管理者
+	 * @param orgid
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/setowner",method=RequestMethod.GET)
+	public ModelAndView setowner(String orgid,ModelMap modelMap) {
+		//获取选中组的所有者,供页面实现和删除
+		List<Sys_account> owners = orgService.getowner(orgid);
+		modelMap.put("owners", owners);
+		//获取当前帐户作为owner的组及子组.供页面实现组树，点击时，显示组下的帐户
+		Sys_account account = super.getSessionAccount();
+		List<Sys_org> orgList = orgService.orgownerList(account.getId());
+		
+		String orgListString = JSON.toJSONString(orgList);
+		modelMap.put("orgList", orgListString);
+		
+		Sys_org org = orgService.getById(orgid);
+		
+		modelMap.put("org", org);
+		return new ModelAndView("/view/group/org/setowner",modelMap);
 	}
 
 }
