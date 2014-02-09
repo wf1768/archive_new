@@ -9,7 +9,7 @@
   	
     <div id="bodyer2">
     	<div class="xtgl">
-        	<P>${sessionScope.CURRENT_USER_IN_SESSION.accountcode },欢迎您进入集团管理模块</P>
+        	<P>${sessionScope.CURRENT_USER_IN_SESSION.accountcode },欢迎您进入权限管理模块</P>
         </div>
     </div>
 

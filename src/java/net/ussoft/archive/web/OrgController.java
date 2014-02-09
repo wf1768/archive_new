@@ -43,8 +43,11 @@ public class OrgController extends BaseConstroller {
 	@RequestMapping(value="/list",method=RequestMethod.GET)
 	public ModelAndView list(String orgid,String type,ModelMap modelMap) throws Exception {
 		
+		String version = "no";
+		
 		//判断版本,是否是集团版本
 		if (encryService.getInit(4)) {
+			version = "group";
 			String urlString = "";
 			if (type != null && type.equals("group")) {
 				modelMap = super.getModelMap("GROUP","GROUPORG");
@@ -97,13 +100,26 @@ public class OrgController extends BaseConstroller {
 //			modelMap.put("childList", pageBean.getList());
 			modelMap.put("childList", childList);
 			
+			modelMap.put("version", version);
+			
 			modelMap.put("orgid", orgid);
 			return new ModelAndView(urlString,modelMap);
 		}
 		
+		//如果是非集团版本(网络、单机)
 		//获取数据
+		modelMap = super.getModelMap("AUTH","ORG");
 		List<Sys_org> orgList = orgService.list();
-		modelMap.put("orgList", orgList);
+		String orgListString = JSON.toJSONString(orgList);
+		modelMap.put("orgList", orgListString);
+		List<HashMap<String, String>> childList = new ArrayList<HashMap<String,String>>();
+		if (null != orgid && !orgid.equals("")) {
+			childList = orgService.getChildList(orgid);
+		}
+		modelMap.put("orgid", orgid);
+		modelMap.put("childList", childList);
+		
+		modelMap.put("version", version);
 		
 		return new ModelAndView("/view/auth/org/list",modelMap);
 	}
@@ -248,13 +264,13 @@ public class OrgController extends BaseConstroller {
 	}
 	
 	/**
-	 * 集团版设置组的管理者
+	 * 集团版打开设置组的管理者页面
 	 * @param orgid
 	 * @param modelMap
 	 * @return
 	 */
 	@RequestMapping(value="/setowner",method=RequestMethod.GET)
-	public ModelAndView setowner(String orgid,ModelMap modelMap) {
+	public ModelAndView setowner(String orgid,String selectOrgid,ModelMap modelMap) {
 		//获取选中组的所有者,供页面实现和删除
 		List<Sys_account> owners = orgService.getowner(orgid);
 		modelMap.put("owners", owners);
@@ -266,9 +282,98 @@ public class OrgController extends BaseConstroller {
 		modelMap.put("orgList", orgListString);
 		
 		Sys_org org = orgService.getById(orgid);
-		
 		modelMap.put("org", org);
+		
+		
+		//页面上点击了组节点，获取该组下所有帐户数据，供选择为owner
+		if (null != selectOrgid && !selectOrgid.equals("")) {
+			List<Sys_account> accounts = orgService.getAccounts(selectOrgid);
+			modelMap.put("accounts", accounts);
+			modelMap.put("selectOrgid", selectOrgid);
+		}
 		return new ModelAndView("/view/group/org/setowner",modelMap);
+	}
+	
+	/**
+	 * 移除组的所有者
+	 * @param orgid
+	 * @param accountid
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/removeowner",method=RequestMethod.POST)
+	public void removeowner(String orgid,String accountid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (orgid == null || orgid.equals("") || accountid == null || accountid.equals("")) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		Boolean b = orgService.removeowner(orgid, accountid);
+		
+		if (!b) {
+			result = "failure";
+		}
+		
+		out.print(result);
+	}
+	
+	@RequestMapping(value="/saveowner",method=RequestMethod.POST)
+	public void saveowner(String orgid,String accountid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (orgid == null || orgid.equals("") || accountid == null || accountid.equals("")) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		Boolean b = orgService.setowner(orgid, accountid);
+		
+		if (!b) {
+			result = "failure";
+		}
+		
+		out.print(result);
+	}
+	
+	/**
+	 * 删除组。
+	 * @param orgid
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/delete",method=RequestMethod.POST)
+	public void delete(String orgid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (orgid == null || orgid.equals("") ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		int num = orgService.delete(orgid);
+		
+		
+		if (num <= 0) {
+			result = "failure";
+		}
+		
+		out.print(result);
 	}
 
 }

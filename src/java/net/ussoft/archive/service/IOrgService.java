@@ -104,5 +104,20 @@ public interface IOrgService {
 	 * @return
 	 */
 	public Boolean move(String id,String targetid);
-
+	
+	/**
+	 * 移除组的管理者。删除组id和帐户id的对应关系
+	 * @param orgid
+	 * @param accountid
+	 * @return
+	 */
+	public Boolean removeowner(String orgid,String accountid);
+	/**
+	 * 设置组的管理者。将组id与帐户id对应表保存
+	 * @param orgid
+	 * @param accountid
+	 * @return
+	 */
+	public Boolean setowner(String orgid,String accountid);
+	
 }

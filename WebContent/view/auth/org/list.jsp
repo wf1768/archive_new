@@ -50,7 +50,7 @@
 	}
 	
 	function onClick(event, treeId, nodes) {
-		window.location.href="${pageContext.request.contextPath}/org/list.do?type=group&orgid="+nodes.id;
+		window.location.href="${pageContext.request.contextPath}/org/list.do?orgid="+nodes.id;
 	};
 	
 	$(function(){
@@ -66,7 +66,7 @@
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var nodes = treeObj.getSelectedNodes();
 		if (nodes.length != 1) {
-			alert("请选择左侧集团组织机构树，再创建下级单位。");
+			alert("请选择左侧组织机构树，再创建下级单位。");
 			return;
 		}
 		var url = "add.do?parentid="+nodes[0].id+"&time="+Date.parse(new Date());
@@ -134,9 +134,11 @@
 	<div id="bodyer_left">
 		<dl>
 			<dt>
-				<a href="#" class="blue"><img
-					src="${pageContext.request.contextPath}/images/i1_03.png"
-					width="29" height="22" class="tubiao" /><span>集团管理</span></a>
+				<a href="#" class="blue"><img src="${pageContext.request.contextPath}/images/i1_03.png" width="29" height="22" class="tubiao" />
+					<span>
+						组织机构管理
+					</span>
+				</a>
 			</dt>
 			<dd>
 				<ul id="treeDemo" class="ztree"></ul>
@@ -144,7 +146,7 @@
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：集团管理－集团组织机构管理</div>
+		<div class="dqwz">当前位置：权限管理－组织机构管理</div>
 		<div  class="caozuo">
             <div class="caozuo_left">
         	<ul>
@@ -168,20 +170,26 @@
 			<table id="cssz_table">
 				<tr class="textCt ertr  hui title1">
 					<td><p>#</p></td>
-					<td><p>集团机构名称</p></td>
-					<td><p>管理者</p></td>
+					<td><p>机构名称</p></td>
+					<c:if test="${version=='group' }">
+						<td><p>管理者</p></td>
+					</c:if>
 					<td><p>操作</p></td>
 				</tr>
 				<c:forEach items="${childList}" varStatus="i" var="item">
 					<tr class="textCt ertr  ">
 						<td>${i.index+1 }</td>
 						<td>${item['orgname']}</td>
+						<c:if test="${version=='group' }">
 						<td>${item['ownerString']}</td>
+						</c:if>
 						<td>
-							<a href="javascript:;" onclick="setowner('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
-								管理者
-							</a>
+							<c:if test="${version=='group' }">
+								<a href="javascript:;" onclick="setowner('${item.id}')" class="juse">
+									<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
+									管理者
+								</a>
+							</c:if>
 							<a href="#" onclick="edit('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
 								修改

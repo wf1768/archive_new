@@ -3,6 +3,7 @@ package net.ussoft.archive.service.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -87,9 +88,37 @@ public class OrgService implements IOrgService {
 		return 0;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#delete(java.lang.String)
+	 */
+	@Transactional("txManager")
 	@Override
 	public int delete(String id) {
-		return orgDao.del(id);
+		if (id == null || id.equals("")) {
+			return 0;
+		}
+		Sys_org org = orgDao.get(id);
+		if (org == null || org.getTreenode().equals("")) {
+			return 0;
+		}
+		
+		//删除组下的帐户及子组的全部帐户
+		String sql = "";
+		sql = "delete from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
+		List<Object> values = new ArrayList<Object>();
+		accountDao.del(sql, values);
+		
+		//TODO 因集团版删除组涉及到很多方面，这个等做完帐户管理、角色管理、档案类型管理等再做
+		
+		//删除组及子组的管理者
+		sql = "delete from sys_orgowner where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
+		orgownerDao.del(sql, values);
+		
+		//删除组、以及子组
+		sql = "delete from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%'";
+		int num = orgDao.del(sql, values);
+		return num;
 	}
 	
 	
@@ -289,6 +318,61 @@ public class OrgService implements IOrgService {
 		Sys_account account = new Sys_account();
 		account.setOrgid(orgid);
 		return accountDao.search(account);
+	}
+
+	@Transactional("txManager")
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#removeowner(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Boolean removeowner(String orgid, String accountid) {
+		
+		//获取组与管理者对应表里的数据对象
+		Sys_orgowner owner = new Sys_orgowner();
+		owner.setAccountid(accountid);
+		owner.setOrgid(orgid);
+		List<Sys_orgowner> orgowners = orgownerDao.search(owner);
+		if (orgowners.size() == 1) {
+			int num = orgownerDao.del(orgowners.get(0).getId().toString());
+			if (num <= 0 ) {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+		
+		return true;
+	}
+
+	@Transactional("txManager")
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#setowner(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Boolean setowner(String orgid, String accountid) {
+		//获取组与管理者对应表里的数据对象
+		Sys_orgowner owner = new Sys_orgowner();
+		owner.setAccountid(accountid);
+		owner.setOrgid(orgid);
+		List<Sys_orgowner> orgowners = orgownerDao.search(owner);
+		//如果不存在记录,就添加
+		if (orgowners != null && orgowners.size() == 0) {
+			owner.setId(UUID.randomUUID().toString());
+			owner.setAccountid(accountid);
+			owner.setOrgid(orgid);
+			owner = orgownerDao.save(owner);
+			if (owner == null ) {
+				return false;
+			}
+		}
+		else {
+			return true;
+		}
+		
+		return true;
 	}
 
 }

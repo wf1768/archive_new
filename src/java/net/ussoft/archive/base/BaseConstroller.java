@@ -88,11 +88,13 @@ public class BaseConstroller {
 		modelMap.put("focus_first", focus_first);
 		modelMap.put("focus_second", focus_second);
 		
-		//获取当前一级节点功能id，用来显示二级菜单
-		Sys_function function = new Sys_function();
-		function.setFunenglishname(focus_first);
-		function = functionService.getFunction(function);
-		modelMap.put("focus_first_id", function.getId());
+		if (!focus_first.equals("index")) {
+			//获取当前一级节点功能id，用来显示二级菜单
+			Sys_function function = new Sys_function();
+			function.setFunenglishname(focus_first);
+			function = functionService.getFunction(function);
+			modelMap.put("focus_first_id", function.getId());
+		}
 		
 		return modelMap;
 	}
