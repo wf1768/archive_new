@@ -59,23 +59,36 @@ public class RoleController extends BaseConstroller {
 	 * @throws Exception 
 	 */
 	@RequestMapping(value="/list",method=RequestMethod.GET)
-	public ModelAndView list(String treeid,ModelMap modelMap) throws Exception {
-		
-		modelMap = super.getModelMap("SYSTEM","ROLE");
+	public ModelAndView list(String orgid,String type,ModelMap modelMap) throws Exception {
 		
 		//判断版本
 		if (encryService.getInit(4)) {
-			//获取角色组
-			List<Sys_org> orgList = orgService.list();
-			String orgListString = JSON.toJSONString(orgList);
-			modelMap.put("orgList", orgListString);
-			//获取数据
-			List<Sys_role> roleList = new ArrayList<Sys_role>();
-			String orgid = treeid;
-			if (null == treeid || treeid.equals("") || treeid.equals("1")) {
-				
+			String urlString = "";
+			if (type != null && type.equals("group")) {
+				modelMap = super.getModelMap("GROUP","GROUPROLE");
+				urlString = "/view/group/role/list";
 			}
 			else {
+				modelMap = super.getModelMap("AUTH","ROLE");
+				urlString = "/view/auth/role/list";
+			}
+			
+			//获取当前帐户能管理的组织机构
+			Sys_account account = super.getSessionAccount();
+			
+			List<Sys_org> orgList = orgService.orgownerList(account.getId());
+			String orgListString = JSON.toJSONString(orgList);
+			modelMap.put("orgList", orgListString);
+			
+//			//获取角色组
+//			List<Sys_org> orgList = orgService.list();
+//			String orgListString = JSON.toJSONString(orgList);
+//			modelMap.put("orgList", orgListString);
+			//获取数据
+			List<Sys_role> roleList = new ArrayList<Sys_role>();
+			
+			//获取选择的组下的帐户
+			if (null != orgid && !orgid.equals("")) {
 				Sys_role role = new Sys_role();
 				if (orgid != null) {
 					role.setOrgid(orgid);
@@ -84,15 +97,16 @@ public class RoleController extends BaseConstroller {
 			}
 			
 			modelMap.put("roleList", roleList);
-			modelMap.put("treeid", treeid);
-			return new ModelAndView("/view/system/role/rolist",modelMap);
+			modelMap.put("orgid", orgid);
+			return new ModelAndView(urlString,modelMap);
 		}
+		modelMap = super.getModelMap("AUTH","ROLE");
 		
 		//获取数据
 		List<Sys_role> roleList = roleService.list();
 		modelMap.put("roleList", roleList);
 		
-		return new ModelAndView("/view/system/role/list",modelMap);
+		return new ModelAndView("/view/auth/role/list",modelMap);
 	}
 	/**
 	 * 打开添加页面
@@ -100,7 +114,7 @@ public class RoleController extends BaseConstroller {
 	 */
 	@RequestMapping(value="/add",method=RequestMethod.GET)
 	public String add() {
-		return "/view/system/role/add";
+		return "/view/auth/role/add";
 	}
 	@RequestMapping(value="/save",method=RequestMethod.POST)
 	public ModelAndView save(Sys_role role,ModelMap modelMap) {
@@ -116,7 +130,7 @@ public class RoleController extends BaseConstroller {
 		}
 		modelMap.put("role", role);
 		modelMap.put("result", result);
-		return new ModelAndView("/view/system/role/add",modelMap);
+		return new ModelAndView("/view/auth/role/add",modelMap);
 	}
 	
 	/**
@@ -156,7 +170,7 @@ public class RoleController extends BaseConstroller {
 		//获取对象
 		Sys_role role = roleService.getById(id);
 		modelMap.put("role", role);
-		return new ModelAndView("/view/system/role/edit",modelMap);
+		return new ModelAndView("/view/auth/role/edit",modelMap);
 	}
 	
 	/**
@@ -176,7 +190,7 @@ public class RoleController extends BaseConstroller {
 		}
 		modelMap.put("role", role);
 		modelMap.put("result", result);
-		return new ModelAndView("/view/system/role/edit",modelMap);
+		return new ModelAndView("/view/auth/role/edit",modelMap);
 	}
 	
 	
@@ -201,7 +215,7 @@ public class RoleController extends BaseConstroller {
 		String authfunString = JSON.toJSONString(authfunList);
 		modelMap.put("authfunList", authfunString);
 		modelMap.put("roleid", id);
-		return new ModelAndView("/view/system/role/auth",modelMap);
+		return new ModelAndView("/view/auth/role/auth",modelMap);
 	}
 	
 	/**
@@ -243,7 +257,7 @@ public class RoleController extends BaseConstroller {
 		}
 		modelMap = getAccountMap(id,modelMap);
 
-		return new ModelAndView("/view/system/role/account",modelMap);
+		return new ModelAndView("/view/auth/role/account",modelMap);
 	}
 	
 	private ModelMap getAccountMap(String roleid,ModelMap modelMap) {

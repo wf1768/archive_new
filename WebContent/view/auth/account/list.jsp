@@ -50,7 +50,7 @@
 	}
 	
 	function onClick(event, treeId, nodes) {
-		window.location.href="${pageContext.request.contextPath}/org/list.do?orgid="+nodes.id;
+		window.location.href="${pageContext.request.contextPath}/account/list.do?orgid="+nodes.id;
 	};
 	
 	$(function(){
@@ -59,6 +59,12 @@
 		var treeid = "${orgid}";
 		selectTreeid = treeid;
 		selectNode(treeid);
+		
+		$('#checkall').click(function(){
+		    $('input[name="checkbox"]').attr("checked",this.checked);
+		});
+		
+		$('input[type="checkbox"]').removeAttr("checked");
 	});
 
 
@@ -66,10 +72,10 @@
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var nodes = treeObj.getSelectedNodes();
 		if (nodes.length != 1) {
-			alert("请选择左侧组织机构树，再创建下级单位。");
+			alert("请选择左侧组织机构树，再创建帐户。");
 			return;
 		}
-		var url = "add.do?parentid="+nodes[0].id+"&time="+Date.parse(new Date());
+		var url = "add.do?orgid="+nodes[0].id+"&time="+Date.parse(new Date());
 		var whObj = { width: 340, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
 		//window.location.reload(true); // 刷新窗体
@@ -77,16 +83,16 @@
 	
 	function del(id) {
 		if (id == "") {
-			alert("没有获得要删除的组，请重新尝试，或与管理员联系。");
+			alert("没有获得要删除的帐户，请重新尝试，或与管理员联系。");
 			return;
 		}
 		
-		if (confirm("确定要删除选择的组吗？删除该组，将同时删除该组下包含的全部组、帐户、档案类型及档案树节点。请谨慎操作。")) {
+		if (confirm("确定要删除选择的帐户吗？删除该帐户，将同时删除该帐户的一切附属信息。请谨慎操作。")) {
 		    $.ajax({
 		        async : true,
-		        url : "${pageContext.request.contextPath}/org/delete.do",
+		        url : "${pageContext.request.contextPath}/account/delete.do",
 		        type : 'post',
-		        data: {orgid:id},
+		        data: {id:id},
 		        dataType : 'text',
 		        success : function(data) {
 		            if (data == "success") {
@@ -112,22 +118,58 @@
 		window.location.reload(true);
 	}
 	
-	function move(id) {
-		var url = "move.do?id="+id + "&time="+Date.parse(new Date());
+	function move() {
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要移动的帐户。");
+			return;
+		}
+
+		str = str.substring(0,str.length-1);
+		var url = "move.do?id="+str + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
 	}
 	
-	function setowner(id) {
-		var url = "setowner.do?orgid="+id + "&time="+Date.parse(new Date());
-		var whObj = { width: 740, height: 500 };
+	function updatepass(id) {
+		var url = "updatepass.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 440, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
 	}
 	
-	function setrole(id) {
-		var url = "setrole.do?orgid="+id + "&time="+Date.parse(new Date());
-		var whObj = { width: 740, height: 500 };
-		var result = openShowModalDialog(url,window,whObj);
+	function updatestate(id,state) {
+		if (id == "") {
+			alert("没有获得要更改状态的帐户，请重新尝试，或与管理员联系。");
+			return;
+		}
+		var str = "确定要将状态更改为［禁用］吗？禁用后该帐户将不能登录本系统。";
+		if (state == 1) {
+			str = "确定要将状态更改为［启用］吗？";
+		}
+		
+		if (confirm(str)) {
+		    $.ajax({
+		        async : true,
+		        url : "${pageContext.request.contextPath}/account/updatestate.do",
+		        type : 'post',
+		        data: {id:id,state:state},
+		        dataType : 'text',
+		        success : function(data) {
+		            if (data == "success") {
+		            	alert("更改完毕。");
+		            	
+		            } else {
+		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
+		            }
+		            window.location.reload(true);
+		        }
+		    });
+		}
 	}
 
 
@@ -142,7 +184,7 @@
 			<dt>
 				<a href="#" class="blue"><img src="${pageContext.request.contextPath}/images/i1_03.png" width="29" height="22" class="tubiao" />
 					<span>
-						组织机构管理
+						帐户管理
 					</span>
 				</a>
 			</dt>
@@ -152,7 +194,7 @@
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：权限管理－组织机构管理</div>
+		<div class="dqwz">当前位置：权限管理－帐户管理</div>
 		<div  class="caozuo">
             <div class="caozuo_left">
         	<ul>
@@ -161,8 +203,11 @@
             </div>
         	<div  class="caozuo_right">
         	<ul>
-                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
-                    添加组织机构</a>
+                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_add.png"  />
+                    添加帐户</a>
+                </li>
+                <li><a href="javascript:;" onclick="move()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_go.png"  />
+                    移动帐户</a>
                 </li>
                 <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
                     刷新列表</a>
@@ -175,52 +220,54 @@
 		<div class="shuju" id="sj">
 			<table id="cssz_table">
 				<tr class="textCt ertr  hui title1">
+					<td><input type="checkbox" id="checkall"></td>
 					<td><p>#</p></td>
-					<td><p>机构名称</p></td>
-					<c:if test="${version=='group' }">
-						<td><p>管理者</p></td>
-					</c:if>
-					<td><p>角色</p></td>
+					<td><p>帐户名称</p></td>
+					<td><p>帐户状态</p></td>
+					<td><p>备注</p></td>
 					<td><p>操作</p></td>
 				</tr>
-				<c:forEach items="${childList}" varStatus="i" var="item">
+				<c:forEach items="${accounts}" varStatus="i" var="item">
 					<tr class="textCt ertr  ">
+						<td><input type="checkbox" name="checkbox" value="${item.id }"></td>
 						<td>${i.index+1 }</td>
-						<td>${item['orgname']}</td>
-						<c:if test="${version=='group' }">
-						<td>${item['ownerString']}</td>
-						</c:if>
-						<td>${item['roleString']}</td>
+						<td>${item.accountcode}</td>
 						<td>
-							<c:if test="${version=='group' }">
-								<a href="javascript:;" onclick="setowner('${item.id}')" class="juse">
-									<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
-									管理者
-								</a>
-							</c:if>
+						<c:choose>
+							<c:when test="${item.accountstate==1 }">
+								<a href="javascript:;" onclick="updatestate('${item.id}',0)" >启用</a>
+							</c:when>
+							<c:when test="${item.accountstate==0 }">
+								<a href="javascript:;" onclick="updatestate('${item.id}',1)" ><font color="red">禁用</font></a>
+							</c:when>
+							<c:otherwise>
+								<a href="javascript:;" onclick="updatestate('${item.id}',1)" ><font color="red">未知</font></a>
+							</c:otherwise>
+						</c:choose>
+						</td>
+						<td>${item.accountmemo}</td>
+						<td>
 							<a href="javascript:;" onclick="edit('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
 								修改
 							</a>
-							<a href="javascript:;" onclick="del('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_delete.png" />
-								删除
+							<a href="javascript:;" onclick="updatepass('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
+								修改密码
 							</a>
-							<a href="javascript:;" onclick="move('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_refresh.png" />
-								移动
-							</a> | 
-							<a href="javascript:;" onclick="setrole('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/vcard_add.png" />
-								角色
-							</a>
+							<c:if test="${item.accountcode != 'admin' }">
+								<a href="javascript:;" onclick="del('${item.id}')" class="juse">
+									<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_delete.png" />
+									删除
+								</a>
+							</c:if>
 						</td>
 					</tr>
 				</c:forEach>
 			</table>
 		</div>
 		<div id="fanye" class="fanye1">
-			<p>共 ${fn:length(childList) } 条记录</p>
+			<p>共 ${fn:length(accounts) } 条记录</p>
 		</div>
 	</div>
 	<div style="clear: both"></div>

@@ -123,10 +123,6 @@ function searchAccount(id) {
 						<td>${item.rolename}</td>
 						<td>${item.rolememo}</td>
 						<td>
-							<a href="javascript:;" onclick="status('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/group_key.png" />
-								帐户组
-							</a>
 							<a href="javascript:;" onclick="searchAccount('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
 								帐户

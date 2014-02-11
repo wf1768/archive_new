@@ -99,7 +99,9 @@ public class RoleService implements IRoleService {
 	
 	@Override
 	public List<Sys_function> searchFunctions(String roleid) {
-		
+		if (roleid == null || roleid.equals("")) {
+			return null;
+		}
 		//获取角色id与功能的关联list
 		Sys_role_function ref = new Sys_role_function();
 		ref.setRoleid(roleid);

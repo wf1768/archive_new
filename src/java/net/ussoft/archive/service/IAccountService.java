@@ -26,13 +26,19 @@ public interface IAccountService {
 	 * @return
 	 */
 	public PageBean<Sys_account> list(String orgid,Integer page);
+	/**
+	 * 帐户列表，不分页
+	 * @param orgid
+	 * @return
+	 */
+	public List<Sys_account> list(String orgid);
 	
 	/**
 	 * 插入新帐户
 	 * @param account
 	 * @return
 	 */
-	public Sys_account insertOne(Sys_account account);
+	public Sys_account insert(Sys_account account);
 	
 	/**
 	 * 更新帐户
@@ -46,6 +52,14 @@ public interface IAccountService {
 	 * @return
 	 */
 	public int delete(String id);
+	
+	/**
+	 * 移动帐户
+	 * @param id
+	 * @param targetid
+	 * @return
+	 */
+	public Boolean move(String id,String targetid);
 	
 	/**
 	 * 帐户登陆验证

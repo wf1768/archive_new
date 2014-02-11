@@ -120,4 +120,19 @@ public interface IOrgService {
 	 */
 	public Boolean setowner(String orgid,String accountid);
 	
+	/**
+	 * 设置组的角色
+	 * @param orgid
+	 * @param roleid
+	 * @return
+	 */
+	public Boolean setrole(String orgid,String roleid);
+	/**
+	 * 移除组的角色
+	 * @param orgid
+	 * @param roleid
+	 * @return
+	 */
+	public Boolean removerole(String orgid,String roleid);
+	
 }

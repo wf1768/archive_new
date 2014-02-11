@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import net.ussoft.archive.dao.AccountDao;
 import net.ussoft.archive.dao.AccountTreeDao;
 import net.ussoft.archive.dao.OrgDao;
+import net.ussoft.archive.dao.OrgownerDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
@@ -31,17 +32,30 @@ public class AccountService implements IAccountService {
 	private AccountTreeDao accounttreeDao;
 	@Resource
 	private OrgDao orgDao;
+	@Resource
+	private OrgownerDao orgownerDao;
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IAccountService#getById(java.lang.String)
+	 */
 	@Override
 	public Sys_account getById(String id) {
 		return accountDao.get(id);
 	}
-	
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IAccountService#list()
+	 */
 	@Override
 	public List<Sys_account> list() {
 		return accountDao.getAll();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IAccountService#list(java.lang.String, java.lang.Integer)
+	 */
 	@Override
 	public PageBean<Sys_account> list(String orgid, Integer page) {
 		PageBean<Sys_account> p = new PageBean<Sys_account>();
@@ -51,13 +65,25 @@ public class AccountService implements IAccountService {
 		Sys_account account = new Sys_account();
 		account.setOrgid(orgid);
 		p = accountDao.search(account, p);
-		// p = Info_userDao.searchForMap("select * from Info_user", new ArrayList(),p);
 		return p;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IAccountService#list(java.lang.String)
+	 */
+	@Override
+	public List<Sys_account> list(String orgid) {
+//		return accountDao.getAll("accountcode asc");
+		String sql = "select * from sys_account where orgid=? order by accountcode asc";
+		List<Object> values = new ArrayList<Object>();
+		values.add(orgid);
+		return accountDao.search(sql, values);
 	}
 
 	@Transactional("txManager")
 	@Override
-	public Sys_account insertOne(Sys_account account) {
+	public Sys_account insert(Sys_account account) {
 		accountDao.save(account);
 		return account;
 	}
@@ -76,9 +102,53 @@ public class AccountService implements IAccountService {
 	 * (non-Javadoc)
 	 * @see net.ussoft.archive.service.IAccountService#delete(java.lang.String)
 	 */
+	@Transactional("txManager")
 	@Override
 	public int delete(String id) {
+		//TODO 删除帐户可能后期还要删除其他帐户关联的信息。
+		//删除帐户与档案树节点的关联
+		String sql = "delete from sys_account_tree where accountid=?";
+		List<Object> values = new ArrayList<Object>();
+		values.add(id);
+		accounttreeDao.del(sql, values);
+		//删除帐户作为管理者的，与组织机构的关联
+		sql = "delete from sys_orgowner where accountid=?";
+		orgownerDao.del(sql, values);
+		
 		return accountDao.del(id);
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IAccountService#move(java.lang.String, java.lang.String)
+	 */
+	@Transactional("txManager")
+	@Override
+	public Boolean move(String id, String targetid) {
+		if (id == null || id.equals("") || targetid == null || targetid.equals("")) {
+			return false;
+		}
+		//处理id
+		String[] idsStrings = id.split(",");
+		
+		String strResult = "";
+		for(int i=0;i<idsStrings.length;i++){
+		   strResult += "'"+idsStrings[i] +"',";
+		}
+		//去掉最后多出来的逗号。
+		strResult = strResult.substring(0,strResult.length()-1);
+		
+		String sql = "update sys_account set orgid=? where id in ("+strResult+")";
+		List<Object> values = new ArrayList<Object>();
+		values.add(targetid);
+		
+		int num = accountDao.update(sql, values);
+		
+		if (num > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/*

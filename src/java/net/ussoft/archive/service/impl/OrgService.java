@@ -11,12 +11,14 @@ import net.ussoft.archive.dao.AccountDao;
 import net.ussoft.archive.dao.OrgDao;
 import net.ussoft.archive.dao.OrgTreeDao;
 import net.ussoft.archive.dao.OrgownerDao;
+import net.ussoft.archive.dao.RoleDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_orgowner;
+import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.util.CommonUtils;
@@ -38,6 +40,8 @@ public class OrgService implements IOrgService {
 	private OrgownerDao orgownerDao;
 	@Resource
 	private AccountDao accountDao ;
+	@Resource
+	private RoleDao roleDao ;
 	
 	/*
 	 * (non-Javadoc)
@@ -110,6 +114,7 @@ public class OrgService implements IOrgService {
 		accountDao.del(sql, values);
 		
 		//TODO 因集团版删除组涉及到很多方面，这个等做完帐户管理、角色管理、档案类型管理等再做
+		//TODO 要删除组关联的其他信息。（sys_org_tree  sys_orgowner sys_role sys_templet sys_templetfield sys_table）
 		
 		//删除组及子组的管理者
 		sql = "delete from sys_orgowner where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
@@ -253,6 +258,18 @@ public class OrgService implements IOrgService {
 					ownerString += sys_account.getAccountcode() + " ";
 				}
 				childMap.put("ownerString", ownerString);
+				//获取当前组的角色
+				String roleString = "";
+				String roleid = sys_org.getRoleid();
+				
+				if (roleid==null || roleid.equals("")) {
+					childMap.put("roleString", "");
+				}
+				else {
+					Sys_role role = roleDao.get(roleid);
+					childMap.put("roleString", role.getRolename());
+					
+				}
 				resultList.add(childMap);
 			}
 		}
@@ -320,11 +337,12 @@ public class OrgService implements IOrgService {
 		return accountDao.search(account);
 	}
 
-	@Transactional("txManager")
+	
 	/*
 	 * (non-Javadoc)
 	 * @see net.ussoft.archive.service.IOrgService#removeowner(java.lang.String, java.lang.String)
 	 */
+	@Transactional("txManager")
 	@Override
 	public Boolean removeowner(String orgid, String accountid) {
 		
@@ -346,11 +364,12 @@ public class OrgService implements IOrgService {
 		return true;
 	}
 
-	@Transactional("txManager")
+	
 	/*
 	 * (non-Javadoc)
 	 * @see net.ussoft.archive.service.IOrgService#setowner(java.lang.String, java.lang.String)
 	 */
+	@Transactional("txManager")
 	@Override
 	public Boolean setowner(String orgid, String accountid) {
 		//获取组与管理者对应表里的数据对象
@@ -371,6 +390,44 @@ public class OrgService implements IOrgService {
 		else {
 			return true;
 		}
+		
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#setrole(java.lang.String, java.lang.String)
+	 */
+	@Transactional("txManager")
+	@Override
+	public Boolean setrole(String orgid, String roleid) {
+		//获取组对象
+		Sys_org org = orgDao.get(orgid);
+		
+		if (null == org) {
+			return false;
+		}
+		org.setRoleid(roleid);
+		org = orgDao.update(org);
+		
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#removerole(java.lang.String, java.lang.String)
+	 */
+	@Transactional("txManager")
+	@Override
+	public Boolean removerole(String orgid, String roleid) {
+		//获取组对象
+		Sys_org org = orgDao.get(orgid);
+		
+		if (null == org) {
+			return false;
+		}
+		org.setRoleid("");
+		org = orgDao.update(org);
 		
 		return true;
 	}

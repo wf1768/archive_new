@@ -14,8 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
+import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.service.IEncryService;
 import net.ussoft.archive.service.IOrgService;
+import net.ussoft.archive.service.IRoleService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -33,6 +35,8 @@ public class OrgController extends BaseConstroller {
 	private IOrgService orgService;
 	@Resource
 	private IEncryService encryService;
+	@Resource
+	private IRoleService roleService;
 	
 	/**
 	 * 组列表
@@ -77,24 +81,24 @@ public class OrgController extends BaseConstroller {
 			}
 			else {
 				//获取当前帐户作为owner的组对象
-				List<Sys_org> ownerList = orgService.getorgowner(account.getId());
+				//List<Sys_org> ownerList = orgService.getorgowner(account.getId());
 				//获取当前组的treenode，来判断，点击的组是否应该显示子组。例如如果当前帐户作为三级树的owner，为了画树，它的父节点也都画出来了，点击父节点
 				//就不应该显示子节点,因为当前帐户不是父节点的owner
-				Sys_org tmpOrg = orgService.getById(orgid);
+				//Sys_org tmpOrg = orgService.getById(orgid);
 				
 				//判断前台选择的组是否在当前帐户的owner范围内
-				Boolean isowner = false;
-				for (Sys_org sys_org : ownerList) {
-					String orgTreeNodeString = sys_org.getTreenode();
-					if (orgTreeNodeString.equals(tmpOrg.getTreenode()) || !orgTreeNodeString.contains(tmpOrg.getTreenode())) {
-						isowner = true;
-						break;
-					}
-				}
-				if (isowner) {
-					childList = orgService.getChildList(orgid);
-				}
-				
+//				Boolean isowner = false;
+//				for (Sys_org sys_org : ownerList) {
+//					String orgTreeNodeString = sys_org.getTreenode();
+//					if (orgTreeNodeString.equals(tmpOrg.getTreenode()) || !orgTreeNodeString.contains(tmpOrg.getTreenode())) {
+//						isowner = true;
+//						break;
+//					}
+//				}
+//				if (isowner) {
+//					childList = orgService.getChildList(orgid);
+//				}
+				childList = orgService.getChildList(orgid);
 			}
 			
 //			modelMap.put("childList", pageBean.getList());
@@ -211,6 +215,35 @@ public class OrgController extends BaseConstroller {
 		if (num <= 0 ) {
 			result = "failure";
 		}
+		out.print(result);
+	}
+	
+	/**
+	 * 删除组。
+	 * @param orgid
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/delete",method=RequestMethod.POST)
+	public void delete(String orgid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (orgid == null || orgid.equals("") ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		int num = orgService.delete(orgid);
+		
+		if (num <= 0) {
+			result = "failure";
+		}
+		
 		out.print(result);
 	}
 	
@@ -347,33 +380,80 @@ public class OrgController extends BaseConstroller {
 	}
 	
 	/**
-	 * 删除组。
+	 * 打开设置组角色页面
 	 * @param orgid
-	 * @param request
-	 * @param response
-	 * @throws IOException
+	 * @param selectOrgid
+	 * @param modelMap
+	 * @return
 	 */
-	@RequestMapping(value="/delete",method=RequestMethod.POST)
-	public void delete(String orgid,HttpServletRequest request,HttpServletResponse response) throws IOException {
+	@RequestMapping(value="/setrole",method=RequestMethod.GET)
+	public ModelAndView setrole(String orgid,ModelMap modelMap) {
+		//获取组对象
+		Sys_org org = orgService.getById(orgid);
+		//获取选中组的角色,供页面实现和删除
+		Sys_role role = null;
+		if (null != org.getRoleid() && !org.getRoleid().equals("")) {
+			role = roleService.getById(org.getRoleid());
+		}
+		modelMap.put("role", role);
+		modelMap.put("org", org);
+		
+		//获取角色供选择
+		List<Sys_role> sys_roles = roleService.list();
+		
+		modelMap.put("sys_roles", sys_roles);
+		
+		return new ModelAndView("/view/auth/org/setrole",modelMap);
+	}
+	
+	@RequestMapping(value="/saverole",method=RequestMethod.POST)
+	public void saverole(String orgid,String roleid,HttpServletResponse response) throws IOException {
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
 		
 		String result = "success";
-		if (orgid == null || orgid.equals("") ) {
+		if (orgid == null || orgid.equals("") || roleid == null || roleid.equals("")) {
 			result = "failure";
 			out.print(result);
 			return;
 		}
 		
-		int num = orgService.delete(orgid);
+		Boolean b = orgService.setrole(orgid, roleid);
 		
-		
-		if (num <= 0) {
+		if (!b) {
 			result = "failure";
 		}
 		
 		out.print(result);
 	}
-
+	/**
+	 * 移除组的角色
+	 * @param orgid
+	 * @param roleid
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/removerole",method=RequestMethod.POST)
+	public void removerole(String orgid,String roleid,HttpServletResponse response) throws IOException {
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (orgid == null || orgid.equals("") || roleid == null || roleid.equals("")) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		Boolean b = orgService.removerole(orgid, roleid);
+		
+		if (!b) {
+			result = "failure";
+		}
+		
+		out.print(result);
+	}
+	
 }

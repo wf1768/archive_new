@@ -4,7 +4,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/js/sexybuttons/sexybuttons.css" type="text/css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/easyvalidator/css/validate.css" type="text/css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
@@ -46,13 +45,13 @@
 				<tr >
 					<td class="txt1">角色描述 :</td>
 					<td>
-						<input name="rolememo" type="text" id="rolememo" value="${role.rolememo }" tip="服务器名称[不必须填写] " />
+						<input name="rolememo" type="text" id="rolememo" value="${role.rolememo }" tip="角色描述[不必须填写] " />
 					</td>
 				</tr>
 				<tr >
 					<td class="caozuo" colspan="2">
-						<button type="submit" class="sexybutton sexysimple sexyblue"><span class="ok">保存</span></button>
-						<button type="button" class="sexybutton sexysimple" onclick="closepage()">关闭</button>
+						<button type="submit"><span class="ok">保存</span></button>
+						<button type="button" onclick="closepage()">关闭</button>
 					</td>
 				</tr>
 			</tbody>

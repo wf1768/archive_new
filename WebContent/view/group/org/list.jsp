@@ -124,7 +124,11 @@
 		var result = openShowModalDialog(url,window,whObj);
 	}
 
-
+	function setrole(id) {
+		var url = "setrole.do?orgid="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 740, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
 </script>
 
 
@@ -170,6 +174,7 @@
 					<td><p>#</p></td>
 					<td><p>集团机构名称</p></td>
 					<td><p>管理者</p></td>
+					<td><p>角色</p></td>
 					<td><p>操作</p></td>
 				</tr>
 				<c:forEach items="${childList}" varStatus="i" var="item">
@@ -177,6 +182,7 @@
 						<td>${i.index+1 }</td>
 						<td>${item['orgname']}</td>
 						<td>${item['ownerString']}</td>
+						<td>${item['roleString']}</td>
 						<td>
 							<a href="javascript:;" onclick="setowner('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user.png" />
@@ -193,6 +199,10 @@
 							<a href="#" onclick="move('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_refresh.png" />
 								移动
+							</a>
+							<a href="javascript:;" onclick="setrole('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/vcard_add.png" />
+								角色
 							</a>
 						</td>
 					</tr>
