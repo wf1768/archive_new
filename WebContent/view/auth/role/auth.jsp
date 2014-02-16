@@ -5,7 +5,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/js/sexybuttons/sexybuttons.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
@@ -112,11 +111,8 @@
 			</tr>
 			<tr >
 				<td class="caozuo" colspan="2">
-					<button type="button" class="sexybutton sexysimple sexyblue" onclick="setchecknodes()">授权</button>
-					<button type="button" class="sexybutton sexysimple" onclick="closepage()">关闭</button>
-					<!-- <input type="submit" value="保存" class="save" />
-					<input type="button" value="关闭" class="close" onclick="closepage()">
-					<input type="button" value="关闭111" class="close" onclick="setchecknodes()"> -->
+					<button type="button" onclick="setchecknodes()">授权</button>
+					<button type="button" onclick="closepage()">关闭</button>
 				</td>
 			</tr>
 		</tbody>

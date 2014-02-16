@@ -6,6 +6,7 @@ import java.util.List;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
+import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface IOrgService {
@@ -134,5 +135,35 @@ public interface IOrgService {
 	 * @return
 	 */
 	public Boolean removerole(String orgid,String roleid);
+	/**
+	 * 为组赋权，树节点访问权
+	 * @param orgid
+	 * @param treeList
+	 * @return
+	 */
+	public Boolean setorgtree(String orgid,List<String> treeList);
+	
+	/**
+	 * 获取当前组的树节点关联权限
+	 * @param orgid
+	 * @param treeid
+	 * @return
+	 */
+	public Sys_org_tree getTreeAuth(String orgid,String treeid);
+	/**
+	 * 保存组与树关联的附属权限（电子全文）
+	 * @param org_tree
+	 * @return
+	 */
+	public Boolean setTreeAuth(Sys_org_tree tmp);
+	
+	/**
+	 * 保存组与树的数据访问权限
+	 * @param org_tree
+	 * @param tabletype
+	 * @param filter
+	 * @return
+	 */
+	public Boolean saveDataAuth(Sys_org_tree org_tree,String tabletype,String filter);
 	
 }

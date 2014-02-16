@@ -27,6 +27,8 @@ import net.ussoft.archive.util.resule.ResultInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
+
 @Service
 public class OrgService implements IOrgService {
 	
@@ -120,14 +122,19 @@ public class OrgService implements IOrgService {
 		sql = "delete from sys_orgowner where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
 		orgownerDao.del(sql, values);
 		
+		//删除组、子组与档案树的关联
+		sql = "delete from sys_org_tree where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
+		orgtreeDao.del(sql, values);
+		
 		//删除组、以及子组
 		sql = "delete from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%'";
 		int num = orgDao.del(sql, values);
 		return num;
 	}
-	
-	
-
+	/*
+	 * (non-Javadoc)
+	 * @see net.ussoft.archive.service.IOrgService#getOrgTree(java.lang.String)
+	 */
 	@Override
 	public ResultInfo getOrgTree(String orgid) {
 		List<Object> values=new ArrayList<Object>();
@@ -137,7 +144,7 @@ public class OrgService implements IOrgService {
 		ResultInfo info = new ResultInfo(Boolean.TRUE);
 		
 		if (orgTreeList.size()  == 0) {
-			return null;
+			return info;
 		}
 		
 		values.clear();
@@ -148,7 +155,7 @@ public class OrgService implements IOrgService {
 		}
 		CommonUtils.deleteLastStr(sb, ",");
 		
-		List<Sys_tree> treeList = treeDao.search("select * from sys_tree where treeid in ("+sb.toString()+")", values);
+		List<Sys_tree> treeList = treeDao.search("select * from sys_tree where id in ("+sb.toString()+")", values);
 		
 		info.setMsg("获取帐户组管理的树节点成功。");
 		info.put("list", treeList);
@@ -229,7 +236,7 @@ public class OrgService implements IOrgService {
 	 */
 	@Override
 	public List<HashMap<String, String>> getChildList(String orgid) {
-		List<HashMap<String, String>> resultList = new ArrayList();
+		List<HashMap<String, String>> resultList = new ArrayList<HashMap<String, String>>();
 		PageBean<Sys_org> pageBean = new PageBean<Sys_org>();
 		Sys_org org = new Sys_org();
 		if (orgid != null) {
@@ -259,7 +266,6 @@ public class OrgService implements IOrgService {
 				}
 				childMap.put("ownerString", ownerString);
 				//获取当前组的角色
-				String roleString = "";
 				String roleid = sys_org.getRoleid();
 				
 				if (roleid==null || roleid.equals("")) {
@@ -308,7 +314,7 @@ public class OrgService implements IOrgService {
 		values.add(oldTreenodeString + "#%");
 		String sql = "update sys_org set treenode = CONCAT(?,orgindex) where treenode like ?";
 		
-		int num = orgDao.update(sql, values);
+		orgDao.update(sql, values);
 		return true;
 	}
 
@@ -428,6 +434,186 @@ public class OrgService implements IOrgService {
 		}
 		org.setRoleid("");
 		org = orgDao.update(org);
+		
+		return true;
+	}
+
+	@Transactional("txManager")
+	@Override
+	public Boolean setorgtree(String orgid, List<String> treeList) {
+		
+		String sql = "";
+		List<Object> values = new ArrayList<Object>();
+		
+		//如果传入的treeList为空，那就清空组对应的树节点.
+		if (null == treeList || treeList.size() == 0) {
+			sql = "delete from sys_org_tree where orgid=?";
+			values.add(orgid);
+			orgtreeDao.del(sql, values);
+			return true;
+		}
+		
+		//获取组已经存在的树节点访问权
+		sql = "select * from sys_org_tree where orgid=?";
+		values.clear();
+		values.add(orgid);
+		List<Sys_org_tree> org_trees = orgtreeDao.search(sql, values);
+		
+		//获取新加入的。
+		List<String> newList = new ArrayList<String>();
+		for (int i=0;i < treeList.size();i++) {
+			Boolean b = false;
+			for (int j = 0;j<org_trees.size();j++) {
+				if (treeList.get(i).toString().equals(org_trees.get(j).getTreeid())) {
+					b = true;
+					break;
+				}
+			}
+			if (!b) {
+				newList.add(treeList.get(i).toString());
+			}
+		}
+		//将新加入的，保存到数据库
+		List<List<Object>> values2 = new ArrayList<List<Object>>();
+		for (int i = 0; i < newList.size(); i++) {
+			List<Object> tmp = new ArrayList<Object>();
+			tmp.add(UUID.randomUUID().toString());
+			tmp.add(orgid);
+			tmp.add(newList.get(i));
+			tmp.add(0);
+			tmp.add(0);
+			tmp.add(0);
+			tmp.add("");
+			values2.add(tmp);
+		}
+		orgtreeDao.batchAdd("insert into sys_org_tree (id,orgid,treeid,filescan,filedown,fileprint,filter) values (?,?,?,?,?,?,?)", values2);
+		
+		//处理原来有，本次被移除的关联
+		List<String> delList = new ArrayList<String>();
+		for (int i=0;i < org_trees.size();i++) {
+			Boolean b = false;
+			for (int j = 0;j<treeList.size();j++) {
+				if (org_trees.get(i).getTreeid().equals(treeList.get(j))) {
+					b = true;
+					break;
+				}
+			}
+			if (!b) {
+				delList.add(org_trees.get(i).getId());
+			}
+		}
+		
+		//删除被移除的关联
+		if (null != delList && delList.size() >0) {
+			orgtreeDao.delByIds(delList);
+		}
+		
+		return true;
+	}
+
+	@Override
+	public Sys_org_tree getTreeAuth(String orgid, String treeid) {
+		Sys_org_tree org_tree = new Sys_org_tree();
+		org_tree.setOrgid(orgid);
+		org_tree.setTreeid(treeid);
+		return orgtreeDao.searchOne(org_tree);
+	}
+
+	@Transactional("txManager")
+	@Override
+	public Boolean setTreeAuth(Sys_org_tree tmp) {
+		//获取对象
+		Sys_org_tree oTree = new Sys_org_tree();
+		oTree.setOrgid(tmp.getOrgid());
+		oTree.setTreeid(tmp.getTreeid());
+		Sys_org_tree org_tree = orgtreeDao.searchOne(oTree);
+		
+		if (null == org_tree) {
+			return false;
+		}
+		
+		//获取tree对象，判断是否是夹（F），如果是夹，赋予夹下面的所有与当前组关联的树节点相同的权限
+		Sys_tree tree = treeDao.get(org_tree.getTreeid());
+		
+		if (null == tree) {
+			return false;
+		}
+		
+		if (tree.getTreetype().equals("F")) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getOrgid());
+			values.add(tree.getId());
+			
+			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
+			
+			for (Sys_org_tree sys_org_tree : childList) {
+				sys_org_tree.setFilescan(tmp.getFilescan());
+				sys_org_tree.setFiledown(tmp.getFiledown());
+				sys_org_tree.setFileprint(tmp.getFileprint());
+				
+				orgtreeDao.update(sys_org_tree);
+			}
+		}
+		else {
+			org_tree.setFilescan(tmp.getFilescan());
+			org_tree.setFiledown(tmp.getFiledown());
+			org_tree.setFileprint(tmp.getFileprint());
+			
+			//保存
+			orgtreeDao.update(org_tree);
+		}
+		
+		
+		
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Transactional("txManager")
+	@Override
+	public Boolean saveDataAuth(Sys_org_tree org_tree, String tabletype,
+			String filter) {
+		
+		//获取orgtree关联对象
+		Sys_org_tree orgTree = orgtreeDao.searchOne(org_tree);
+		
+		if (null == orgTree) {
+			return false;
+		}
+		
+		String f = orgTree.getFilter();
+		HashMap<String, String> tmpMap = new HashMap<String, String>();
+		//转化参数
+		if (filter == null || filter.equals("")) {
+			return false;
+		}
+		else {
+			tmpMap = (HashMap<String, String>) JSON.parseObject(filter,new HashMap<String,String>().getClass());  
+		}
+		List list = new ArrayList();
+		
+		
+		//如果已经设置过
+		try {
+			if (f != null && f.length() > 0) {
+				list = (List) JSON.parseObject(f, new ArrayList().getClass());
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+		
+		tmpMap.put("id", UUID.randomUUID().toString());
+		tmpMap.put("tableType", tabletype);
+		
+		list.add(tmpMap);
+		
+		Sys_org_tree record = new Sys_org_tree();
+		record.setFilter(JSON.toJSONString(list));
+//		record.setFilter(gson.toJson(list));
+		record.setId(orgTree.getId());
+		orgtreeDao.update(record);
 		
 		return true;
 	}

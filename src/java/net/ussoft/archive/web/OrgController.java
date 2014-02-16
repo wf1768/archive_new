@@ -14,10 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
+import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_role;
+import net.ussoft.archive.model.Sys_templetfield;
+import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IEncryService;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.IRoleService;
+import net.ussoft.archive.service.ITreeService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -37,6 +41,8 @@ public class OrgController extends BaseConstroller {
 	private IEncryService encryService;
 	@Resource
 	private IRoleService roleService;
+	@Resource
+	private ITreeService treeService;
 	
 	/**
 	 * 组列表
@@ -137,7 +143,13 @@ public class OrgController extends BaseConstroller {
 		modelMap.put("parentid", parentid);
 		return "/view/group/org/add";
 	}
-	
+	/**
+	 * 保持新建组
+	 * @param org
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	@RequestMapping(value="/save",method=RequestMethod.POST)
 	public void save(Sys_org org,HttpServletRequest request,HttpServletResponse response) throws IOException {
 		
@@ -356,7 +368,14 @@ public class OrgController extends BaseConstroller {
 		
 		out.print(result);
 	}
-	
+	/**
+	 * 保存组的所有者（集团版本需要）
+	 * @param orgid
+	 * @param accountid
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	@RequestMapping(value="/saveowner",method=RequestMethod.POST)
 	public void saveowner(String orgid,String accountid,HttpServletRequest request,HttpServletResponse response) throws IOException {
 		response.setContentType("text/xml;charset=UTF-8");
@@ -405,7 +424,13 @@ public class OrgController extends BaseConstroller {
 		
 		return new ModelAndView("/view/auth/org/setrole",modelMap);
 	}
-	
+	/**
+	 * 保存组的角色
+	 * @param orgid
+	 * @param roleid
+	 * @param response
+	 * @throws IOException
+	 */
 	@RequestMapping(value="/saverole",method=RequestMethod.POST)
 	public void saverole(String orgid,String roleid,HttpServletResponse response) throws IOException {
 		response.setContentType("text/xml;charset=UTF-8");
@@ -455,5 +480,159 @@ public class OrgController extends BaseConstroller {
 		
 		out.print(result);
 	}
+	
+	/**
+	 * 打开设置组的树节点访问权限页面
+	 * @param orgid
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/setauth",method=RequestMethod.GET)
+	public ModelAndView setauth(String orgid,ModelMap modelMap) {
+		//获取组对象
+		Sys_org org = orgService.getById(orgid);
+		modelMap.put("org", org);
+		
+		//获取树节点，用来画树
+		List<Sys_tree> treeList = treeService.list();
+		String treeString = JSON.toJSONString(treeList);
+		modelMap.put("treeList", treeString);
+		
+		//获取当前组能访问的树节点，用来checkbox勾选
+		@SuppressWarnings("unchecked")
+		List<Sys_tree> orgTrees = (List<Sys_tree>) orgService.getOrgTree(orgid).getData().get("list");
+		String orgTreesString = JSON.toJSONString(orgTrees);
+		modelMap.put("orgTrees", orgTreesString);
+		
+		return new ModelAndView("/view/auth/org/setauth",modelMap);
+	}
+	/**
+	 * 保存组的树节点赋权
+	 * @param orgid
+	 * @param treeids
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/saveOrgAuth")
+	public void saveOrgAuth(String orgid,String treeids,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+
+		@SuppressWarnings("unchecked")
+		List<String> treeList = (List<String>) JSON.parse(treeids);
+		
+		Boolean b = orgService.setorgtree(orgid, treeList);
+		String result = "failure";
+		if (b) {
+			result = "success";
+		}
+		out.print(result);
+	}
+	/**
+	 * 点击树节点，显示当前组的树节点辅助权限（全文浏览权、全文下载权、全文打印权、节点下数据访问权）
+	 * @param orgid
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/getTreeAuth")
+	public void getTreeAuth(String orgid,String treeid,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		Sys_org_tree org_tree = orgService.getTreeAuth(orgid, treeid);
+		
+		String result = "failure";
+		if (null == org_tree) {
+			out.print(result);
+			return;
+		}
+		
+		result = JSON.toJSONString(org_tree);
+		//获取组和树的对应
+		out.print(result);
+	}
+	/**
+	 * 保存当前组的树节点辅助权限（全文浏览权、全文下载权、全文打印权、节点下数据访问权）
+	 * @param org_tree
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/saveTreeAuth")
+	public void saveTreeAuth(Sys_org_tree org_tree,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "failure";
+		
+		Boolean b = orgService.setTreeAuth(org_tree);
+		
+		if (b) {
+			result = "success";
+		}
+		//获取组和树的对应
+		out.print(result);
+	}
+	
+	/**
+	 * 打开组针对树节点的数据访问权添加页面
+	 * @param orgid
+	 * @param treeid
+	 * @param tabletype
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/showSetDataAuthWindow",method=RequestMethod.GET)
+	public ModelAndView showSetDataAuthWindow(String orgid,String treeid,String tabletype,ModelMap modelMap) {
+		//获取组对象
+		Sys_org org = orgService.getById(orgid);
+		modelMap.put("org", org);
+		
+		//获取树对象
+		Sys_tree tree = treeService.getById(treeid);
+		modelMap.put("tree", tree);
+		
+		modelMap.put("tabletype", tabletype);
+		
+		//获取tree对应的模版字段列表
+		List<Sys_templetfield> templetfields = treeService.geTempletfields(treeid, tabletype);
+		modelMap.put("templetfields", templetfields);
+		
+		return new ModelAndView("/view/auth/org/setdataauth",modelMap);
+	}
+	/**
+	 * 保存组的数据访问权限
+	 * @param org_tree
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="saveDataAuth",method=RequestMethod.POST)
+	public void saveDataAuth(Sys_org_tree org_tree,String tabletype,String filter,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "failure";
+		
+		if (null == org_tree || tabletype.equals("") || filter.equals("")) {
+			out.print(result);
+			return;
+		}
+		//去掉org_tree的filter，可能前台传入的时候会自动加到类里，这样查询不出来
+		org_tree.setFilter(null);
+		Boolean b = orgService.saveDataAuth(org_tree,tabletype,filter);
+		
+		if (b) {
+			result = "success";
+		}
+		//获取组和树的对应
+		out.print(result);
+	} 
 	
 }

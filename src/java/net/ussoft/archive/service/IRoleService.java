@@ -59,5 +59,10 @@ public interface IRoleService {
 	 */
 	public List<Sys_function> searchFunctions(String roleid);
 	
+	/**
+	 * 为角色赋权
+	 * @param funList
+	 * @param roleid
+	 */
 	public void setFunctions(List<String> funList,String roleid);
 }

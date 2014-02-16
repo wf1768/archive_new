@@ -129,8 +129,14 @@
 		var whObj = { width: 740, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
 	}
+	
+	function setauth(id) {
+		var url = "setauth.do?orgid="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 800, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
 
-
+	
 </script>
 
 
@@ -213,6 +219,10 @@
 							<a href="javascript:;" onclick="setrole('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/vcard_add.png" />
 								角色
+							</a>
+							<a href="javascript:;" onclick="setauth('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/key_add.png" />
+								权限
 							</a>
 						</td>
 					</tr>
