@@ -18,65 +18,6 @@
 		window.close();
 	}
 	
-	function aa() {
-		//创建对象
-		var dataAuth = {};
-		dataAuth.dataAuthValue = dataAuthValue;
-		dataAuth.selectField = selectField;
-		dataAuth.fieldname = fieldname;
-		dataAuth.oper = oper;
-		
-		var tmpid="";
-		var url = "";
-		if (authorityCommon.isSetAccount != 1) {
-			tmpid = authorityCommon.orgTreeid;
-			url = "setDataAuth.action";
-		}
-		else {
-			tmpid = authorityCommon.accountTreeid;
-			url = "setAccountDataAuth.action";
-		}
-		var tableType = $("#tableType").val();
-		//保存到服务器
-		$.ajax({
-	        async: false,
-	        url: url,
-	        type: 'post',
-	        dataType: 'script',
-	        data: {orgTreeid: tmpid, tableType: tableType,filter:JSON.stringify(dataAuth)},
-	        success: function (data) {
-	            if (data != "error") {
-	            	//保存成功后，提示
-	            	openalert("授权成功！");
-	            	if (authorityCommon.isSetAccount != 1) {
-	            		authorityCommon.getOrgTree(); //刷新
-	            	}
-	            	else {
-	            		authorityCommon.getAccountTree(); //刷新
-	            	}
-		   			
-	            	//保存成功后，显示在页面上。
-		   			if (templettype != "F") {
-		   				if (tableType == '01') {
-		   					createDataAuthTable('ajAuth',JSON.stringify(dataAuth));
-		   				}
-		   				else if (tableType == '02') {
-		   					createDataAuthTable('wjAuth',JSON.stringify(dataAuth));
-		   				}
-		   			}
-		   			else {
-		   				createDataAuthTable('wjAuth',JSON.stringify(dataAuth));
-		   			}
-		   			
-//	                field = eval(fields);
-//	                talbeField(field); //字段
-	            } else {
-	                openalert('读取数据时出错，请尝试重新操作或与管理员联系!');
-	            }
-	        }
-	    });
-	}
-	
 	function saveDataAuth() {
 		
 		//获取权限内容
@@ -110,38 +51,8 @@
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 	            }
-	            //window.dialogArguments.location.reload();
-	            //window.location.reload();
 	        }
 	    });
-	}
-	
-	function save(orgid,roleid) {
-		
-		if (orgid == "" || roleid == "") {
-			alert("没有获取足够数据，请退出后，重新尝试，或与管理员联系。");
-			return;
-		}
-		
-		if (confirm("确定要将选择的角色赋予 ${org.orgname} 组吗？")) {
-		    $.ajax({
-		        async : true,
-		        url : "${pageContext.request.contextPath}/org/saverole.do",
-		        type : 'post',
-		        data:{orgid:orgid,roleid:roleid},
-		        dataType : 'text',
-		        success : function(data) {
-		            if (data == "success") {
-		            	alert("更新完毕。");
-		            	
-		            } else {
-		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
-		        }
-		    });
-		}
 	}
 	
 	$(function() {
@@ -150,7 +61,6 @@
 		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
 		if (result != "") {
 			alert(result);
-			window.dialogArguments.location.reload();
 		}
 	})
 	
@@ -182,6 +92,7 @@
 				<td>
 					<select id="oper" class="input-small">
 						<option value="equal">等于</option>
+						<option value="like">包含</option>
 					</select>
 				</td>
 				<td>

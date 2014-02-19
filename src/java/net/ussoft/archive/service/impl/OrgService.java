@@ -568,16 +568,9 @@ public class OrgService implements IOrgService {
 		
 		return true;
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	@Transactional("txManager")
-	@Override
-	public Boolean saveDataAuth(Sys_org_tree org_tree, String tabletype,
-			String filter) {
-		
-		//获取orgtree关联对象
-		Sys_org_tree orgTree = orgtreeDao.searchOne(org_tree);
-		
+	private Boolean setDataAuth(Sys_org_tree orgTree,String tabletype,String filter) {
 		if (null == orgTree) {
 			return false;
 		}
@@ -611,8 +604,88 @@ public class OrgService implements IOrgService {
 		
 		Sys_org_tree record = new Sys_org_tree();
 		record.setFilter(JSON.toJSONString(list));
-//		record.setFilter(gson.toJson(list));
 		record.setId(orgTree.getId());
+		orgtreeDao.update(record);
+		
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Transactional("txManager")
+	@Override
+	public Boolean saveDataAuth(Sys_org_tree org_tree, String tabletype,
+			String filter) {
+		
+		if (null == org_tree.getTreeid() || org_tree.getTreeid().equals("")) {
+			return false;
+		}
+		
+		//判断Treeid是夹还是节点，如果是夹，则获取当前帐户在该夹下所有有权限的节点赋权
+		Sys_tree tree = treeDao.get(org_tree.getTreeid());
+		
+		if (null == tree) {
+			return false;
+		}
+		
+		if (tree.getTreetype().equals("F")) {
+			//如果是夹，则获取夹下面的子节点
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(org_tree.getOrgid());
+			values.add(tree.getId());
+			
+			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
+			
+			for (Sys_org_tree sys_org_tree : childList) {
+				setDataAuth(sys_org_tree,tabletype,filter);
+			}
+		}
+		else {
+			//获取orgtree关联对象
+			Sys_org_tree orgTree = orgtreeDao.searchOne(org_tree);
+			return setDataAuth(orgTree,tabletype,filter);
+		}
+		
+		return true;
+	}
+
+	@Transactional("txManager")
+	@Override
+	public Boolean removeDataAuth(String orgtreeid, String id) {
+		if (null == orgtreeid || orgtreeid.equals("") || null == id || id.equals("")) {
+			return false;
+		}
+		//获取orgtree对象
+		Sys_org_tree org_tree = orgtreeDao.get(orgtreeid);
+		
+		String f = org_tree.getFilter();
+		
+		if (null == f || f.equals("")) {
+			return false;
+		}
+		
+		List list = new ArrayList();
+		//如果已经设置过
+		try {
+			list = (List) JSON.parseObject(f, new ArrayList().getClass());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+		
+		for (int i=0;i<list.size();i++) {
+			HashMap<String, String> map = (HashMap<String, String>) JSON.parseObject(list.get(i).toString(),new HashMap<String,String>().getClass());
+//			HashMap<String, String> map = (HashMap<String, String>) list.get(i);
+			
+			if (map.get("id").equals(id)) {
+				list.remove(i);
+				break;
+			}
+		}
+		
+		Sys_org_tree record = new Sys_org_tree();
+		record.setFilter(JSON.toJSONString(list));
+		record.setId(org_tree.getId());
 		orgtreeDao.update(record);
 		
 		return true;

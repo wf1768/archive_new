@@ -633,6 +633,35 @@ public class OrgController extends BaseConstroller {
 		}
 		//获取组和树的对应
 		out.print(result);
-	} 
+	}
+	/**
+	 * 删除组与树关联的数据访问权限
+	 * @param orgtreeid
+	 * @param id
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="removeDataAuth",method=RequestMethod.POST)
+	public void removeDataAuth(String orgtreeid,String id,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "failure";
+		
+		if (null == orgtreeid || orgtreeid.equals("") || null == id || id.equals("")) {
+			out.print(result);
+			return;
+		}
+		Boolean b = orgService.removeDataAuth(orgtreeid, id);
+		
+		if (b) {
+			result = "success";
+		}
+		//获取组和树的对应
+		out.print(result);
+	}
+	
 	
 }

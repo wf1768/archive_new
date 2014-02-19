@@ -166,4 +166,12 @@ public interface IOrgService {
 	 */
 	public Boolean saveDataAuth(Sys_org_tree org_tree,String tabletype,String filter);
 	
+	/**
+	 * 删除组与树的数据访问权限
+	 * @param orgtreeid
+	 * @param id
+	 * @return
+	 */
+	public Boolean removeDataAuth(String orgtreeid,String id);
+	
 }

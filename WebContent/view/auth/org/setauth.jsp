@@ -69,7 +69,9 @@
 		            	$('#fileprint').attr("checked",true);
 		            }
 		            $('.btn').removeAttr("disabled");
-		            showDataAuth(myData.filter,treetype);
+		            if (myData.filter != "") {
+		            	showDataAuth(myData.id,myData.filter,treetype);
+		            }
 	            }
 	            else {
             		$('input[type="checkbox"]').attr('disabled', 'disabled');
@@ -206,6 +208,14 @@
 			var url = "showSetDataAuthWindow.do?orgid=${org.id }&treeid="+node.id+"&tabletype="+id+"&time="+Date.parse(new Date());
 			var whObj = { width: 550, height: 300 };
 			var result = openShowModalDialog(url,window,whObj);
+			//关闭窗口后，刷新页面
+			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+			var nodes = treeObj.getSelectedNodes();
+			if (nodes.length != 1) {
+				return;
+			}
+			node = nodes[0];
+			onClick(null,null,node);
 		};
 	}
 	
@@ -231,7 +241,7 @@
 	
 	
 	//显示数据访问权限
-	function showDataAuth(filter,templettype) {
+	function showDataAuth(orgtreeid,filter,templettype) {
 		$("#ajAuth").html('');
 		$("#wjAuth").html('');
 		//如果当前树节点的档案类型是标准档案或图片档案
@@ -241,10 +251,10 @@
 			
 			for(var i=0;i<array.length;i++) {
 				if (array[i].tableType == '01') {
-					createDataAuthTable('ajAuth',JSON.stringify(array[i]));
+					createDataAuthTable(orgtreeid,'ajAuth',JSON.stringify(array[i]));
 				}
 				else {
-					createDataAuthTable('wjAuth',JSON.stringify(array[i]));
+					createDataAuthTable(orgtreeid,'wjAuth',JSON.stringify(array[i]));
 				}
 			}
 			
@@ -253,88 +263,64 @@
 			//获取条件对象
 			var array = JSON.parse(filter);
 			for(var i=0;i<array.length;i++) {
-				createDataAuthTable('wjAuth',JSON.stringify(array[i]));
+				createDataAuthTable(orgtreeid,'wjAuth',JSON.stringify(array[i]));
 			}
 		}
 	}
+	
 	//创建数据访问权限页面显示
-	function createDataAuthTable(who,dataAuth) {
+	function createDataAuthTable(orgtreeid,who,dataAuth) {
 		if (dataAuth == "") {
 			return;
 		}
 		var html = $("#"+who).html();
 		var auth = JSON.parse(dataAuth);
 		var tmp = '<tr id="'+auth.id+'">';
-		tmp += '<td><input name="authid" type="checkbox" value="'+auth.id+'"/></td>';
 		tmp += '<td>'+auth.fieldname+'</td>';
 		if (auth.oper == 'equal') {
 			tmp += '<td>等于</td>';
 		}
+		else if (auth.oper == 'like'){
+			tmp += '<td>包含</td>';
+		}
 		tmp += '<td>'+auth.dataAuthValue+'</td>';
+		tmp += '<td><a href="javascript:;" onclick="removeDataAuth(\''+orgtreeid+'\',\''+auth.id+'\')" >删除</a></td>';
 		tmp += '</tr>';
 		html += tmp;
 		$("#"+who).html(html);
 	}
-	
 	//删除组的数据访问权限
-	function removeDataAuth(who) {
+	function removeDataAuth(orgtreeid,id) {
+		if (id == "") {
+			alert("请选择要删除的数据！");
+		}
 		
-		var f_str = "";
-		$("#"+who+" :checkbox:checked").each(function(){
-		   if($(this).attr("checked")=="checked"){
-		    f_str += $(this).attr("value")+",";
-		   }
-		});
-		
-		if(f_str==""){
-			openalert("请选择要删除的数据！");
-		}else{
-			bootbox.confirm("确定要删除选择的数据吗？", function(result) {
-	            if(result){
-	                f_str = f_str.substring(0,f_str.length-1);
-	                
-	        		if (authorityCommon.isSetAccount != 1) {
-	        			tmpid = authorityCommon.orgTreeid;
-	        			url = "removeDataAuth.action";
-	        		}
-	        		else {
-	        			tmpid = authorityCommon.accountTreeid;
-	        			url = "removeAccountDataAuth.action";
-	        		}
-	        		
-	                $.ajax({
-	                    type:"post",
-	                    url:url,
-	                    data: {par:f_str,orgTreeid: tmpid},
-	                    success: function(data){
-	                        if (data=="succ") {
-	                           	openalert("删除成功！");
-	                           	if (authorityCommon.isSetAccount != 1) {
-	                        		authorityCommon.getOrgTree(); //刷新
-	                        	}
-	                        	else {
-	                        		authorityCommon.getAccountTree(); //刷新
-	                        	}
-	                           	
-	                           	var ids = f_str.split(",");
-	                           	for (var i=0;i<ids.length;i++) {
-	                           		//移除
-	                               	$("#"+ids[i]).remove();
-	                           	}
-	                           	
-	                        }else {
-	                            openalert("删除出错，请重新尝试或与管理员联系。");
-	                        }
-	                    },
-	                    error: function() {
-	                        openalert("执行操作出错，请重新尝试或与管理员联系。");
-	                    }
-	                });
-	            }
-	        });
+		if (confirm("确定要删除选择的数据访问权限吗，是否继续？")) {
+			$.ajax({
+		        async : true,
+		        url : "${pageContext.request.contextPath}/org/removeDataAuth.do",
+		        type : 'post',
+		        data:{orgtreeid:orgtreeid,id:id},
+		        dataType : 'text',
+		        success : function(data) {
+		            if (data == "success") {
+		            	alert("删除完毕。");
+		            	//删除后刷新
+		            	var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+		    			var nodes = treeObj.getSelectedNodes();
+		    			if (nodes.length != 1) {
+		    				return;
+		    			}
+		    			node = nodes[0];
+		    			onClick(null,null,node);
+		            	
+		            } else {
+		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
+		            };
+		        }
+		    });
 		}
 	}
-	
 	
 </script>
 <title>为组赋权</title>
@@ -376,18 +362,17 @@
 					<div>
 						<p style="margin: 6px 12px;">
 							<button class="btn" type="button" disabled onclick="showSetDataAuthWindow('01')">添加</button>
-							<button class="btn" type="button" disabled onclick="removeDataAuth('ajAuth')">移除</button>
 						</p>
 					</div>
 					<div>
 			            <div id="dataAuth">
-			            	<table border="1" cellpadding="1" cellspacing="0" width="70%">
+			            	<table border="1" cellpadding="1" cellspacing="0" width="90%">
 								<thead>
 								<tr>
-									<th width="5%">#</th>
 									<th>字段</th>
 									<th>关系符</th>
 									<th>值</th>
+									<th>操作</th>
 								</tr>
 								</thead>
 								<tbody id="ajAuth">
@@ -409,18 +394,17 @@
 					<div>
 						<p style="margin: 6px 12px;">
 							<button class="btn" disabled type="button" onclick="showSetDataAuthWindow('02')">添加</button>
-							<button class="btn" disabled type="button" onclick="removeDataAuth('wjAuth')">移除</button>
 						</p>
 					</div>
 					<div>
 			            <div id="">
-			            	<table border="1" cellpadding="1" cellspacing="0" width="70%">
+			            	<table border="1" cellpadding="1" cellspacing="0" width="90%">
 								<thead>
 								<tr>
-									<th width="5%">#</th>
 									<th>字段</th>
 									<th>关系符</th>
 									<th>值</th>
+									<th>操作</th>
 								</tr>
 								</thead>
 								<tbody id="wjAuth">
