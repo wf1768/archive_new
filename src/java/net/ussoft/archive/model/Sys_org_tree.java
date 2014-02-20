@@ -16,6 +16,7 @@ public class Sys_org_tree {
 	private Integer filedown;
 	private Integer fileprint;
 	private String filter;
+	private String docauth;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -61,6 +62,12 @@ public class Sys_org_tree {
 	}
 	public void setFilter(String filter) {
 		this.filter = filter;
+	}
+	public String getDocauth() {
+		return docauth;
+	}
+	public void setDocauth(String docauth) {
+		this.docauth = docauth;
 	}
 	
 	

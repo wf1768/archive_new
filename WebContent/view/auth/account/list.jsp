@@ -171,6 +171,18 @@
 		    });
 		}
 	}
+	
+	function setrole(id) {
+		var url = "setrole.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 740, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
+	
+	function setauth(id) {
+		var url = "setauth.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 800, height: 500 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
 
 
 </script>
@@ -224,6 +236,7 @@
 					<td><p>#</p></td>
 					<td><p>帐户名称</p></td>
 					<td><p>帐户状态</p></td>
+					<td><p>帐户角色</p></td>
 					<td><p>备注</p></td>
 					<td><p>操作</p></td>
 				</tr>
@@ -245,6 +258,7 @@
 							</c:otherwise>
 						</c:choose>
 						</td>
+						<td>${item.rolename}</td>
 						<td>${item.accountmemo}</td>
 						<td>
 							<a href="javascript:;" onclick="edit('${item.id}')" class="juse">
@@ -261,6 +275,14 @@
 									删除
 								</a>
 							</c:if>
+							| <a href="javascript:;" onclick="setrole('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/vcard_add.png" />
+								角色
+							</a>
+							<a href="javascript:;" onclick="setauth('${item.id}')" class="juse">
+								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/key_add.png" />
+								权限
+							</a>
 						</td>
 					</tr>
 				</c:forEach>

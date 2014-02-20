@@ -1,22 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<!DOCTYPE HTML>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link type="text/css" href="${pageContext.request.contextPath}/css/template.css" rel="stylesheet" />
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
-<title>${sysname }</title>
-<!--[if IE 6]>
-<script src="${pageContext.request.contextPath}/js/DD_belatedPNG.js"></script>
-<script>
-  DD_belatedPNG.fix('.login_bottom,.logo,.l_m_b, tubiao, tubiao1,');
-</script>
-<![endif]-->
-</head>
-<body>
+<%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
 <%@ include file="/view/common/top_second_menu.jsp"%>
 
@@ -59,10 +43,6 @@ function openwindow(id){
 	var result = openShowModalDialog(url,null,whObj);
 	window.location.reload(true); // 刷新窗体
 	
-	//if(result==null || result=="undefined"){ // 判断是否异常关闭（点击窗体“关闭”按钮)
-	//}else{
-	//    window.location.reload(true); // 刷新窗体
-	//}
 }
 
 
@@ -88,6 +68,9 @@ function openwindow(id){
 					<li><a href="${pageContext.request.contextPath}/docserver/list.do" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_10.png"
 							width="18" height="13" class="tubiao1" /><span>文件服务器</span></a></li>
+					<li><a href="${pageContext.request.contextPath}/config/docauthlist.do" class="txt2"><img
+							src="${pageContext.request.contextPath}/images/i_10.png"
+							width="18" height="13" class="tubiao1" /><span>电子文件权限</span></a></li>
 					<li><a href="#" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_14.png"
 							width="18" height="13" class="tubiao1" /><span>索引维护</span></a></li>
@@ -113,11 +96,10 @@ function openwindow(id){
 						<td><font color="blue">${item.configvalue}</font></td>
 						<td>${item.configmemo}</td>
 						<td>
-							<p>
-								<a href="#" onclick="openwindow('${item.id}')" class="juse">
+							<a href="#" onclick="openwindow('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
-								修改</a>
-							</p>
+								修改
+							</a>
 						</td>
 					</tr>
 				</c:forEach>

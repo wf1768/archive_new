@@ -377,7 +377,7 @@ public class OrgService implements IOrgService {
 	 */
 	@Transactional("txManager")
 	@Override
-	public Boolean setowner(String orgid, String accountid) {
+	public Boolean saveowner(String orgid, String accountid) {
 		//获取组与管理者对应表里的数据对象
 		Sys_orgowner owner = new Sys_orgowner();
 		owner.setAccountid(accountid);
@@ -406,7 +406,7 @@ public class OrgService implements IOrgService {
 	 */
 	@Transactional("txManager")
 	@Override
-	public Boolean setrole(String orgid, String roleid) {
+	public Boolean saverole(String orgid, String roleid) {
 		//获取组对象
 		Sys_org org = orgDao.get(orgid);
 		
@@ -440,7 +440,7 @@ public class OrgService implements IOrgService {
 
 	@Transactional("txManager")
 	@Override
-	public Boolean setorgtree(String orgid, List<String> treeList) {
+	public Boolean saveorgtree(String orgid, List<String> treeList) {
 		
 		String sql = "";
 		List<Object> values = new ArrayList<Object>();
@@ -484,9 +484,10 @@ public class OrgService implements IOrgService {
 			tmp.add(0);
 			tmp.add(0);
 			tmp.add("");
+			tmp.add("1");
 			values2.add(tmp);
 		}
-		orgtreeDao.batchAdd("insert into sys_org_tree (id,orgid,treeid,filescan,filedown,fileprint,filter) values (?,?,?,?,?,?,?)", values2);
+		orgtreeDao.batchAdd("insert into sys_org_tree (id,orgid,treeid,filescan,filedown,fileprint,filter,docauth) values (?,?,?,?,?,?,?,?)", values2);
 		
 		//处理原来有，本次被移除的关联
 		List<String> delList = new ArrayList<String>();
@@ -521,7 +522,7 @@ public class OrgService implements IOrgService {
 
 	@Transactional("txManager")
 	@Override
-	public Boolean setTreeAuth(Sys_org_tree tmp) {
+	public Boolean saveTreeAuth(Sys_org_tree tmp) {
 		//获取对象
 		Sys_org_tree oTree = new Sys_org_tree();
 		oTree.setOrgid(tmp.getOrgid());
@@ -563,9 +564,6 @@ public class OrgService implements IOrgService {
 			//保存
 			orgtreeDao.update(org_tree);
 		}
-		
-		
-		
 		return true;
 	}
 	
@@ -688,6 +686,47 @@ public class OrgService implements IOrgService {
 		record.setId(org_tree.getId());
 		orgtreeDao.update(record);
 		
+		return true;
+	}
+
+	@Transactional("txManager")
+	@Override
+	public Boolean saveDocAuth(Sys_org_tree tmp) {
+		//获取对象
+		Sys_org_tree oTree = new Sys_org_tree();
+		oTree.setOrgid(tmp.getOrgid());
+		oTree.setTreeid(tmp.getTreeid());
+		Sys_org_tree org_tree = orgtreeDao.searchOne(oTree);
+		
+		if (null == org_tree) {
+			return false;
+		}
+		
+		//获取tree对象，判断是否是夹（F），如果是夹，赋予夹下面的所有与当前组关联的树节点相同的权限
+		Sys_tree tree = treeDao.get(org_tree.getTreeid());
+		
+		if (null == tree) {
+			return false;
+		}
+		
+		if (tree.getTreetype().equals("F")) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getOrgid());
+			values.add(tree.getId());
+			
+			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
+			
+			for (Sys_org_tree sys_org_tree : childList) {
+				sys_org_tree.setDocauth(tmp.getDocauth());
+				orgtreeDao.update(sys_org_tree);
+			}
+		}
+		else {
+			org_tree.setDocauth(tmp.getDocauth());
+			//保存
+			orgtreeDao.update(org_tree);
+		}
 		return true;
 	}
 

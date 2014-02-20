@@ -26,4 +26,10 @@ public interface IConfigService {
 	public int update(Sys_config config);
 	
 	public Sys_config selectByWhere(Sys_config config);
+	
+	/**
+	 * 删除电子全文权限代码
+	 * @return
+	 */
+	public int deleteDocAuth(String id);
 }

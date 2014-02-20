@@ -119,7 +119,7 @@ public interface IOrgService {
 	 * @param accountid
 	 * @return
 	 */
-	public Boolean setowner(String orgid,String accountid);
+	public Boolean saveowner(String orgid,String accountid);
 	
 	/**
 	 * 设置组的角色
@@ -127,7 +127,7 @@ public interface IOrgService {
 	 * @param roleid
 	 * @return
 	 */
-	public Boolean setrole(String orgid,String roleid);
+	public Boolean saverole(String orgid,String roleid);
 	/**
 	 * 移除组的角色
 	 * @param orgid
@@ -141,7 +141,7 @@ public interface IOrgService {
 	 * @param treeList
 	 * @return
 	 */
-	public Boolean setorgtree(String orgid,List<String> treeList);
+	public Boolean saveorgtree(String orgid,List<String> treeList);
 	
 	/**
 	 * 获取当前组的树节点关联权限
@@ -155,7 +155,7 @@ public interface IOrgService {
 	 * @param org_tree
 	 * @return
 	 */
-	public Boolean setTreeAuth(Sys_org_tree tmp);
+	public Boolean saveTreeAuth(Sys_org_tree tmp);
 	
 	/**
 	 * 保存组与树的数据访问权限
@@ -173,5 +173,11 @@ public interface IOrgService {
 	 * @return
 	 */
 	public Boolean removeDataAuth(String orgtreeid,String id);
+	/**
+	 * 保存组与树的电子文件浏览范围权限
+	 * @param tmp
+	 * @return
+	 */
+	public Boolean saveDocAuth(Sys_org_tree tmp);
 	
 }

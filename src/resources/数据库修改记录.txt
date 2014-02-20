@@ -60,4 +60,6 @@
 	(2)初始化第一条数据
 	(3)sys_role表增加字段groupid 关联的
 	
-12、
+12、在表sys_org_tree\sys_account_tree\sys_doc 增加docauth（varchar 40）字段，用来存储电子文件权限代码id.根据这个，来判断当帐户或组有访问该tree下电子全文时，哪些不能显示
+
+

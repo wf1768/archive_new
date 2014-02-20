@@ -54,9 +54,9 @@
 		
 		$.ajax({
 	        async : true,
-	        url : "${pageContext.request.contextPath}/org/getTreeAuth.do",
+	        url : "${pageContext.request.contextPath}/account/getTreeAuth.do",
 	        type : 'post',
-	        data:{orgid:"${org.id }",treeid:treeNode.id},
+	        data:{id:"${account.id }",treeid:treeNode.id},
 	        dataType : 'text',
 	        success : function(data) {
 	            if (data != "failure") {
@@ -142,9 +142,9 @@
 		if (b) {
 			$.ajax({
 		        async : true,
-		        url : "${pageContext.request.contextPath}/org/saveTreeAuth.do",
+		        url : "${pageContext.request.contextPath}/account/saveTreeAuth.do",
 		        type : 'post',
-		        data:{orgid:"${org.id }",treeid:node.id,filescan:filescan,filedown:filedown,fileprint:fileprint},
+		        data:{accountid:"${account.id }",treeid:node.id,filescan:filescan,filedown:filedown,fileprint:fileprint},
 		        dataType : 'text',
 		        success : function(data) {
 		        	if (data == "success") {
@@ -179,9 +179,9 @@
 		if (b) {
 			$.ajax({
 		        async : true,
-		        url : "${pageContext.request.contextPath}/org/saveDocAuth.do",
+		        url : "${pageContext.request.contextPath}/account/saveDocAuth.do",
 		        type : 'post',
-		        data:{orgid:"${org.id }",treeid:node.id,docauth:docauth},
+		        data:{accountid:"${account.id }",treeid:node.id,docauth:docauth},
 		        dataType : 'text',
 		        success : function(data) {
 		        	if (data == "success") {
@@ -215,9 +215,9 @@
 		
 	    $.ajax({
 	        async : true,
-	        url : "${pageContext.request.contextPath}/org/saveOrgAuth.do",
+	        url : "${pageContext.request.contextPath}/account/saveAccountAuth.do",
 	        type : 'post',
-	        data:{orgid:"${org.id }",treeids:treeids},
+	        data:{id:"${account.id }",treeids:treeids},
 	        dataType : 'text',
 	        success : function(data) {
 	            if (data == "success") {
@@ -247,7 +247,7 @@
 		}
 
 		if (b) {
-			var url = "showSetDataAuthWindow.do?orgid=${org.id }&treeid="+node.id+"&tabletype="+id+"&time="+Date.parse(new Date());
+			var url = "showSetDataAuthWindow.do?id=${account.id }&treeid="+node.id+"&tabletype="+id+"&time="+Date.parse(new Date());
 			var whObj = { width: 550, height: 300 };
 			var result = openShowModalDialog(url,window,whObj);
 			//关闭窗口后，刷新页面
@@ -264,12 +264,12 @@
 	$(function() {
 		$.fn.zTree.init($("#treeDemo"), setting, nodes);
 		
-		var orgTrees = ${orgTrees};
+		var accountTrees = ${accountTrees};
 		
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		if (orgTrees != null) {
-			for (var i=0;i<orgTrees.length;i++) {
-				var node = treeObj.getNodeByParam("id", orgTrees[i].id, null);
+		if (accountTrees != null) {
+			for (var i=0;i<accountTrees.length;i++) {
+				var node = treeObj.getNodeByParam("id", accountTrees[i].id, null);
 				if (node != null) {
 					treeObj.checkNode(node, true, false);
 				}
@@ -284,7 +284,7 @@
 	
 	
 	//显示数据访问权限
-	function showDataAuth(orgtreeid,filter,templettype) {
+	function showDataAuth(accounttreeid,filter,templettype) {
 		$("#ajAuth").html('');
 		$("#wjAuth").html('');
 		//如果当前树节点的档案类型是标准档案或图片档案
@@ -294,10 +294,10 @@
 			
 			for(var i=0;i<array.length;i++) {
 				if (array[i].tableType == '01') {
-					createDataAuthTable(orgtreeid,'ajAuth',JSON.stringify(array[i]));
+					createDataAuthTable(accounttreeid,'ajAuth',JSON.stringify(array[i]));
 				}
 				else {
-					createDataAuthTable(orgtreeid,'wjAuth',JSON.stringify(array[i]));
+					createDataAuthTable(accounttreeid,'wjAuth',JSON.stringify(array[i]));
 				}
 			}
 			
@@ -306,13 +306,13 @@
 			//获取条件对象
 			var array = JSON.parse(filter);
 			for(var i=0;i<array.length;i++) {
-				createDataAuthTable(orgtreeid,'wjAuth',JSON.stringify(array[i]));
+				createDataAuthTable(accounttreeid,'wjAuth',JSON.stringify(array[i]));
 			}
 		}
 	}
 	
 	//创建数据访问权限页面显示
-	function createDataAuthTable(orgtreeid,who,dataAuth) {
+	function createDataAuthTable(accounttreeid,who,dataAuth) {
 		if (dataAuth == "") {
 			return;
 		}
@@ -327,13 +327,13 @@
 			tmp += '<td>包含</td>';
 		}
 		tmp += '<td>'+auth.dataAuthValue+'</td>';
-		tmp += '<td><a href="javascript:;" onclick="removeDataAuth(\''+orgtreeid+'\',\''+auth.id+'\')" >删除</a></td>';
+		tmp += '<td><a href="javascript:;" onclick="removeDataAuth(\''+accounttreeid+'\',\''+auth.id+'\')" >删除</a></td>';
 		tmp += '</tr>';
 		html += tmp;
 		$("#"+who).html(html);
 	}
 	//删除组的数据访问权限
-	function removeDataAuth(orgtreeid,id) {
+	function removeDataAuth(accounttreeid,id) {
 		if (id == "") {
 			alert("请选择要删除的数据！");
 		}
@@ -341,9 +341,9 @@
 		if (confirm("确定要删除选择的数据访问权限吗，是否继续？")) {
 			$.ajax({
 		        async : true,
-		        url : "${pageContext.request.contextPath}/org/removeDataAuth.do",
+		        url : "${pageContext.request.contextPath}/account/removeDataAuth.do",
 		        type : 'post',
-		        data:{orgtreeid:orgtreeid,id:id},
+		        data:{accounttreeid:accounttreeid,id:id},
 		        dataType : 'text',
 		        success : function(data) {
 		            if (data == "success") {
@@ -366,14 +366,14 @@
 	}
 	
 </script>
-<title>为组赋权</title>
+<title>为帐户赋权</title>
 </head>
 <body>
 	<div style="float: left;">
 	<table id="testTable" cellpadding="0" cellspacing="0">
 		<tbody>
 			<tr >
-                <td class="biaoti" colspan="2">为组 [${org.orgname }] 赋予档案使用权</td>
+                <td class="biaoti" colspan="2">为帐户 [${account.accountcode }] 赋予档案使用权</td>
                 <td>&nbsp;</td>
             </tr>
 			<tr class="tr1">
@@ -390,7 +390,7 @@
 	</div>
 	<div style="float:right;">
 		<div id="ajDataAuth">
-			<h5>设置帐户组对档案节点数据［案卷］记录的访问权限</h5>
+			<h5>设置帐户对档案节点数据［案卷］记录的访问权限</h5>
 			<hr>
 			<div>
 				<div>
@@ -422,7 +422,7 @@
 			</div>
 		</div>
 		<div id="wjDataAuth">
-			<h5>设置帐户组对档案节点数据［文件］记录的访问权限</h5>
+			<h5>设置帐户对档案节点数据［文件］记录的访问权限</h5>
 			<hr>
 			<div>
 				<div>

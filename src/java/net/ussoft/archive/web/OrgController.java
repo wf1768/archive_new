@@ -13,11 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
+import net.ussoft.archive.service.ICodeService;
 import net.ussoft.archive.service.IEncryService;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.IRoleService;
@@ -43,6 +45,8 @@ public class OrgController extends BaseConstroller {
 	private IRoleService roleService;
 	@Resource
 	private ITreeService treeService;
+	@Resource
+	private ICodeService codeService;
 	
 	/**
 	 * 组列表
@@ -151,7 +155,7 @@ public class OrgController extends BaseConstroller {
 	 * @throws IOException
 	 */
 	@RequestMapping(value="/save",method=RequestMethod.POST)
-	public void save(Sys_org org,HttpServletRequest request,HttpServletResponse response) throws IOException {
+	public void save(Sys_org org,HttpServletResponse response) throws IOException {
 		
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -389,7 +393,7 @@ public class OrgController extends BaseConstroller {
 			return;
 		}
 		
-		Boolean b = orgService.setowner(orgid, accountid);
+		Boolean b = orgService.saveowner(orgid, accountid);
 		
 		if (!b) {
 			result = "failure";
@@ -444,7 +448,7 @@ public class OrgController extends BaseConstroller {
 			return;
 		}
 		
-		Boolean b = orgService.setrole(orgid, roleid);
+		Boolean b = orgService.saverole(orgid, roleid);
 		
 		if (!b) {
 			result = "failure";
@@ -504,6 +508,12 @@ public class OrgController extends BaseConstroller {
 		String orgTreesString = JSON.toJSONString(orgTrees);
 		modelMap.put("orgTrees", orgTreesString);
 		
+		//获取电子全文浏览范围代码，供页面填充select
+		Sys_code code = new Sys_code();
+		code.setTempletfieldid("DOCAUTH");
+		List<Sys_code> codes = codeService.selectByWhere(code);
+		modelMap.put("codes", codes);
+		
 		return new ModelAndView("/view/auth/org/setauth",modelMap);
 	}
 	/**
@@ -523,7 +533,7 @@ public class OrgController extends BaseConstroller {
 		@SuppressWarnings("unchecked")
 		List<String> treeList = (List<String>) JSON.parse(treeids);
 		
-		Boolean b = orgService.setorgtree(orgid, treeList);
+		Boolean b = orgService.saveorgtree(orgid, treeList);
 		String result = "failure";
 		if (b) {
 			result = "success";
@@ -531,7 +541,7 @@ public class OrgController extends BaseConstroller {
 		out.print(result);
 	}
 	/**
-	 * 点击树节点，显示当前组的树节点辅助权限（全文浏览权、全文下载权、全文打印权、节点下数据访问权）
+	 * 点击树节点，显示当前组的树节点辅助权限（全文浏览权、全文下载权、全文打印权、节点下数据访问权、电子全文浏览范围代码）
 	 * @param orgid
 	 * @param response
 	 * @throws IOException
@@ -570,7 +580,7 @@ public class OrgController extends BaseConstroller {
 		
 		String result = "failure";
 		
-		Boolean b = orgService.setTreeAuth(org_tree);
+		Boolean b = orgService.saveTreeAuth(org_tree);
 		
 		if (b) {
 			result = "success";
@@ -655,6 +665,30 @@ public class OrgController extends BaseConstroller {
 			return;
 		}
 		Boolean b = orgService.removeDataAuth(orgtreeid, id);
+		
+		if (b) {
+			result = "success";
+		}
+		//获取组和树的对应
+		out.print(result);
+	}
+	
+	/**
+	 * 保存组的树节点下电子全文浏览范围权限
+	 * @param org_tree
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/saveDocAuth")
+	public void saveDocAuth(Sys_org_tree org_tree,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "failure";
+		
+		Boolean b = orgService.saveDocAuth(org_tree);
 		
 		if (b) {
 			result = "success";

@@ -21,6 +21,7 @@ public class Sys_doc {
 	private String fileid;
 	private String tableid;
 	private String treeid;
+	private String docauth;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -102,6 +103,12 @@ public class Sys_doc {
 	}
 	public void setTreeid(String treeid) {
 		this.treeid = treeid;
+	}
+	public String getDocauth() {
+		return docauth;
+	}
+	public void setDocauth(String docauth) {
+		this.docauth = docauth;
 	}
 	
 	

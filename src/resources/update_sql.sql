@@ -104,3 +104,8 @@ alter table ar_collection add accountid varchar(40);
 --11 在role表增加groupid，角色与角色组的关联
 --alter table sys_role add groupid varchar(40);
 
+--12在表sys_org_tree\sys_account_tree\sys_doc 增加字段docauth
+alter table sys_org_tree add docauth varchar(40);
+alter table sys_account_tree add docauth varchar(40);
+alter table sys_doc add docauth varchar(40);
+

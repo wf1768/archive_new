@@ -40,9 +40,9 @@
 		
 	    $.ajax({
 	        async : true,
-	        url : "${pageContext.request.contextPath}/org/saveDataAuth.do",
+	        url : "${pageContext.request.contextPath}/account/saveDataAuth.do",
 	        type : 'post',
-	        data:{orgid:"${org.id}",treeid:"${tree.id}",tabletype:"${tabletype }",filter:JSON.stringify(dataAuth)},
+	        data:{accountid:"${account.id}",treeid:"${tree.id}",tabletype:"${tabletype }",filter:JSON.stringify(dataAuth)},
 	        dataType : 'text',
 	        success : function(data) {
 	            if (data == "success") {
@@ -54,13 +54,14 @@
 	        }
 	    });
 	}
+	
 </script>
 <title>设置数据访问权限</title>
 </head>
 <body>
 	<div style="width: 90%;margin: 0 auto;">
 		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>设置 [${org.orgname }] 组对于 [${tree.treename }] 档案节点的数据访问权限。</caption>
+			<caption>设置帐户 [${account.accountcode }] 对于 [${tree.treename }] 档案节点的数据访问权限。</caption>
 			<thead>
 			<tr>
 				<th>字段</th>
