@@ -8,6 +8,16 @@ public class Constants{
 	 * 用户session变量
 	 */
 	public static final String user_in_session = "CURRENT_USER_IN_SESSION";
+	
+	/**
+	 * 字段代码copy时 session变量
+	 */
+	public static final String code_copy_session = "CURRENT_CODE_COPY_SESSION";
+	
+	/**
+	 * 字段copy时，记录copy的字段id
+	 */
+	public static final String field_copy_session = "CURRENT_FIELD_COPY_SESSION";
 
 	/**
 	 * 总行数

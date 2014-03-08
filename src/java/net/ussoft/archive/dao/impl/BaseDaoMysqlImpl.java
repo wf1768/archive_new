@@ -42,6 +42,8 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import sun.tools.tree.ThisExpression;
+
 
 public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements BaseDao<T,ID>{
 	public final Log log = LogFactory.getLog(this.getClass());
@@ -414,9 +416,13 @@ public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements B
 	public int getCount(String sql,List<Object> values){
 		if(StringUtils.isEmpty(sql))return 0;
 		if(values==null)values=new ArrayList<Object>();
+		//TODO wf 修改，这里原始的sql，有错误。有时间看一下为什么会报错
 		StringBuilder sb=new StringBuilder("select count(*) from (");
 		sb.append(sql);
 		sb.append(") as _tn");
+		
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("select count(*) from ").append(this.tableName).append(" ").append(sql);
 		return this.getInt(sb.toString(), values);
 	}
 	

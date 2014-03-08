@@ -12,6 +12,8 @@ public class Sys_templet {
 	private String templetname;
 	private String templettype;
 	private String orgid;
+	private Integer sort;
+	private String parentid;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -39,6 +41,18 @@ public class Sys_templet {
 	}
 	public void setOrgid(String orgid) {
 		this.orgid = orgid;
+	}
+	public Integer getSort() {
+		return sort;
+	}
+	public void setSort(Integer sort) {
+		this.sort = sort;
+	}
+	public String getParentid() {
+		return parentid;
+	}
+	public void setParentid(String parentid) {
+		this.parentid = parentid;
 	}
 	
 }

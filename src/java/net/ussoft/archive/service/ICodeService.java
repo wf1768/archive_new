@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_org;
+import net.ussoft.archive.model.Sys_templet;
 
 public interface ICodeService {
 
@@ -41,4 +42,12 @@ public interface ICodeService {
 	public int delete(String id);
 	
 	public List<Sys_code> selectByWhere(Sys_code code);
+	
+	/**
+	 * 直接传where、order查
+	 * @param where
+	 * @param order
+	 * @return
+	 */
+	public List<Sys_code> list(String where,List<Object> values,String order);
 }

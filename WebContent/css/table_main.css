@@ -1,0 +1,34 @@
+
+.tableTopTitle-bg   {   
+  FONT-WEIGHT:   bold;   FONT-SIZE:   12px;   BACKGROUND-IMAGE:   VERTICAL-ALIGN:    middle;     
+     TEXT-INDENT:   6px;   BACKGROUND-REPEAT:   repeat-x;   HEIGHT:   30px;   LINE-HEIGHT:   150%;  
+  TEXT-DECORATION:   none  ; background-color:#A3B6CD; text-align:center
+}   
+.tableTop-bg   {   
+  FONT-WEIGHT:   bold;   FONT-SIZE:   12px;   BACKGROUND-IMAGE:   VERTICAL-ALIGN:   middle;     
+  COLOR:   #ffffff;   TEXT-INDENT:   6px;   BACKGROUND-REPEAT:   repeat-x;   HEIGHT:   30px;     
+  TEXT-DECORATION:   none   
+}   
+.table-TitleBG   {   
+  FONT-WEIGHT:   bold;   FONT-SIZE:   12px;   LINE-HEIGHT:   150%;   BACKGROUND-COLOR:   #f7faff;     
+  TEXT-DECORATION:   none  ;
+}   
+.table-Kang   {   
+  BORDER-RIGHT:   #0066cc   1px   solid;   BORDER-TOP:   #0066cc   1px   solid;   BORDER-LEFT:     
+  #0066cc   1px   solid;   BORDER-BOTTOM:   #0066cc   1px   solid;   BACKGROUND-COLOR:   #91afdd   
+}   
+.table-Sbg   {   
+  FONT-SIZE:   12px;   LINE-HEIGHT:   150%;   BACKGROUND-COLOR:   #ecf4ff;   
+}
+.table-botton   {   
+  FONT-WEIGHT:   bold;   FONT-SIZE:   12px;   BACKGROUND-IMAGE:   VERTICAL-ALIGN:    middle;     
+     TEXT-INDENT:   6px;   BACKGROUND-REPEAT:   repeat-x;   HEIGHT:   25px;
+  TEXT-DECORATION:   none  ; background-color:#A3B6CD;  LINE-HEIGHT:   100%;   
+}
+.table-SbgList   {   
+  FONT-SIZE:   12px;    LINE-HEIGHT:   70%;  BACKGROUND-COLOR:   #ecf4ff;text-align:center ;HEIGHT:30px  
+}  
+.table-Qbg   {   
+  FONT-SIZE:   12px;   LINE-HEIGHT:   150%;   BACKGROUND-COLOR:   #f7faff;   TEXT-DECORATION:     
+  none   ;text-align:center
+}

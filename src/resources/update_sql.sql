@@ -109,3 +109,11 @@ alter table sys_org_tree add docauth varchar(40);
 alter table sys_account_tree add docauth varchar(40);
 alter table sys_doc add docauth varchar(40);
 
+--13在表sys_templet 增加sort字段（int 11）字段，用来档案类型排序
+alter table sys_templet add sort int(11) default 0;
+
+--14在表sys_templetfield 增加orderby （varchar 30）  iscopy（int 11）［1:添加字段内容时，继承自上一条记录 0:不顺带］
+alter table sys_templetfield add orderby varchar(30);
+alter table sys_templetfield add iscopy int(11) default 0;
+
+

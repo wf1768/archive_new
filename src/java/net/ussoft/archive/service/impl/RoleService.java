@@ -127,8 +127,9 @@ public class RoleService implements IRoleService {
 		//TODO 这里能不能直接sql in list？不用这样拼id in的字符串？
 //		List values = new ArrayList();
 //		values.add(idList);
+		String sql = "select * from sys_function where id in ("+sb.toString()+") order by funorder asc";
 		
-		List<Sys_function> funList = functionDao.search("select * from sys_function where id in ("+sb.toString()+")", values);
+		List<Sys_function> funList = functionDao.search(sql, values);
 		
 		return funList;
 	}

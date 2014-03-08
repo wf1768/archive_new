@@ -62,4 +62,18 @@ public class CodeService implements ICodeService {
 		return codeDao.del(id);
 	}
 
+	@Override
+	public List<Sys_code> list(String where, List<Object> values, String order) {
+		String sql = "select * from sys_code ";
+		if (null != where && !where.equals("")) {
+			sql += where;
+		}
+		
+		if (null != order && !where.equals("")) {
+			sql += order;
+		}
+		
+		return codeDao.search(sql, values);
+	}
+
 }

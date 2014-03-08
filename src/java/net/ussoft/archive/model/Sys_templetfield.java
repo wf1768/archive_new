@@ -25,6 +25,8 @@ public class Sys_templetfield {
 	private Integer issystem;
 	private String fieldcss;
 	private String tableid;
+	private String orderby;
+	private Integer iscopy;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -130,6 +132,18 @@ public class Sys_templetfield {
 	}
 	public void setTableid(String tableid) {
 		this.tableid = tableid;
+	}
+	public String getOrderby() {
+		return orderby;
+	}
+	public void setOrderby(String orderby) {
+		this.orderby = orderby;
+	}
+	public Integer getIscopy() {
+		return iscopy;
+	}
+	public void setIscopy(Integer iscopy) {
+		this.iscopy = iscopy;
 	}
 	
 	

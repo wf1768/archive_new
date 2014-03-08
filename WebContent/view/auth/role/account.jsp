@@ -6,25 +6,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table/table_design.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <base target="_self">
-<style type="text/css">
-caption {
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    color: #333333;
-    font-size: 1.4em;
-    font-weight: bold;
-    padding: 0 0 0.5em;
-    text-align: left;
-    text-transform: uppercase;
-}
-* {
-    list-style: none outside none;
-    margin: 0;
-    padding: 0;
-}
-</style>
 
 <script>
 	function closepage() {
@@ -71,7 +55,7 @@ caption {
 </head>
 <body>
 	<div style="width: 90%;margin: 0 auto;">
-		<table id="cssz_table" width="100%">
+		<table width="90%" cellspacing="0" cellpadding="8" align="center">
 			<caption>拥有 [${role.rolename }] 角色的全部帐户，可以移除帐户的角色。</caption>
 			<thead>
 			<tr>

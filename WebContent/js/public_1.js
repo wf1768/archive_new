@@ -22,12 +22,12 @@
          
                 $("#bodyer_right").height(leftH);
 				$("#bodyer_left").height(h);
-				//$("#fanye").width($("#shuju").height());
+				$("#fanye").width($("#shuju").height());
 				$("#bodyer_right").width(w);
-                //$("#cssz_table").width(rw);
-				$("#table_main").height($("#bodyer_right").height() - 55);
-				$(".scrollTable").height($("#bodyer_right").height() - 40);
-				$("#not").height($("#table_main").height()-60);
+                $("#cssz_table").width(rw);
+				$("#sj").height($("#bodyer_right").height() - $("#fanye").height() - 66);
+				
+
             }
 
 
