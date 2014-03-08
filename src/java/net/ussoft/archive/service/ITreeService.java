@@ -55,4 +55,11 @@ public interface ITreeService {
 	 */
 	public List<Sys_templetfield> geTempletfields(String treeid,String tabletype);
 
+	/**
+	 * 根据账户ID，获取账户的权限的树节点范围
+	 * @param accountId		账户ID
+	 * @return
+	 * */
+	public List<Sys_tree> getAuthTree(String accountId);
+	
 }
