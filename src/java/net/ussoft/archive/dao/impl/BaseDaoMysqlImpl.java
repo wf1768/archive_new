@@ -42,7 +42,6 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import sun.tools.tree.ThisExpression;
 
 
 public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements BaseDao<T,ID>{
