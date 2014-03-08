@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import net.ussoft.archive.dao.OrgTreeDao;
 import net.ussoft.archive.dao.TableDao;
 import net.ussoft.archive.dao.TempletDao;
 import net.ussoft.archive.dao.TempletfieldDao;
@@ -30,6 +31,9 @@ public class TreeService implements ITreeService {
 	@Resource
 	private TempletfieldDao templetfieldDao;
 
+	@Resource
+	private OrgTreeDao orgtreeDao;
+	
 	@Override
 	public Sys_tree getById(String id) {
 		return treeDao.get(id);
@@ -95,6 +99,11 @@ public class TreeService implements ITreeService {
 		values.add(table.getId());
 		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
 		return templetfields;
+	}
+
+	@Override
+	public List<Sys_tree> getAuthTree(String accountId) {
+		return null;
 	}
 
 }
