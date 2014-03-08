@@ -5,16 +5,20 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import net.ussoft.archive.dao.AccountTreeDao;
 import net.ussoft.archive.dao.OrgTreeDao;
 import net.ussoft.archive.dao.TableDao;
 import net.ussoft.archive.dao.TempletDao;
 import net.ussoft.archive.dao.TempletfieldDao;
 import net.ussoft.archive.dao.TreeDao;
+import net.ussoft.archive.model.Sys_account_tree;
+import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.ITreeService;
+import net.ussoft.archive.util.CommonUtils;
 
 import org.springframework.stereotype.Service;
 
@@ -30,6 +34,10 @@ public class TreeService implements ITreeService {
 	private TableDao tableDao;
 	@Resource
 	private TempletfieldDao templetfieldDao;
+	@Resource
+	private AccountTreeDao accounttreeDao;
+	
+	
 
 	@Resource
 	private OrgTreeDao orgtreeDao;
@@ -104,6 +112,52 @@ public class TreeService implements ITreeService {
 	@Override
 	public List<Sys_tree> getAuthTree(String accountId) {
 		return null;
+	}
+
+	@Override
+	public List<Sys_tree> getAccountTree(String accountid) {
+		List<Object> values=new ArrayList<Object>();
+		values.add(accountid);
+		List<Sys_account_tree> accountTreeList = accounttreeDao.search("select * from sys_account_tree where accountid=?", values);
+		
+		if (accountTreeList.size()  == 0) {
+			return null;
+		}
+		
+		values.clear();
+		StringBuilder sb=new StringBuilder();
+		for (Sys_account_tree sys_account_tree : accountTreeList) {
+			values.add(sys_account_tree.getTreeid());
+			sb.append("?,");
+		}
+		CommonUtils.deleteLastStr(sb, ",");
+		
+		List<Sys_tree> treeList = treeDao.search("select * from sys_tree where id in ("+sb.toString()+")", values);
+		
+		return treeList;
+	}
+
+	@Override
+	public List<Sys_tree> getOrgTree(String orgid) {
+		List<Object> values=new ArrayList<Object>();
+		values.add(orgid);
+		List<Sys_org_tree> orgTreeList = orgtreeDao.search("select * from sys_org_tree where orgid=?", values);
+		
+		if (orgTreeList.size()  == 0) {
+			return null;
+		}
+		
+		values.clear();
+		StringBuilder sb=new StringBuilder();
+		for (Sys_org_tree sys_org_tree : orgTreeList) {
+			values.add(sys_org_tree.getTreeid());
+			sb.append("?,");
+		}
+		CommonUtils.deleteLastStr(sb, ",");
+		
+		List<Sys_tree> treeList = treeDao.search("select * from sys_tree where id in ("+sb.toString()+")", values);
+		
+		return treeList;
 	}
 
 }

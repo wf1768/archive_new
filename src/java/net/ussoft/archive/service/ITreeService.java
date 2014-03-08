@@ -5,6 +5,7 @@ import java.util.List;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
+import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface ITreeService {
 
@@ -61,5 +62,19 @@ public interface ITreeService {
 	 * @return
 	 * */
 	public List<Sys_tree> getAuthTree(String accountId);
+	
+	/**
+	 * 获取帐户的档案树节点范围list
+	 * @param accountid
+	 * @return
+	 */
+	public List<Sys_tree> getAccountTree(String accountid);
+	
+	/**
+	 * 获取帐户组的树管理权限范围
+	 * @param 
+	 * @return
+	 */
+	public List<Sys_tree> getOrgTree(String orgid);
 	
 }
