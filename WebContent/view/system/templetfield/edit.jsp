@@ -63,10 +63,10 @@
 		if ($("#isgridshow").is(":checked")) {
 			isgridshow = 1;
 		}
-		var iscopy = 0;
+		/* var iscopy = 0;
 		if ($("#iscopy").is(":checked")) {
 			iscopy = 1;
-		}
+		} */
 		var orderby = $("#orderby").val();
 		
 		if (chinesename == "") {
@@ -86,7 +86,7 @@
 		d.isunique = isunique; */
 		d.issearch = issearch;
 		d.isgridshow = isgridshow;
-		d.iscopy = iscopy;
+		//d.iscopy = iscopy;
 		d.orderby = orderby;
 		//d.ispk = 0;
 		//d.isedit = 1;
@@ -165,10 +165,10 @@
 					<td class="txt1">列表显示 :</td>
 					<td><input type="checkbox" id="isgridshow" name="isgridshow" ${field.isgridshow==1?'checked':'' }></td>
 				</tr>
-				<tr class="tr1">
+				<%-- <tr class="tr1">
 					<td class="txt1">顺带 :</td>
 					<td><input type="checkbox" id="iscopy" name="iscopy" ${field.iscopy==1?'checked':'' }>顺带最近一次录入的值</td>
-				</tr>
+				</tr> --%>
 				<tr class="tr1">
 					<td class="txt1">数据排序 :</td>
 					<td>

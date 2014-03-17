@@ -44,9 +44,7 @@
 		var defaultvalue = $("#defaultvalue").val();
 		
 		if (fieldtype == 'INT') {
-			alert('1');
 			if(!isNaN(defaultvalue)){
-				alert('2');
 				defaultvalue = 0;
 			}
 		}
@@ -70,10 +68,10 @@
 		if ($("#isgridshow").is(":checked")) {
 			isgridshow = 1;
 		}
-		var iscopy = 0;
+		/* var iscopy = 0;
 		if ($("#iscopy").is(":checked")) {
 			iscopy = 1;
-		}
+		} */
 		var orderby = $("#orderby").val();
 		
 		if (tableid == "" || chinesename == "" || englishname=="") {
@@ -92,7 +90,7 @@
 		d.isunique = 0;
 		d.issearch = issearch;
 		d.isgridshow = isgridshow;
-		d.iscopy = iscopy;
+		//d.iscopy = iscopy;
 		d.orderby = orderby;
 		d.ispk = 0;
 		d.isedit = 1;
@@ -173,10 +171,10 @@
 					<td class="txt1">列表显示 :</td>
 					<td><input type="checkbox" id="isgridshow" name="isgridshow" ></td>
 				</tr>
-				<tr class="tr1">
+				<!-- <tr class="tr1">
 					<td class="txt1">顺带 :</td>
 					<td><input type="checkbox" id="iscopy" name="iscopy">顺带最近一次录入的值</td>
-				</tr>
+				</tr> -->
 				<tr class="tr1">
 					<td class="txt1">数据排序 :</td>
 					<td>

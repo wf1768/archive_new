@@ -15,6 +15,7 @@ public class Sys_templet {
 	private Integer sort;
 	private String parentid;
 	
+	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	public String getId() {

@@ -116,4 +116,14 @@ alter table sys_templet add sort int(11) default 0;
 alter table sys_templetfield add orderby varchar(30);
 alter table sys_templetfield add iscopy int(11) default 0;
 
+--15在表sys_tree 增加sort字段（int 11）字段，用来档案类型排序
+alter table sys_tree add sort int(11) default 0;
+--首次时，更新tree表sort，按照templet表的sort
+update sys_tree r ,sys_templet t set r.sort = t.sort where r.templetid = t.id  and r.treetype <> 'W'
+
+--16在表sys_templet 增加parentid（varchar 40） 档案库也可以增加档案夹，需要parentid画树
+alter table sys_templet add parentid varchar(40);
+
+
+
 

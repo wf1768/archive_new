@@ -23,6 +23,7 @@ import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,9 @@ public class TempletfieldController extends BaseConstroller {
 	
 	@Resource
 	private ICodeService codeService;
+	
+	@Autowired
+	private  HttpServletRequest request; 
 	
 	/**
 	 * 打开字段列表页面
@@ -76,20 +80,20 @@ public class TempletfieldController extends BaseConstroller {
 		List<Sys_table> tables = tableService.list();
 		
 		//生成档案类型页面需要的templet tree的格式list
-		List<HashMap> result = new ArrayList<HashMap>();
+		List<HashMap<String,Object>> result = new ArrayList<HashMap<String,Object>>();
 		
 		if (null != m && m.equals("c")) {
 			for (Sys_templet templet : templets) {
-				HashMap map = new HashMap();
+				HashMap<String,Object> map = new HashMap<String,Object>();
 //				map.put("id", templet.getId());
 				map.put("name", templet.getTempletname());
 				map.put("isParent", true);
 				map.put("isleaf", false);
 				
-				List<HashMap> childList = new ArrayList<HashMap>();
+				List<HashMap<String,Object>> childList = new ArrayList<HashMap<String,Object>>();
 				
 				for (Sys_table table : tables) {
-					HashMap childMap = new HashMap();
+					HashMap<String,Object> childMap = new HashMap<String,Object>();
 					if (templet.getId().equals(table.getTempletid())) {
 						childMap.put("id",table.getId());
 						childMap.put("name", table.getTablelabel());
@@ -109,14 +113,14 @@ public class TempletfieldController extends BaseConstroller {
 		}
 		else {
 			//非模版档案类型。与模版档案类型显示不一样，单独处理。
-			HashMap map = new HashMap();
+			HashMap<String,Object> map = new HashMap<String,Object>();
 			map.put("id", "0");
 			map.put("name", "档案库");
 			map.put("templettype", "T");
 			map.put("isParent", true);
 			map.put("isleaf", false);
 			map.put("open", true);
-			List<HashMap> childList = createList("0",templets,tables);
+			List<HashMap<String,Object>> childList = createList("0",templets,tables);
 			map.put("children", childList);
 			result.add(map);
 			
@@ -134,16 +138,23 @@ public class TempletfieldController extends BaseConstroller {
 			modelMap.put("templetfields", templetfields);
 		}
 		
-		return new ModelAndView("/view/system/templetfield/list",modelMap);
+		return new ModelAndView("/view/system/templetfield/Copy of list",modelMap);
 	}
 	
-	private List<HashMap> createList(String parentid,List<Sys_templet> templets,List<Sys_table> tables) {
+	private List<HashMap<String,Object>> createList(String parentid,List<Sys_templet> templets,List<Sys_table> tables) {
 		
-		List<HashMap> result = new ArrayList<HashMap>();
+		String path = request.getContextPath();
+    	String basePath = request.getScheme() + "://"
+    			+ request.getServerName() + ":" + request.getServerPort()
+    			+ path + "/";
+    	
+    	System.out.println("field path:" + path + "...basepath:" + basePath);
+		
+		List<HashMap<String,Object>> result = new ArrayList<HashMap<String,Object>>();
 		
 		for (Sys_templet templet : templets) {
 			if (templet.getParentid().equals(parentid)) {
-				HashMap map = new HashMap();
+				HashMap<String,Object> map = new HashMap<String,Object>();
 	//			map.put("id", templet.getId());
 				map.put("name", templet.getTempletname());
 				map.put("templettype", templet.getTemplettype());
@@ -151,10 +162,12 @@ public class TempletfieldController extends BaseConstroller {
 				map.put("isleaf", false);
 				
 				if (!templet.getTemplettype().equals("T")) {
-					List<HashMap> childList = new ArrayList<HashMap>();
+					map.put("iconClose", path+"/images/icons/1.gif");
+					map.put("iconOpen", path+"/images/icons/2.gif");
+					List<HashMap<String,Object>> childList = new ArrayList<HashMap<String,Object>>();
 					
 					for (Sys_table table : tables) {
-						HashMap childMap = new HashMap();
+						HashMap<String,Object> childMap = new HashMap<String,Object>();
 						if (templet.getId().equals(table.getTempletid())) {
 							childMap.put("id",table.getId());
 							childMap.put("name", table.getTablelabel());

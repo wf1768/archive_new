@@ -15,20 +15,25 @@
 	}
 	
 	function save() {
-		var parentid = $("#parentid").val();
-		var templetname = $("#templetname").val();
+		var id = $("#id").val();
+		var sort = $("#sort").val();
 		
-		if (parentid == "" || templetname == "" ) {
+		if(isNaN(sort)){
+			alert("排序值只能为是数字,请输入数字。");
+			$("#sort").focus();
+			return;
+		}
+		if (id == "" || sort == "" ) {
 			alert("没有获取足够数据，请退出后，重新尝试，或与管理员联系。");
 			return;
 		}
 		var d = {};
-		d.parentid = parentid;
-		d.templetname = templetname;
+		d.id = id;
+		d.sort = sort;
 		
 	    $.ajax({
 	        async : true,
-	        url : "${pageContext.request.contextPath}/templet/save.do",
+	        url : "${pageContext.request.contextPath}/templet/sortsave.do",
 	        type : 'post',
 	        data:d,
 	        dataType : 'text',
@@ -45,26 +50,21 @@
 	}
 	
 </script>
-<title>添加档案类型夹</title>
+<title>修改档案类型排序</title>
 </head>
 <body>
 	<table width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>
                 <td class="biaoti" colspan="2" align="center">
-                	添加档案类型夹
-                	<input type="hidden" id="parentid" name="parentid" value="${parentid }">
+                	修改档案类型排序
+                	<input type="hidden" id="id" name="id" value="${templet.id }">
                 </td>
             </tr>
 			<tr class="tr1">
-				<td class="txt1">夹名称 :</td>
-				<td><input type="text" id=templetname name="templetname" >* </td>
+				<td class="txt1">排序值 :</td>
+				<td><input type="text" id="sort" name="sort" value="${templet.sort }"></td>
 			</tr>
-			
-			<!-- <tr class="tr1">
-				<td class="txt1">排序 :</td>
-				<td><input type="text" id="sort" name="sort" value="1" reg="^\d+$" tip="大小[必须填写，必须数字] "></td>
-			</tr> -->
 			<tr>
 				<td class="caozuo" colspan="2" align="center">
 					<button type="button" onclick="save()">保存</button>

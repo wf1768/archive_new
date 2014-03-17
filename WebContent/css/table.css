@@ -1,6 +1,9 @@
 @CHARSET "UTF-8";
 
-table,th,td{border:1px solid #CC6600;border-collapse:collapse;font-size:12px;}  
-    #tit{ font-size:24px; }
+table,th,td{border:1px solid #CC6600;border-collapse:collapse;font-size:12px;}
+
+
+
+/*     #tit{ font-size:24px; } */
     
 /*<table width="800" cellspacing="0" cellpadding="8" align="center" >*/  

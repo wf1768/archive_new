@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 @Controller
 @RequestMapping(value="org")
@@ -492,7 +494,7 @@ public class OrgController extends BaseConstroller {
 	 * @return
 	 */
 	@RequestMapping(value="/setauth",method=RequestMethod.GET)
-	public ModelAndView setauth(String orgid,ModelMap modelMap) {
+	public ModelAndView setauth(String orgid,HttpServletRequest request,ModelMap modelMap) {
 		//获取组对象
 		Sys_org org = orgService.getById(orgid);
 		modelMap.put("org", org);
@@ -500,7 +502,31 @@ public class OrgController extends BaseConstroller {
 		//获取树节点，用来画树
 		List<Sys_tree> treeList = treeService.list();
 		String treeString = JSON.toJSONString(treeList);
-		modelMap.put("treeList", treeString);
+		
+		String path = request.getContextPath();
+    	String basePath = request.getScheme() + "://"
+    			+ request.getServerName() + ":" + request.getServerPort()
+    			+ path + "/";
+    	
+		//通过json对象，插入isparent
+		JSONArray jsonArray = JSON.parseArray(treeString);
+		for (int i=0;i<jsonArray.size();i++) {
+			String typeString = ((JSONObject) jsonArray.get(i)).get("treetype").toString();
+			if (typeString.equals("F") || typeString.equals("T")) {
+				((JSONObject) jsonArray.get(i)).put("isParent", true);
+			}
+			if (typeString.equals("F")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/icons/1.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/icons/2.gif");
+			}
+			if (typeString.equals("T")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/folder.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/folder-open.gif");
+			}
+		}
+		String jsonString = JSON.toJSONString(jsonArray);
+		
+		modelMap.put("treeList", jsonString);
 		
 		//获取当前组能访问的树节点，用来checkbox勾选
 		@SuppressWarnings("unchecked")

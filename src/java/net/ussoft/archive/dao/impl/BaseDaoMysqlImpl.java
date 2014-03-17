@@ -357,6 +357,16 @@ public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements B
 		}
 		return this.getJdbcTemplate().update(sql, values.toArray());
 	}
+	
+	@Override
+	public void execute(String sql){
+		if(StringUtils.isEmpty(sql))return;
+		if(log.isDebugEnabled()){
+			log.debug("sql : "+sql);
+		}
+		this.getJdbcTemplate().execute(sql);
+	}
+	
 	@Override
 	public int del(ID id){
 		if(id==null)return 0;

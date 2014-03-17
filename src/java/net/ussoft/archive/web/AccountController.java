@@ -16,7 +16,6 @@ import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_org;
-import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
@@ -35,6 +34,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 @Controller
 @RequestMapping(value="account")
@@ -163,7 +164,7 @@ public class AccountController extends BaseConstroller {
 		PrintWriter out = response.getWriter();
 		
 		String result = "success";
-		if (id == null || id.equals("") || targetid == null || targetid.equals("")) {
+		if (null == id || id.equals("") || null == targetid || targetid.equals("")) {
 			result = "failure";
 			out.print(result);
 			return;
@@ -423,7 +424,7 @@ public class AccountController extends BaseConstroller {
 	 * @return
 	 */
 	@RequestMapping(value="/setauth",method=RequestMethod.GET)
-	public ModelAndView setauth(String id,ModelMap modelMap) {
+	public ModelAndView setauth(String id,HttpServletRequest request,ModelMap modelMap) {
 		//获取帐户对象
 		Sys_account account = accountService.getById(id);
 		modelMap.put("account", account);
@@ -431,12 +432,37 @@ public class AccountController extends BaseConstroller {
 		//获取树节点，用来画树
 		List<Sys_tree> treeList = treeService.list();
 		String treeString = JSON.toJSONString(treeList);
-		modelMap.put("treeList", treeString);
+		
+		String path = request.getContextPath();
+    	String basePath = request.getScheme() + "://"
+    			+ request.getServerName() + ":" + request.getServerPort()
+    			+ path + "/";
+    	
+		//通过json对象，插入isparent
+		JSONArray jsonArray = JSON.parseArray(treeString);
+		for (int i=0;i<jsonArray.size();i++) {
+			String typeString = ((JSONObject) jsonArray.get(i)).get("treetype").toString();
+			if (typeString.equals("F") || typeString.equals("T")) {
+				((JSONObject) jsonArray.get(i)).put("isParent", true);
+			}
+			if (typeString.equals("F")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/icons/1.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/icons/2.gif");
+			}
+			if (typeString.equals("T")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/folder.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/folder-open.gif");
+			}
+		}
+		String jsonString = JSON.toJSONString(jsonArray);
+		
+		modelMap.put("treeList", jsonString);
 		
 		//获取当前帐户能访问的树节点，用来checkbox勾选
-		@SuppressWarnings("unchecked")
-		List<Sys_tree> accountTrees = accountService.getAccountTree(id);
+		List<Sys_tree> accountTrees = treeService.getAccountTree(id);
+		
 		String accountTreesString = JSON.toJSONString(accountTrees);
+		
 		modelMap.put("accountTrees", accountTreesString);
 		
 		//获取电子全文浏览范围代码，供页面填充select

@@ -25,7 +25,7 @@ public class TableService implements ITableService {
 
 	@Override
 	public List<Sys_table> list() {
-		return tableDao.getAll();
+		return tableDao.getAll("tabletype");
 	}
 
 	@Override

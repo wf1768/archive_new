@@ -37,6 +37,13 @@ public interface BaseDao<T,ID> {
 	public int update(String sql, List<Object> values);
 	
 	/**
+	 * 基础接口
+	 * 执行
+	 * @param sql
+	 */
+	public void execute(String sql);
+	
+	/**
 	 * 基础接口之一</br>
 	 * 查询一个long值
 	 * @param sql

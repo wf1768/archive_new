@@ -49,7 +49,8 @@ public class TreeService implements ITreeService {
 
 	@Override
 	public List<Sys_tree> list() {
-		return treeDao.getAll("CONVERT(treename USING gbk)");
+		return treeDao.getAll(" sort asc");
+//		return treeDao.getAll("CONVERT(treename USING gbk)");
 	}
 
 	@Override

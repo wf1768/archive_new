@@ -66,3 +66,7 @@
 
 14、在表sys_templetfield 增加orderby （varchar 30）  iscopy（int 11）［1:添加字段内容时，继承自上一条记录 0:不顺带］
 
+15、在表sys_tree 增加sort字段（int 11）字段，用来档案树排序
+
+16、在表sys_templet 增加parentid（varchar 40） 档案库也可以增加档案夹，需要parentid画树
+

@@ -14,6 +14,7 @@ public class Sys_tree {
 	private String treetype;
 	private String treenode;
 	private String templetid;
+	private Integer sort;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -53,6 +54,12 @@ public class Sys_tree {
 	}
 	public void setTreenode(String treenode) {
 		this.treenode = treenode;
+	}
+	public Integer getSort() {
+		return sort;
+	}
+	public void setSort(Integer sort) {
+		this.sort = sort;
 	}
 
 	
