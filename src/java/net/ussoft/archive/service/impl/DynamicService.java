@@ -16,9 +16,11 @@ import net.ussoft.archive.dao.TableDao;
 import net.ussoft.archive.dao.TempletDao;
 import net.ussoft.archive.dao.TempletfieldDao;
 import net.ussoft.archive.dao.TreeDao;
+import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_table;
+import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IDynamicService;
@@ -47,7 +49,45 @@ public class DynamicService implements IDynamicService {
 	private DocserverDao docserverDao;
 	@Resource
 	private DocDao docDao;
-
+	
+	@Override
+	public PageBean<Map<String, Object>> archiveList(String treeid,String tabletype,
+			PageBean<Map<String, Object>> pageBean) {
+		if (null == treeid || treeid.equals("")) {
+			return null;
+		}
+		
+		String sql = "";
+		List<Object> values = new ArrayList<Object>();
+		
+		//获取tree 对象
+		Sys_tree tree = treeDao.get(treeid);
+		//获得tree对应的templet
+		Sys_templet templet = templetDao.get(tree.getTempletid());
+		
+		//获取table
+		sql = "select * from sys_table where templetid=? and tabletype=?";
+		values.add(templet.getId());
+		values.add(tabletype);
+		List<Sys_table> tables = tableDao.search(sql, values);
+		
+		if (null == tables || tables.size() != 1) {
+			return null;
+		}
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("select * from ");
+		sb.append(tables.get(0).getTablename());
+		sb.append(" where ");
+		sb.append(" treeid=? and status = 0");
+		
+		values.clear();
+		values.add(tree.getId());
+		pageBean = dynamicDao.searchForMap(sb.toString(), values, pageBean);
+		
+		return pageBean;
+	}
+	
 	@Transactional("txManager")
 	@Override
 	public ResultInfo saveArchive(String treeid, List<Map<String, String>> archiveList) {

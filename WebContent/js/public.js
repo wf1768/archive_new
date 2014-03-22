@@ -1,10 +1,7 @@
 // JavaScript Document
 $(function() {
 	$(window).resize(function() {
-							  setUI();
-		//setTimeout(function() {
-//			setUI();
-//		}, 500);
+		setUI();
 	});
 	$(function() {
 		setUI();
@@ -27,7 +24,7 @@ $(function() {
 		var topH1 = $("header").outerHeight();
 
 		var w = winW - leftW;
-		var rw = w -20 + "px";
+		var rw = w -28 + "px";
 		
 		var h = winH - topH1 - bottH - 80;
 
@@ -40,21 +37,18 @@ $(function() {
 		//$(".data_table").height(200);
 		// $("#cssz_table").width(rw);
 		// $("#tb2").height($("#bodyer_right").height() - 55);
-		$(".scrollTable").height($("#bodyer_right").height() - 80);
+		$(".scrollTable").height($("#bodyer_right").height() - 70);
 		// $("#not").height($("#table_main").height()-60);
 		// $("#ddiv").width(w*0.98-2);
 		
 		
 
-		var n = $(".scrollTable").height()-$(".aa").height()-10;
-		if (n > 0) {
-			$('.data_table').fixHeader({
-				height : n
-				
-			});
-		}
+		var n = $(".scrollTable").height()-$(".aa").height();
+		$('.data_table').fixHeader({
+			height : n
+			
+		});
 		
-
 	}
 
 });

@@ -62,7 +62,7 @@ public class TempletService implements ITempletService {
 			sql += where;
 		}
 		
-		if (null != order && !where.equals("")) {
+		if (null != order && !order.equals("")) {
 			sql += order;
 		}
 		
@@ -432,7 +432,7 @@ public class TempletService implements ITempletService {
 		}
 		Sys_tree updateTree = new Sys_tree();
 		updateTree.setId(tree.getId());
-		updateTree.setSort(tmp.getSort());
+		updateTree.setSort(templet.getSort());
 		treeDao.update(updateTree);
 		
 		templetDao.update(templet);

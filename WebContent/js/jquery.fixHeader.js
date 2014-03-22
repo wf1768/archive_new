@@ -27,13 +27,13 @@ $.fn.fixHeader = function(options){
     var thead = elem.find('thead');
     var fixTable = elem.clone().empty().removeAttr('id');
     //set head default background-color
-    if(fixTable.css('background-color') == 'transparent' || fixTable.css('background-color') == ''){
-        fixTable.css('background-color', '#fff');
-    }
+//    if(fixTable.css('background-color') == 'transparent' || fixTable.css('background-color') == ''){
+//        fixTable.css('background-color', '#fff');
+//    }
     fixTable.css({
         'position': 'relative',
         'top': '33px',
-		
+	
        
         'border-bottom': $('tr:eq(0)', thead).find('th:eq(0), td:eq(0)').css('border-bottom-width')
     });
@@ -83,10 +83,11 @@ $.fn.fixHeader = function(options){
 
 
     var tbodyWrapper = elem.wrap('<div class="body-wrapper"></div>').parent();
-    var tableWrapper = tbodyWrapper.wrap('<div class="table-wrapper" style="position:relative;"/>').parent();
+    var tableWrapper = tbodyWrapper.wrap('<div class="table-wrapper" style="position:relative ;top:-25px;"/>').parent();
     setTableWidth();
     setWrapperSize();
-
+	fixTable.width(fixTable.width());
+   
     fixTable.prependTo(tableWrapper);
 
     return this;
@@ -113,13 +114,23 @@ $.fn.fixHeader = function(options){
         var elemWidth = elem.outerWidth(true);
         var elemHeight = elem.outerHeight(true);
         var scrollBarWidth = 1;
+        
+        //wf 修改，判断浏览器，设置不同的值
+        if($.browser.chrome){
+        	scrollBarWidth = -8;
+        }
+        
 
         if(options.width == ''){
+			var a =16;
+			if($.browser.chrome){
+				a = 25;
+			}
             tbodyWrapper.css({
-                'width': (elemWidth+scrollBarWidth) + 'px',
+                'width': (elemWidth+scrollBarWidth)+a + 'px',
                 'height': options.height,
-                'overflow-x': 'hidden',
-                'overflow-y': 'scroll'
+                'overflow-x': 'auto',
+                'overflow-y': 'auto'
             });
         }
         else{
@@ -127,7 +138,7 @@ $.fn.fixHeader = function(options){
                 tbodyWrapper.css({
                     'width': options.width+'px',
                     'height': options.height,
-                    'overflow-x': 'hidden',
+                    'overflow-x': 'auto',
                     'overflow-y': 'auto'
                 });
             }

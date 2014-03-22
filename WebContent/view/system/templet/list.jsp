@@ -101,10 +101,6 @@
 		var result = openShowModalDialog(url, window, whObj);
 	}
 	
-	function selectRadio(value) {
-		window.location.href="${pageContext.request.contextPath}/templet/list.do?selectid="+nodes.id;
-	}
-	
 	function edit(id) {
 		var url = "${pageContext.request.contextPath}/templet/edit.do?id="
 				+ id + "&time=" + Date.parse(new Date());
@@ -158,7 +154,7 @@
 			str = "确定要删除选择的档案类型夹吗？将同时删除该档案类型夹下包含的所有档案类型，及档案数据、电子全文。请谨慎操作。"
 		}
 		else {
-			str = "确定要删除选择的档案类型吗？将同时删除该档案类型夹下包含的所有档案数据、电子全文。请谨慎操作。"
+			str = "确定要删除选择的档案类型吗？将同时删除该档案类型下包含的所有档案数据、电子全文。请谨慎操作。"
 		}
 		
 		if (confirm(str)) {
@@ -202,141 +198,6 @@
 		};
 	}
 	
-	//============
-
-	function addField() {
-		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		var nodes = treeObj.getSelectedNodes();
-		if (typeof (nodes[0]) == "undefined") {
-			alert("请选择档案类型，再创建字段。");
-			return;
-		}
-		if (!nodes[0].isleaf) {
-			alert("请选择档案类型，再创建字段。");
-			return;
-		}
-
-		var url = "${pageContext.request.contextPath}/templetfield/add.do?tableid="
-				+ nodes[0].id + "&time=" + Date.parse(new Date());
-		var whObj = {
-			width : 600,
-			height : 500
-		};
-		var result = openShowModalDialog(url, window, whObj);
-		//window.location.reload(true); // 刷新窗体
-	}
-
-	function delField(id) {
-		if (id == "") {
-			alert("没有获得要删除的字段，请重新尝试，或与管理员联系。");
-			return;
-		}
-
-		if (confirm("确定要删除选择的字段吗？删除该字段，将同时删除该字段已录入的信息。请谨慎操作。")) {
-			$.ajax({
-				async : true,
-				url : "${pageContext.request.contextPath}/templetfield/delete.do",
-				type : 'post',
-				data : {
-					id : id
-				},
-				dataType : 'text',
-				success : function(data) {
-					if (data == "success") {
-						alert("删除完毕。");
-
-					} else {
-						alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-					}
-					window.location.reload(true);
-				}
-			});
-		};
-	}
-
-	//更新字段的一些属性。例如：检索字段、列表显示等的0和1修改。
-	function updateOtherInfo(id, type, value) {
-		$.ajax({
-			async : true,
-			url : "${pageContext.request.contextPath}/templetfield/updateOtherInfo.do",
-			type : 'post',
-			data : {
-				id : id,
-				type : type,
-				value : value
-			},
-			dataType : 'text',
-			success : function(data) {
-				if (data == "success") {
-
-				} else {
-					alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-				}
-				window.location.reload(true);
-			}
-		});
-	}
-
-	function fieldcode(id) {
-		var url = "${pageContext.request.contextPath}/templetfield/fieldcode.do?id="
-				+ id + "&time=" + Date.parse(new Date());
-		var whObj = {
-			width : 640,
-			height : 400
-		};
-		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
-	}
-
-	function fieldcopy(id) {
-		$.ajax({
-			async : true,
-			url : "${pageContext.request.contextPath}/templetfield/fieldcopy.do",
-			type : 'post',
-			data : {
-				id : id
-			},
-			dataType : 'text',
-			success : function(data) {
-				if (data == "success") {
-					alert("字段复制成功，任意档案类型下，点击［粘贴字段］。");
-				} else {
-					alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-				}
-			}
-		});
-	}
-
-	function fieldpaste() {
-		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		var nodes = treeObj.getSelectedNodes();
-		if (typeof (nodes[0]) == "undefined") {
-			alert("请选择档案类型，再粘贴字段。");
-			return;
-		}
-		if (!nodes[0].isleaf) {
-			alert("请选择档案类型，再粘贴字段。");
-			return;
-		}
-
-		$.ajax({
-			async : true,
-			url : "${pageContext.request.contextPath}/templetfield/fieldpaste.do",
-			type : 'post',
-			data : {
-				tableid : nodes[0].id
-			},
-			dataType : 'text',
-			success : function(data) {
-				if (data == "success") {
-
-				} else {
-					alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!");
-				}
-			}
-		});
-	}
-
 	function initgrid() {
 		var rowNum = '${fn:length(templets) }';
 		if (rowNum == 0) {
@@ -357,6 +218,7 @@
 			} */
 		}
 	}
+
 </script>
 
 

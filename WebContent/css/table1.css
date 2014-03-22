@@ -15,6 +15,7 @@
 	*margin-right:5px;
 }
 
+
 .tableTopTitle-bg {
 	font-weight: bold;
 	font-size: 12px;
@@ -22,11 +23,14 @@
 	text-indent: 0px;
 	background-repeat: repeat-x;
 	height: 30px;
-	line-height: 150%;
+	line-height: 30px;
 	text-decoration: none;
 	background-color: #a3b6cd;
-	text-align: center
+	text-align: center;
+	
+	
 }
+
 
 .tableTop-bg {
 	font-weight: bold;
@@ -39,13 +43,15 @@
 	text-decoration: none
 }
 
+
 .table-TitleBG {
 	font-weight: bold;
 	font-size: 12px;
-	line-height: 150%;
+	line-height: 30px;
 	background-color: #f7faff;
 	text-decoration: none;
 }
+
 
 .table-Kang {
 	border-right: #0066cc 1px solid;
@@ -57,7 +63,7 @@
 
 .table-Sbg {
 	font-size: 12px;
-	line-height: 150%;
+	line-height: 30px;
 	background-color: #ecf4ff;
 }
 
@@ -66,18 +72,29 @@
 	font-size: 12px;
 	background-image: vertical-align:     middle;
 	text-indent: 6px;
-	background-repeat: repeat-x;
+	color:#36C;
+	
 	height: 25px;
 	text-decoration: none;
-	background-color: #a3b6cd;
+	
 	line-height: 100%;
 }
 
 .table-SbgList {
 	font-size: 12px;
-	line-height: 70%;
+	line-height: 100%;
 	background-color: #ecf4ff;
 	text-align: center;
-	height: 30px
+	height: 30px;
+	
 }
+.table-SbgList:hover
+{
+	background:#b8e4f9;
+	}
+
+
 .aa{ padding:0; margin:0;}
+
+
+.fenye{ text-align:right;}

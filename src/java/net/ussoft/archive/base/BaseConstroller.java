@@ -130,4 +130,13 @@ public class BaseConstroller {
 		return roleService.searchFunctions(roleid);
 	}
 	
+	public String getProjectPath() {
+		String path = request.getContextPath();
+    	String basePath = request.getScheme() + "://"
+    			+ request.getServerName() + ":" + request.getServerPort()
+    			+ path + "/";
+    	
+    	return basePath;
+	}
+	
 }

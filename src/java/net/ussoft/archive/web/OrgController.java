@@ -512,14 +512,14 @@ public class OrgController extends BaseConstroller {
 		JSONArray jsonArray = JSON.parseArray(treeString);
 		for (int i=0;i<jsonArray.size();i++) {
 			String typeString = ((JSONObject) jsonArray.get(i)).get("treetype").toString();
-			if (typeString.equals("F") || typeString.equals("T")) {
+			if (typeString.equals("F") || typeString.equals("T") || typeString.equals("FT")) {
 				((JSONObject) jsonArray.get(i)).put("isParent", true);
 			}
 			if (typeString.equals("F")) {
 				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/icons/1.gif");
 				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/icons/2.gif");
 			}
-			if (typeString.equals("T")) {
+			if (typeString.equals("T") || typeString.equals("FT")) {
 				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/folder.gif");
 				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/folder-open.gif");
 			}
@@ -529,8 +529,7 @@ public class OrgController extends BaseConstroller {
 		modelMap.put("treeList", jsonString);
 		
 		//获取当前组能访问的树节点，用来checkbox勾选
-		@SuppressWarnings("unchecked")
-		List<Sys_tree> orgTrees = (List<Sys_tree>) orgService.getOrgTree(orgid).getData().get("list");
+		List<Sys_tree> orgTrees = orgService.getOrgTree(orgid);
 		String orgTreesString = JSON.toJSONString(orgTrees);
 		modelMap.put("orgTrees", orgTreesString);
 		

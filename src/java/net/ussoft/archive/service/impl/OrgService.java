@@ -131,20 +131,14 @@ public class OrgService implements IOrgService {
 		int num = orgDao.del(sql, values);
 		return num;
 	}
-	/*
-	 * (non-Javadoc)
-	 * @see net.ussoft.archive.service.IOrgService#getOrgTree(java.lang.String)
-	 */
-	@Override
-	public ResultInfo getOrgTree(String orgid) {
+	
+	public List<Sys_tree> getOrgTree(String orgid) {
 		List<Object> values=new ArrayList<Object>();
 		values.add(orgid);
 		List<Sys_org_tree> orgTreeList = orgtreeDao.search("select * from sys_org_tree where orgid=?", values);
 		
-		ResultInfo info = new ResultInfo(Boolean.TRUE);
-		
 		if (orgTreeList.size()  == 0) {
-			return info;
+			return null;
 		}
 		
 		values.clear();
@@ -157,10 +151,7 @@ public class OrgService implements IOrgService {
 		
 		List<Sys_tree> treeList = treeDao.search("select * from sys_tree where id in ("+sb.toString()+")", values);
 		
-		info.setMsg("获取帐户组管理的树节点成功。");
-		info.put("list", treeList);
-		
-		return info;
+		return treeList;
 	}
 	
 	/*

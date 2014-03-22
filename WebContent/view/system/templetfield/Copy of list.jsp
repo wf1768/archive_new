@@ -42,7 +42,6 @@
 		var treeid = "${selectid}";
 		selectTreeid = treeid;
 		selectNode(treeid);
-		//initgrid();
 		
 	});
 	
@@ -207,27 +206,6 @@
 	    });
 	}
 
-	
-	function initgrid() {
-		var rowNum = '${fn:length(templetfields) }';
-		if (rowNum == 0) {
-			return;
-		}
-		var jstb1 = document.getElementById("tb1").rows[0];
-		var jstb2 = document.getElementById("tb2").rows[0];
-		//var divw = 0;
-		for ( var i = 0; i < 6; i++) {// “-2”是减去每列左右的边宽
-			jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-			
-			/* if (jstb1.cells[i].clientWidth > jstb2.cells[i].clientWidth) {//如果标题的列宽比数据的列宽还大则用标题的列宽
-				jstb2.cells[i].style.width = parseInt(jstb1.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb1.cells[i].clientWidth) - 2;
-			} else {
-				jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb2.cells[i].clientWidth) - 2;
-			} */
-		}
-	}
 </script>
 
 
@@ -256,7 +234,7 @@
 			</dd>
 		</dl>
 	</div>
-	<div id="bodyer_right" style="background-color: #EFE5E2;">
+	<div id="bodyer_right" >
 		<div class="top_dd" style="margin-bottom: 10px">
 			<div class="dqwz_l">
 				<c:choose>
@@ -276,10 +254,10 @@
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="scrollTable" align="center" >
-		    <table id="data_table"   class="data_table table-Kang" id="tb1" align="center"  width="96%"
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+		    <table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
 				 border=0 cellspacing="1" cellpadding="4" >
-				<thead>
+				<thead >
 				<tr class="tableTopTitle-bg">
 					<td><input type="checkbox" id="checkall"></td>
 					<td>序号</td>
@@ -292,7 +270,7 @@
 					<td>唯一</td> -->
 					<td>检索</td>
 					<td>列表</td>
-					<!-- <td>顺带</td> -->
+					<td>顺带</td>
 					<td>数据排序</td>
 					<td>代码项</td>
 					<td>字段排序</td>
@@ -360,6 +338,19 @@
 						</td>
 						<td>
 							<c:choose>
+								<c:when test="${item.iscopy==1 }">
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
+								</c:when>
+								<c:when test="${item.iscopy==0 }">
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',1)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
+								</c:when>
+								<c:otherwise>
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',1)">未知</a>
+								</c:otherwise>
+							</c:choose>
+						</td>
+						<td>
+							<c:choose>
 								<c:when test="${item.orderby=='ASC' }">
 									正序排序
 								</c:when>
@@ -405,18 +396,16 @@
 			</table>
            
 		   </div>
-           <div class="aa" style=" margin-left:3px;">
-			<table class=" table-Kang" align="center" width="99%"
-				 border=0 cellspacing="0" cellpadding="0" >
-				<tr class="table-botton" id="fanye" >
-					<td colspan="14"><p>共 ${fn:length(templets) } 条记录</p></td>
-				</tr>
-			</table>
+           <div class="aa" style="margin-left:5px" >
+				<table class=" " aline="left" width="100%" 
+					 border=0 cellspacing="0" cellpadding="0" >
+					<tr class="table-botton" id="fanye" >
+						<td colspan="14"><p>当前第 1 页，共 79 页，每页 30 行，共 2349 行</p></td>
+						<td colspan="14" class="fenye" >上一页123456...777879下一页</td>
+					</tr>
+				</table>
+			</div>
 		</div>
-           
-		</div>
-		
-	</div>
 	<div style="clear: both"></div>
 </div>
 

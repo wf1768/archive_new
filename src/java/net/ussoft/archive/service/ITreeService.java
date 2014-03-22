@@ -1,11 +1,12 @@
 package net.ussoft.archive.service;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.List;
 
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
-import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface ITreeService {
 
@@ -23,11 +24,19 @@ public interface ITreeService {
 	public List<Sys_tree> list();
 	
 	/**
+	 * 直接传where、order查
+	 * @param where
+	 * @param order
+	 * @return
+	 */
+	public List<Sys_tree> list(String where,List<Object> values,String order);
+	
+	/**
 	 * 插入
 	 * @param 
 	 * @return
 	 */
-	public Sys_tree insertOne(Sys_tree tree);
+	public String insert(Sys_tree tree);
 	/**
 	 * 更新
 	 * @param 
@@ -38,8 +47,25 @@ public interface ITreeService {
 	 * 删除
 	 * @param id
 	 * @return
+	 * @throws IOException 
+	 * @throws SocketException 
 	 */
-	public int delete(String id);
+	public String delete(String id) throws SocketException, IOException;
+	
+	/**
+	 * 移动
+	 * @param id
+	 * @param targetid
+	 * @return
+	 */
+	public String move(String id,String targetid);
+	
+	/**
+	 * 修改排序
+	 * @param templet
+	 * @return
+	 */
+	public int sortsave(Sys_tree tree);
 	
 	/**
 	 * 根据treeid，获取tree节点对应的档案模版实体对象
@@ -55,13 +81,22 @@ public interface ITreeService {
 	 * @return
 	 */
 	public List<Sys_templetfield> geTempletfields(String treeid,String tabletype);
+	
+	/**
+	 * 根据传入的json，增加根节点和图标
+	 * @param jsonStr
+	 * @param basePath
+	 * @return
+	 */
+	public String createTreeJson(String jsonStr,String basePath);
 
 	/**
-	 * 根据账户ID，获取账户的权限的树节点范围
+	 * 根据账户ID，获取账户的权限  树节点范围
+	 * 如果帐户设置了，就读取帐户的，如果没设置，就读取帐户所属组的。
 	 * @param accountId		账户ID
 	 * @return
 	 * */
-	public List<Sys_tree> getAuthTree(String accountId);
+	public List<Sys_tree> getAuthTree(String accountid);
 	
 	/**
 	 * 获取帐户的档案树节点范围list

@@ -286,7 +286,13 @@ public class TempletController extends BaseConstroller {
 		modelMap.put("id", id);
 		return new ModelAndView("/view/system/templet/move",modelMap);
 	}
-	
+	/**
+	 * 移动档案类型保存
+	 * @param id
+	 * @param targetid
+	 * @param response
+	 * @throws IOException
+	 */
 	@RequestMapping(value="/movesave",method=RequestMethod.POST)
 	public void movesave(String id,String targetid,HttpServletResponse response) throws IOException {
 		response.setContentType("text/xml;charset=UTF-8");
