@@ -1,7 +1,9 @@
 package net.ussoft.archive.web;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -15,9 +17,16 @@ import org.springframework.web.servlet.ModelAndView;
 import com.alibaba.fastjson.JSON;
 
 import net.ussoft.archive.base.BaseConstroller;
+import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_table;
+import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IAccountService;
+import net.ussoft.archive.service.IDynamicService;
+import net.ussoft.archive.service.IOrgService;
+import net.ussoft.archive.service.ITableService;
+import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 
@@ -33,6 +42,14 @@ public class IntelligentController extends BaseConstroller{
 	
 	@Resource
 	private IAccountService accountService;
+	@Resource
+	private ITreeService treeService;
+	@Resource
+	private IOrgService orgService;
+	@Resource
+	private ITableService tableService;
+	@Resource
+	private IDynamicService dynamicService;
 	
 	/**
 	 * 智能检索-检索结果集
@@ -45,10 +62,23 @@ public class IntelligentController extends BaseConstroller{
 		
 		List<Sys_tree> treeList = new ArrayList<Sys_tree>();
 		treeList = getTreeNode(request);
+		String jsonTreeList = JSON.toJSONString(treeList);
+		
+		List<Map<String, String>> list = new ArrayList<Map<String,String>>();
+		Map<String, String> m = new HashMap<String, String>();
+		m.put("a", "aaa");
+		m.put("b", "bbb");
+		list.add(m);
+		Map<String, String> m1 = new HashMap<String, String>();
+		m1.put("a", "1aaa");
+		m1.put("b", "1bbb");
+		list.add(m1);
 		
 		modelMap.put("pageName", "智能检索");
-		modelMap.put("treeList", treeList);
+		modelMap.put("treeList", jsonTreeList);
 		
+		modelMap.put("list", list);
+		modelMap.put("key", "a");
 		return new ModelAndView("/view/search/intelligent/list",modelMap);
 	}
 	
@@ -57,27 +87,38 @@ public class IntelligentController extends BaseConstroller{
 	 * 
 	 * */
 	@RequestMapping(value="/search",method=RequestMethod.GET)
-	public ModelAndView search(String searchText,ModelMap modelMap){
+	public ModelAndView search(HttpServletRequest request,String searchText,ModelMap modelMap){
 		modelMap = super.getModelMap("SEARCHMANAGE","SEARCH");
 		
 		System.out.println(searchText);
-		
-		return new ModelAndView("/view/search/intelligent/list",modelMap);
-	}
-	
-	/**
-	 * 帐户能查询的档案树节点
-	 * 
-	 * */
-	public String getSearchTree(){
-//		PrintWriter out = this.getPrintWriter();
-	
 		List<Sys_tree> treeList = new ArrayList<Sys_tree>();
-//		treeList = getTreeNode();
-		String resultList = JSON.toJSONString(treeList);
-//		out.write(result);
+		treeList = getTreeNode(request);
+		//检索结果数据
+		List<Object> resultList = new ArrayList<Object>();
+		//检索表字段
+		List<Object> fieldList = new ArrayList<Object>();
+		for(Sys_tree aTree:treeList){
+			List<Sys_table> tableList = tableService.getTableByTempletid(aTree.getTempletid());
+			for(Sys_table table:tableList){
+				System.out.println(table.getTablename());
+				List<Sys_templetfield> templetFieldList = tableService.geTempletfields(table.getId());
+				fieldList.add(templetFieldList);
+				
+				PageBean<Map<String, Object>> pb = dynamicService.search(searchText,table.getTablename(),aTree.getId(),templetFieldList,1,10000);
+				resultList.add( pb.getList());
+				
+				String jsonList = JSON.toJSONString(pb.getList());
+				System.out.println(jsonList);
+			}
+		}
 		
-		return null;
+		
+		String jsonTreeList = JSON.toJSONString(treeList);
+		modelMap.put("pageName", "智能检索");
+		modelMap.put("treeList", jsonTreeList);
+		modelMap.put("resultList", resultList);
+		modelMap.put("fieldList", fieldList);
+		return new ModelAndView("/view/search/intelligent/list",modelMap);
 	}
 	
 	/**
@@ -85,24 +126,11 @@ public class IntelligentController extends BaseConstroller{
 	 * @return
 	 */
 	private List<Sys_tree> getTreeNode(HttpServletRequest httpRequest) {
-		
 		//获取session里的登录帐户
 		Object object = CommonUtils.getSessionAttribute(httpRequest, Constants.user_in_session);
-	    Sys_account account = object == null ? null : (Sys_account) object;  
+	    Sys_account account = object == null ? null : (Sys_account) object; 
 	    List<Sys_tree> treeList = new ArrayList<Sys_tree>();
-		//读取帐户本身的树节点范围
-		treeList = accountService.getAccountTree(account.getId());
-		
-		//判断帐户是否有档案树节点操作
-//		if (null == treeList || treeList.size() < 1) {
-//			//如果未设置帐户自己的树节点范围，读取所属组的范围
-//			SysOrg org = accountService.getAccountOfOrg(account);
-//			treeList = orgService.getTree(org.getOrgid());
-//			if (null == treeList || treeList.size() <= 0 ) {
-////					out.write("error");
-//				return null;
-//			}
-//		}
+		treeList = treeService.getAuthTree(account.getId());
 		return treeList;
 	}
 	

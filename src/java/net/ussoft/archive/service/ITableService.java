@@ -1,7 +1,11 @@
 package net.ussoft.archive.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import net.ussoft.archive.model.Dynamic;
+import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
@@ -22,6 +26,11 @@ public interface ITableService {
 	 */
 	public List<Sys_templetfield> geTempletfields(String tableid);
 	
-
-
+	/**
+	 * 根据templetid获取表
+	 * @param templetid
+	 * @return
+	 * */
+	public List<Sys_table> getTableByTempletid(String templetid);
+	
 }

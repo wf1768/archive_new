@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.ussoft.archive.model.PageBean;
+import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface IDynamicService {
@@ -24,4 +25,16 @@ public interface IDynamicService {
 	 */
 	public ResultInfo saveArchive(String treeid,List<Map<String,String>> archiveList);
 
+	/**
+	 * 查询表数据
+	 * @param searchTxt
+	 * @param tablename
+	 * @param treeid
+	 * @param tmpFieldLis
+	 * @param currentPage
+	 * @param pageSize
+	 * @return
+	 * */
+	public PageBean<Map<String, Object>> search(String searchTxt,String tablename,String treeid,List<Sys_templetfield> tmpFieldLis,int currentPage,int pageSize);
+	
 }

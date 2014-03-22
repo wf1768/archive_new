@@ -201,4 +201,26 @@ public class DynamicService implements IDynamicService {
 		return info;
 	}
 
+	@Override
+	public PageBean<Map<String, Object>> search(String searchTxt,String tablename,String treeid,List<Sys_templetfield> tmpFieldList,int currentPage,int pageSize) {
+		PageBean<Map<String, Object>> pb = new PageBean<Map<String,Object>>();
+		pb.setPageNo(currentPage); 	//页码
+		pb.setPageSize(pageSize);			//每页显示的条数
+		if(!searchTxt.replace(" ", "").trim().equals("") || searchTxt != null){
+			StringBuffer sb = new StringBuffer();
+			sb.append(" AND treeid='" + treeid + "' AND (");
+			for(int i=0;i<tmpFieldList.size();i++){
+				if(i < tmpFieldList.size()-1){
+					sb.append(tmpFieldList.get(i).getEnglishname() + " LIKE '%" + searchTxt + "%' OR ");
+				}else{
+					sb.append(tmpFieldList.get(i).getEnglishname() + " LIKE '%" + searchTxt + "%' )");
+				}
+			}
+			String sql = "SELECT * FROM " + tablename +" WHERE 1=1 " + sb.toString();
+			System.out.println(sql);
+			List<Object> values = new ArrayList<Object>();
+			pb = dynamicDao.searchForMap(sql, values, pb);
+		}
+		return pb;
+	}
 }
