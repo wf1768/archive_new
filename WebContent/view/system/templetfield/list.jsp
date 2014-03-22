@@ -3,9 +3,10 @@
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
 <%@ include file="/view/common/top_second_menu.jsp"%>
-
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+
 
 <script>
 	var selectTreeid = 0;
@@ -35,6 +36,14 @@
 		}
 	};
 	
+	$(function(){
+		$.fn.zTree.init($("#treeDemo"), setting, nodes);
+		
+		var treeid = "${selectid}";
+		selectTreeid = treeid;
+		selectNode(treeid);
+		
+	});
 	
 	function addField(){
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
@@ -53,15 +62,6 @@
 		var result = openShowModalDialog(url,window,whObj);
 		//window.location.reload(true); // 刷新窗体
 	}
-	
-	$(function(){
-		$.fn.zTree.init($("#treeDemo"), setting, nodes);
-		
-		var treeid = "${selectid}";
-		selectTreeid = treeid;
-		selectNode(treeid);
-		initgrid();
-	});
 	
 	function delField(id) {
 		if (id == "") {
@@ -206,46 +206,6 @@
 	    });
 	}
 
-	
-	function initgrid() {
-		var rowNum = '${fn:length(templetfields) }';
-		if (rowNum == 0) {
-			return;
-		}
-		var jstb1 = document.getElementById("tb1").rows[0];
-		var jstb2 = document.getElementById("tb2").rows[0];
-		//var divw = 0;
-		/* for ( var i = jstb2.cells.length-1; i >0 ; i--) {// “-2”是减去每列左右的边宽
-			
-			if (i==jstb2.cells.length-1) {
-				jstb2.cells[i].style.width = "230px";
-				jstb1.cells[i].style.width = "228px";
-			}
-			else {
-				jstb2.cells[i].style.width = parseInt(jstb1.cells[i].clientWidth)  + "px";
-			} */
-			for ( var i = 0; i < jstb2.cells.length; i++) {// “-2”是减去每列左右的边宽
-				jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-			
-			
-			/* if (jstb2.cells[i].clientWidth < 10) {
-				jstb2.cells[i].style.width = "80px";
-				jstb1.cells[i].style.width = "80px";
-			}
-			else {
-				jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-			} */
-			
-			
-			/* if (jstb1.cells[i].clientWidth > jstb2.cells[i].clientWidth) {//如果标题的列宽比数据的列宽还大则用标题的列宽
-				jstb2.cells[i].style.width = parseInt(jstb1.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb1.cells[i].clientWidth) - 2;
-			} else {
-				jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb2.cells[i].clientWidth) - 2;
-			} */
-		}
-	}
 </script>
 
 
@@ -274,8 +234,8 @@
 			</dd>
 		</dl>
 	</div>
-	<div id="bodyer_right">
-		<div class="top_dd">
+	<div id="bodyer_right" >
+		<div class="top_dd" style="margin-bottom: 10px">
 			<div class="dqwz_l">
 				<c:choose>
 					<c:when test="${m=='c' }">当前位置：系统配置－档案模版维护</c:when>
@@ -285,10 +245,8 @@
 				</c:choose>
 			</div>
 			<div class="caozuoan">
-				<a href="javascript:;" onclick="addField()">
-					<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_add.png"  />
-                    添加字段
-                </a>
+				<a href="javascript:;" onclick="addField()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_add.png"  />
+                    添加字段</a>
 				<a href="javascript:;" onclick="fieldpaste()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/paste.png"  />
                     粘贴字段</a>
                 <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
@@ -296,10 +254,11 @@
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="title_div" id="tdiv">
-			<table class="table-Kang " id="tb1" align="center" width="98%"
-				 border=0 cellspacing="0" cellpadding="4" style="margin-top: 10px">
-				<tr class=tableTopTitle-bg>
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+		    <table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
+				 border=0 cellspacing="1" cellpadding="4" >
+				<thead >
+				<tr class="tableTopTitle-bg">
 					<td><input type="checkbox" id="checkall"></td>
 					<td>序号</td>
 					<td>中文名称</td>
@@ -307,24 +266,21 @@
 					<td>类型</td>
 					<td>长度</td>
 					<td>默认值</td>
-					<!-- <td><p>必著</p></td>
-					<td><p>唯一</p></td> -->
+					<!-- <td>必著</td>
+					<td>唯一</td> -->
 					<td>检索</td>
 					<td>列表</td>
 					<td>顺带</td>
 					<td>数据排序</td>
 					<td>代码项</td>
 					<td>字段排序</td>
-					<td style="border-right:0">操作</td>
-					<td class="last_list" ></td>
+					<td>操作</td>
+                    
 				</tr>
-			</table>
-		</div>
-		<div class="data_div scrollTable" id="ddiv">
-			<table class="title_tb table-Kang1" id="tb2" align="center" width="100%"
-				 border=0 cellspacing="0" cellpadding="4">
+				</thead>
+				<tbody>
 				<c:forEach items="${templetfields}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
+					<tr class="table-SbgList">
 						<td><input type="checkbox" name="checkbox" value="${item.id }"></td>
 						<td>${i.index+1 }</td>
 						<td>${item.chinesename}</td>
@@ -436,20 +392,23 @@
 						</td>
 					</tr>
 				</c:forEach>
+				</tbody>
 			</table>
+           
+		   </div>
+           <div class="aa" style="margin-left:5px" >
+				<table class=" " aline="left" width="100%" 
+					 border=0 cellspacing="0" cellpadding="0" >
+					<tr class="table-botton" id="fanye" >
+						<td colspan="14"><p>当前第 1 页，共 79 页，每页 30 行，共 2349 行</p></td>
+						<td colspan="14" class="fenye" >上一页123456...777879下一页</td>
+					</tr>
+				</table>
+			</div>
 		</div>
-		<div class="aa">
-			<table class=" table-Kang" align="center" width="98%"
-				 border=0 cellspacing="0" cellpadding="4" >
-				<tr class="table-botton" id="fanye" class="fanye1">
-					<TD colspan="14"><p>共 ${fn:length(templetfields) } 条记录</p></TD>
-				</tr>
-			</table>
-		</div>
-		<div style="clear: both"></div>
-	</div>
 	<div style="clear: both"></div>
 </div>
+
 <!--内容部分结束-->
 
 <%@ include file="/view/common/footer.jsp"%>

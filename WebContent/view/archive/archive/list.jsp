@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ include file="/view/common/header_2.jsp"%>
+<%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
 <%@ include file="/view/common/top_second_menu.jsp"%>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table1.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>

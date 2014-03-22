@@ -138,7 +138,7 @@ public class TempletfieldController extends BaseConstroller {
 			modelMap.put("templetfields", templetfields);
 		}
 		
-		return new ModelAndView("/view/system/templetfield/Copy of list",modelMap);
+		return new ModelAndView("/view/system/templetfield/list",modelMap);
 	}
 	
 	private List<HashMap<String,Object>> createList(String parentid,List<Sys_templet> templets,List<Sys_table> tables) {
