@@ -294,8 +294,17 @@
 		<div class="aa" style="margin-left:5px" >
 			<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >
 				<tr class="table-botton" id="fanye" >
-					<td><p>当前第 ${pagebean.priorNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
-					<td id="pagination" class="fenye pagination" ></td>
+					<c:choose>
+						<c:when test="${pagebean.isPage == true }">
+							<td><p>当前第 ${pagebean.priorNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
+							<td id="pagination" class="fenye pagination" ></td>
+						</c:when>
+						<c:otherwise>
+							<td><p>当前第 1 页，共 1 页，每页 ${pagebean.rowCount } 行，共 ${pagebean.rowCount } 行</p></td>
+							<td  ></td>
+						</c:otherwise>
+					</c:choose>
+					
 				</tr>
 			</table>
 		</div>

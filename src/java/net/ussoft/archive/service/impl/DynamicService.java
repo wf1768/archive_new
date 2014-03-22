@@ -24,6 +24,7 @@ import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IDynamicService;
+import net.ussoft.archive.util.ArchiveUtil;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.apache.commons.lang.StringUtils;
@@ -75,15 +76,30 @@ public class DynamicService implements IDynamicService {
 			return null;
 		}
 		
-		StringBuffer sb = new StringBuffer();
-		sb.append("select * from ");
-		sb.append(tables.get(0).getTablename());
-		sb.append(" where ");
-		sb.append(" treeid=? and status = 0");
+		//获取字段
+		//获取字段
+		values.clear();
+		values.add(tables.get(0).getId());
+		List<Sys_templetfield> fields = templetfieldDao.search("select * from sys_templetfield where tableid=? ", values);
 		
+		sql = ArchiveUtil.createSql(tables.get(0).getTablename(), "1995年 1996", fields);
+		
+		if (sql.contains("WHERE")) {
+			sql += " and treeid=? and status = 0";
+		}
+		else {
+			sql += " WHERE treeid=? and status = 0";
+		}
+		
+//		StringBuffer sb = new StringBuffer();
+//		sb.append("select * from ");
+//		sb.append(tables.get(0).getTablename());
+//		sb.append(" where ");
+//		sb.append(" treeid=? and status = 0");
+		System.out.println(sql);
 		values.clear();
 		values.add(tree.getId());
-		pageBean = dynamicDao.searchForMap(sb.toString(), values, pageBean);
+		pageBean = dynamicDao.searchForMap(sql, values, pageBean);
 		
 		return pageBean;
 	}
