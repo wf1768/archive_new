@@ -22,9 +22,10 @@ public class ArchiveUtil {
 		if (!searchTxt.equals("")) {
 			String[] txts = searchTxt.split("\\s+");
 //			String[] txts = searchTxt.split(" ");
-			sb.append(" (");
+			
 			for (String str : txts) {
 				str = str.trim();
+				sb.append(" (");
 				
 				for(int i=0;i<fields.size();i++){
 					if (fields.get(i).getSort() > 0 && fields.get(i).getIssearch() == 1 && !fields.get(i).getFieldtype().equals("INT")) {
@@ -35,17 +36,24 @@ public class ArchiveUtil {
 //						}
 					}
 				}
+				String tmp = sb.substring(0, sb.length()-4);
+				sb.setLength(0);
+				sb.append(tmp);
+				sb.append(")");
+				sb.append(" and ");
 			}
 			like = sb.toString();
-			like = like.substring(0, sb.length()-4);
-			like += ")";
+			like = like.substring(0, sb.length()-5);
+//			like += ")";
 //			sb.append(")");
 		}
 		
 		//得到字段
 		String fieldString = "";
 		for (Sys_templetfield field : fields) {
-			fieldString += field.getEnglishname() + ",";
+			if (field.getSort() < 0 || field.getIsgridshow() == 1 ) {
+				fieldString += field.getEnglishname() + ",";
+			}
 		}
 		fieldString = fieldString.substring(0, fieldString.length()-1);
 		

@@ -12,6 +12,11 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.fixHeader.js"></script>
 
+<script type="text/javascript">
+function callback() {
+}
+</script>
+
 <title>${sysname }</title>
 <!--[if IE 6]>
 <script src="${pageContext.request.contextPath}/js/DD_belatedPNG.js"></script>

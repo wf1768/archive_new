@@ -110,8 +110,8 @@ public class PageBean<T> implements Serializable {
 	}
 
 	public void setPageSize(int pageSize) {
-		if (pageSize > 100)
-			this.pageSize = 100;
+		if (pageSize > 500)
+			this.pageSize = 500;
 		else
 			this.pageSize = pageSize;
 	}

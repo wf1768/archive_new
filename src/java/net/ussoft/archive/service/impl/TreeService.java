@@ -238,33 +238,6 @@ public class TreeService implements ITreeService {
 		List<Object> values = new ArrayList<Object>();
 		String sql = "";
 		
-//		//实体
-//		Sys_templet tmpTemplet = getByid(idsStrings[i]);
-//		
-//		Sys_templet templet = new Sys_templet();
-//		templet.setId(idsStrings[i]);
-//		templet.setParentid(targetid);
-//		
-//		//查sort最大值＋1赋予新sort
-//		
-//		sql = "select max(sort) from sys_templet where parentid=?";
-//		values.clear();
-//		values.add(targetid);
-//		Long lo = templetDao.getLong(sql, values);
-//		
-//		templet.setSort(lo.intValue()+1);
-//		
-//		//处理tree相同的parentid和sort
-//		Sys_tree tree = new Sys_tree();
-//		tree.setTempletid(templet.getId());
-//		if (tmpTemplet.getTemplettype().equals("T")) {
-//			tree.setTreetype("T");
-//		}
-//		else {
-//			tree.setTreetype("F");
-//		}
-//		tree = treeDao.searchOne(tree);
-		
 		//要移动的节点
 		Sys_tree tree = treeDao.get(id);
 		//移动到目标节点
@@ -276,18 +249,6 @@ public class TreeService implements ITreeService {
 		
 		Sys_tree tmp = new Sys_tree();
 		tmp.setId(tree.getId());
-//		//获取tree的parentid
-//		values.clear();
-//		values.add(targetid);
-//		List<Sys_tree> parentTrees = treeDao.search("select * from sys_tree where templetid=?", values);
-//		
-//		if (null != parentTrees && parentTrees.size() > 0) {
-//			tmp.setParentid(parentTrees.get(0).getId());
-//		}
-//		else {
-//			tmp.setParentid("0");
-//		}
-		
 		tmp.setParentid(targetid);
 		
 		//查sort最大值＋1赋予新字段sort
@@ -356,9 +317,36 @@ public class TreeService implements ITreeService {
 		}
 		
 		//根据tableid，获取字段 templetfield的list
-		String sql = "select * from sys_templetfield where tableid=? order by sort";
+		String sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM' and sort != -1 order by sort";
 		List<Object> values = new ArrayList<Object>();
 		values.add(table.getId());
+		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
+		return templetfields;
+	}
+	
+	@Override
+	public List<Sys_templetfield> geTempletfields(String treeid,
+			String tabletype,String accountid) {
+		
+		//获取tree对象，来获取templetid
+		Sys_tree tree = treeDao.get(treeid);
+		String templetid = tree.getTempletid();
+		
+		//根据templetid 和 tabletype 来或者tableid
+		Sys_table table = new Sys_table();
+		table.setTempletid(templetid);
+		table.setTabletype(tabletype);
+		table = tableDao.searchOne(table);
+		
+		if (null == table) {
+			return null;
+		}
+		
+		//根据tableid，获取字段 templetfield的list
+		String sql = "select * from sys_templetfield where tableid=? and accountid=? and sort != -1 order by sort";
+		List<Object> values = new ArrayList<Object>();
+		values.add(table.getId());
+		values.add(accountid);
 		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
 		return templetfields;
 	}

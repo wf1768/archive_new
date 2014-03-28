@@ -45,6 +45,21 @@
 		
 	});
 	
+	function callback() {
+		var n = $(".scrollTable").height()-$(".aa").height();
+		$('.data_table').fixHeader({
+			height : n
+		});
+		
+		/* $('#checkall').click(function(){
+		    $('input[name="checkbox"]').attr("checked",this.checked);
+		});
+		
+		$('input[type="checkbox"]').removeAttr("checked");
+		
+		$('.shiftCheckbox').shiftcheckbox(); */
+	}
+	
 	function addField(){
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var nodes = treeObj.getSelectedNodes();
@@ -198,7 +213,7 @@
 	        dataType : 'text',
 	        success : function(data) {
 	            if (data == "success") {
-	            	
+	            	window.location.reload(true);
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!");
 	            }
@@ -235,7 +250,7 @@
 		</dl>
 	</div>
 	<div id="bodyer_right" >
-		<div class="top_dd" style="margin-bottom: 10px">
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
 			<div class="dqwz_l">
 				<c:choose>
 					<c:when test="${m=='c' }">当前位置：系统配置－档案模版维护</c:when>
@@ -268,9 +283,10 @@
 					<td>默认值</td>
 					<!-- <td>必著</td>
 					<td>唯一</td> -->
-					<td>检索</td>
-					<td>列表</td>
-					<td>顺带</td>
+					<td title="字段将作为智能检索、高级检索的检索项">检索</td>
+					<td title="字段将在档案数据列表里出现">列表</td>
+					<td title="增加档案时，作为档案著录项">编辑</td>
+					<!-- <td>顺带</td> -->
 					<td>数据排序</td>
 					<td>代码项</td>
 					<td>字段排序</td>
@@ -338,6 +354,19 @@
 						</td>
 						<td>
 							<c:choose>
+								<c:when test="${item.isedit==1 }">
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
+								</c:when>
+								<c:when test="${item.isedit==0 }">
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',1)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
+								</c:when>
+								<c:otherwise>
+									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',1)">未知</a>
+								</c:otherwise>
+							</c:choose>
+						</td>
+						<%-- <td>
+							<c:choose>
 								<c:when test="${item.iscopy==1 }">
 									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
 								</c:when>
@@ -348,7 +377,7 @@
 									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',1)">未知</a>
 								</c:otherwise>
 							</c:choose>
-						</td>
+						</td> --%>
 						<td>
 							<c:choose>
 								<c:when test="${item.orderby=='ASC' }">
@@ -356,6 +385,9 @@
 								</c:when>
 								<c:when test="${item.orderby=='DESC' }">
 									倒序排序
+								</c:when>
+								<c:when test="${item.orderby=='GBK' }">
+									中文排序
 								</c:when>
 							</c:choose>
 						</td>
@@ -400,8 +432,8 @@
 				<table class=" " aline="left" width="100%" 
 					 border=0 cellspacing="0" cellpadding="0" >
 					<tr class="table-botton" id="fanye" >
-						<td colspan="14"><p>当前第 1 页，共 79 页，每页 30 行，共 2349 行</p></td>
-						<td colspan="14" class="fenye" >上一页123456...777879下一页</td>
+						<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(templetfields) } 行</p></td>
+						<td colspan="14" class="fenye" ></td>
 					</tr>
 				</table>
 			</div>

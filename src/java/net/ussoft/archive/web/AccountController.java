@@ -34,8 +34,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 @Controller
 @RequestMapping(value="account")
@@ -315,7 +313,7 @@ public class AccountController extends BaseConstroller {
 		}
 		account.setId(UUID.randomUUID().toString());
 		//生成默认密码md5
-		HashMap<String, Object> configMap = getConfig();
+		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		String pass = configMap.get("PASSWORD").toString();
 		if (pass != null && !pass.equals("")) {
 			pass = MD5.encode(pass);
@@ -437,7 +435,7 @@ public class AccountController extends BaseConstroller {
 			treeJson = JSON.toJSONString(trees);
 		}
 		treeJson = JSON.toJSONString(trees);
-		treeJson = treeService.createTreeJson(treeJson, getProjectPath());
+		treeJson = treeService.createTreeJson(treeJson, getProjectBasePath());
 		
 //		//通过json对象，插入isparent
 //		JSONArray jsonArray = JSON.parseArray(treeString);

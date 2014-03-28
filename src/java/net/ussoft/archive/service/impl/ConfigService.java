@@ -2,6 +2,7 @@ package net.ussoft.archive.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -29,6 +30,13 @@ public class ConfigService implements IConfigService {
 	@Override
 	public Sys_config selectById(String id) {
 		return configDao.get(id);
+	}
+	
+	@Override
+	public List<Sys_config> list(String accountid) {
+		Sys_config config = new Sys_config();
+		config.setAccountid(accountid);
+		return configDao.search(config);
 	}
 
 	@Override
@@ -75,6 +83,70 @@ public class ConfigService implements IConfigService {
 		accountTreeDao.update(sql, values);
 		
 		return codeDao.del(id);
+	}
+
+	@Transactional("txManager")
+	@Override
+	public Sys_config insert(Sys_config config) {
+		if (null == config) {
+			return null;
+		}
+		return configDao.save(config);
+	}
+
+	@Transactional("txManager")
+	@Override
+	public int delete(String id) {
+		return configDao.del(id);
+	}
+
+	@Transactional("txManager")
+	@Override
+	public int deleteByWhere(String where) {
+		
+		String sql = "delete from sys_config ";
+		if (null != where && !where.equals("")) {
+			sql += "where " + where;
+		}
+		else {
+			return 0;
+		}
+		List<Object> values = new ArrayList<Object>();
+		return configDao.del(sql, values);
+		
+	}
+
+	@Transactional("txManager")
+	@Override
+	public List<Sys_config> getAccountConfig(String accountid) {
+		
+		Sys_config config = new Sys_config();
+		config.setAccountid(accountid);
+		List<Sys_config> configs = configDao.search(config);
+		
+		if (null == configs || configs.size() == 0) {
+			//创建帐户自己的配置文件
+			Sys_config config1 = new Sys_config();
+			config.setConfigkey("PAGE");
+			config.setAccountid("SYSTEM");
+			config = selectByWhere(config);
+			config.setId(UUID.randomUUID().toString());
+			config.setAccountid(accountid);
+			insert(config);
+			
+			//创建字段截取字数config
+			Sys_config config2 = new Sys_config();
+			config2.setId(UUID.randomUUID().toString());
+			config2.setAccountid(accountid);
+			config2.setConfigkey("SUBSTRING");
+			config2.setConfigmemo("列表显示截取后文字数");
+			config2.setConfigname("截取文字显示");
+			config2.setConfigvalue("8");
+			insert(config2);
+			configs = configDao.search(config);
+		}
+		return configs;
+		
 	}
 
 }

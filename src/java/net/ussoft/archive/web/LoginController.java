@@ -42,7 +42,7 @@ public class LoginController extends BaseConstroller {
 	
 	@RequestMapping(value="/login")
 	public String login (ModelMap modelMap) {
-		HashMap<String, Object> configMap = getConfig();
+		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		modelMap.put("sysname", configMap.get("SYSNAME"));
 		return "login";
 	}
@@ -51,7 +51,7 @@ public class LoginController extends BaseConstroller {
 	public ModelAndView onLogin(Sys_account account,String kaptchafield,HttpServletRequest request,ModelMap modelMap) {
 		
 		log.debug("进入登录。。");
-		HashMap<String, Object> configMap = getConfig();
+		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		modelMap.put("sysname", configMap.get("SYSNAME"));
 		
 		//判断验证码
@@ -110,7 +110,7 @@ public class LoginController extends BaseConstroller {
 	public String logout(HttpServletRequest request,ModelMap modelMap) {
 		request.getSession().removeAttribute(Constants.user_in_session);
 		request.getSession().invalidate();
-		HashMap<String, Object> configMap = getConfig();
+		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		modelMap.put("sysname", configMap.get("SYSNAME"));
 		return "login";
 	}

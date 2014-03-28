@@ -44,6 +44,18 @@ public class BaseConstroller {
 	@Autowired  
 	private  HttpServletRequest request; 
 	
+	//这样获取response 不行，以后再议
+//	@Resource
+//	private HttpServletResponse response;
+	
+//	public PrintWriter getAjaxWriter() throws IOException {
+//		response.setContentType("text/xml;charset=UTF-8");
+//		response.setCharacterEncoding("UTF-8");
+//		PrintWriter out = response.getWriter();
+//		
+//		return out;
+//	}
+	
 	/**
 	 * 获取session里的帐户实体类
 	 * @return
@@ -56,8 +68,8 @@ public class BaseConstroller {
 	/**
 	 * 获取系统配置表（sys_config）内容，形成map类型。供子类
 	 */
-	public HashMap<String, Object> getConfig() {
-		List<Sys_config> configList = configService.list();
+	public HashMap<String, Object> getConfig(String accountid) {
+		List<Sys_config> configList = configService.list(accountid);
 		
 		HashMap<String, Object> configMap = new HashMap<String, Object>();
 		for (Sys_config config : configList) {
@@ -80,9 +92,8 @@ public class BaseConstroller {
 		List<Sys_function> functions = getFunctions(roleid);
 		modelMap.put("functions", functions);
 		
-		HashMap<String, Object> configMap = getConfig();
+		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		modelMap.put("sysname", configMap.get("SYSNAME"));
-		
 		
 		//设置哪个功能为焦点功能
 		modelMap.put("focus_first", focus_first);
@@ -130,7 +141,19 @@ public class BaseConstroller {
 		return roleService.searchFunctions(roleid);
 	}
 	
+	/**
+	 * 获取项目根路径  例如 /archive 
+	 * @return
+	 */
 	public String getProjectPath() {
+		return request.getContextPath();
+	}
+	
+	/**
+	 * 获取项目全路径  例如 http://localhost:8080/archive 
+	 * @return
+	 */
+	public String getProjectBasePath() {
 		String path = request.getContextPath();
     	String basePath = request.getScheme() + "://"
     			+ request.getServerName() + ":" + request.getServerPort()

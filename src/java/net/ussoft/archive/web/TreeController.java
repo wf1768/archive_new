@@ -48,7 +48,7 @@ public class TreeController extends BaseConstroller {
 		List<Sys_tree> trees = treeService.list(where, values, order);
 		String resultsString = JSON.toJSONString(trees);
 		
-		String basePath = getProjectPath();
+		String basePath = getProjectBasePath();
 		String jsonString = treeService.createTreeJson(resultsString, basePath);
     	
 		

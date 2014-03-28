@@ -30,7 +30,7 @@ body{ height:100%; margin:0; font-size:12px; font-family:"微软雅黑"; backgro
 
 /*头部样式*/
 
-#header{width: 100%; margin: 0 auto;  height:80px;  top: 0;  }
+#header{width: 100%; margin: 0 auto; min-width: 1024px; height:80px;  top: 0;  }
 #header1{ width:100%px; height:39px; background:url(../images/hbg_02.jpg); padding:8px 25px 0 30px; border-bottom:5px solid #09408b}
 .logo{  height:35px; float:left;}
 .logo span{float:left; font-size:16px; color:#0c347d;  font-weight:bold; line-height:35px;}
@@ -55,7 +55,7 @@ body{ height:100%; margin:0; font-size:12px; font-family:"微软雅黑"; backgro
 #top_nav ul li .nowcolor{ color:#3FF;}
 
 /*内容部分样式*/
-#bodyer{width: 100%; margin: 0 auto;  height: 100%; }
+#bodyer{width: 100%; margin: 0 auto; min-width: 1024px; height: 100%; }
 #bodyer_left{ width:209px; background:#EEE; height:100%; float:left; overflow-x:auto; border-right:1px solid  #CCC;}
 .blue{background:url(../images/1_09.gif); color:#FFF; width:209px; height:30px;display:block; border-bottom:1px solid #E6E6E6; line-height:30px; color:#333;}
 .tubiao{ float:left; padding-left:25px; padding-top:5px;}

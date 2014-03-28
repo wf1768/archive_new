@@ -1,9 +1,18 @@
 package net.ussoft.archive.service;
 
+import java.util.List;
+
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface ITempletfieldService {
+	
+	/**
+	 * 根据帐户id，获取帐户自己的字段列表，如果没有，就参照系统的，来创建当前档案类型，来返回list
+	 * @param accountid
+	 * @return
+	 */
+	public List<Sys_templetfield> getAccountTempletfields(String templetid,String tabletype,String accountid);
 	
 	/**
 	 * 根据id获取对象

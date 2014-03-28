@@ -30,7 +30,7 @@ public class TableService implements ITableService {
 	@Override
 	public List<Sys_templetfield> geTempletfields(String tableid) {
 		
-		String sql = "select * from sys_templetfield where tableid=? and sort != -1 order by sort";
+		String sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM' and sort != -1 order by sort";
 		List<Object> values=new ArrayList<Object>();
 		
 		//获取字段

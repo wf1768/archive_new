@@ -8,6 +8,10 @@
 <link type="text/css" href="${pageContext.request.contextPath}/css/common.css" rel="stylesheet" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/public.js"></script>
+<script type="text/javascript">
+function callback() {
+}
+</script>
 <title>${sysname }</title>
 <!--[if IE 6]>
 <script src="${pageContext.request.contextPath}/js/DD_belatedPNG.js"></script>

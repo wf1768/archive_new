@@ -153,16 +153,18 @@
 				<td class="caozuo" colspan="2" align="center">
 					<button type="button" onclick="add('${field.id}')">保存</button>
 					<button type="button" onclick="closepage()">关闭</button>
-					<button type="button" onclick="copy('${field.id}')">复制</button>
-					${sessionScope.CURRENT_CODE_COPY_SESSION}
-					<c:choose>
-						<c:when test="${sessionScope.CURRENT_CODE_COPY_SESSION==null}">
-							<button type="button" disabled="disabled" onclick="paste('${field.id}')">粘贴</button>
-						</c:when>
-						<c:otherwise>
-							<button type="button"  onclick="paste('${field.id}')">粘贴</button>
-						</c:otherwise>
-					</c:choose>
+					<c:if test="${field.accountid=='SYSTEM' }">
+						<button type="button" onclick="copy('${field.id}')">复制</button>
+						<c:choose>
+							<c:when test="${sessionScope.CURRENT_CODE_COPY_SESSION==null}">
+								<button type="button" disabled="disabled" onclick="paste('${field.id}')">粘贴</button>
+							</c:when>
+							<c:otherwise>
+								<button type="button"  onclick="paste('${field.id}')">粘贴</button>
+							</c:otherwise>
+						</c:choose>
+					</c:if>
+					
 				</td>
 			</tr>
 		</tbody>

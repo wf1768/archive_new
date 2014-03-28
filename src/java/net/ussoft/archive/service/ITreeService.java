@@ -75,12 +75,21 @@ public interface ITreeService {
 	public Sys_templet getTemplet(String treeid);
 	
 	/**
-	 * 根据treeid，获取tree节点对应的档案模版的字段list
+	 * 根据treeid，获取tree节点对应的档案模版的字段list  默认accountid为SYSTEM
 	 * @param treeid		树id
 	 * @param tabletype		表类型（01 or 02）
 	 * @return
 	 */
 	public List<Sys_templetfield> geTempletfields(String treeid,String tabletype);
+	
+	/**
+	 * 根据treeid，获取tree节点对应的档案模版的字段list
+	 * @param treeid		树id
+	 * @param tabletype		表类型（01 or 02）
+	 * @param accountid		字段所属帐户id
+	 * @return
+	 */
+	public List<Sys_templetfield> geTempletfields(String treeid,String tabletype,String accountid);
 	
 	/**
 	 * 根据传入的json，增加根节点和图标

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
@@ -16,7 +15,6 @@ import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +31,8 @@ public class TempletController extends BaseConstroller {
 	private ITempletService templetService;
 	@Resource
 	private ITableService tableService;
-	@Autowired
-	private  HttpServletRequest request;
+//	@Autowired
+//	private  HttpServletRequest request;
 	
 	@RequestMapping(value="/list",method=RequestMethod.GET)
 	public ModelAndView list(String selectid,ModelMap modelMap) {
@@ -76,11 +74,12 @@ public class TempletController extends BaseConstroller {
 	
 	private List<HashMap<String,Object>> createTree() {
 		
-		String path = request.getContextPath();
-    	String basePath = request.getScheme() + "://"
-    			+ request.getServerName() + ":" + request.getServerPort()
-    			+ path + "/";
-    	
+//		String path = request.getContextPath();
+//    	String basePath = request.getScheme() + "://"
+//    			+ request.getServerName() + ":" + request.getServerPort()
+//    			+ path + "/";
+
+		String basePath = getProjectBasePath();
 		String where = "";
 		String order = " order by sort asc";
 		

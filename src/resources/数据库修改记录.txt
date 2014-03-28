@@ -70,3 +70,10 @@
 
 16、在表sys_templet 增加parentid（varchar 40） 档案库也可以增加档案夹，需要parentid画树
 
+
+17、在表sys_config表增加accountid，每个帐户可以自己设定配置（每页显示行数、列表字符截取数）.accountid＝“SYSTEM”表示系统配置
+
+18、表sys_templetfield表增加accountid，每个帐户可以自己设定字段（仅限字段的排序、gird显示）.accountid＝“SYSTEM”表示系统配置字段
+
+
+

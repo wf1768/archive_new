@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 	
-    <div id="top_nav">
+    <%-- <div id="top_nav">
         <img src="${pageContext.request.contextPath}/images/1_03.gif" class="fl mlt30" />
         <ul>
         	<c:forEach items="${functions}" varStatus="i" var="item">
@@ -12,4 +12,4 @@
         </ul>
         <img src="${pageContext.request.contextPath}/images/1_03.gif" class="fl mlt15" />
     </div>
-    <div style="clear:both"></div>
+    <div style="clear:both"></div> --%>

@@ -47,8 +47,8 @@ public class TempletfieldController extends BaseConstroller {
 	@Resource
 	private ICodeService codeService;
 	
-	@Autowired
-	private  HttpServletRequest request; 
+//	@Autowired
+//	private  HttpServletRequest request; 
 	
 	/**
 	 * 打开字段列表页面
@@ -127,7 +127,6 @@ public class TempletfieldController extends BaseConstroller {
 		}
 		
 		String resultsString = JSON.toJSONString(result);
-		System.out.println(resultsString);
 		modelMap.put("result", resultsString);
 		modelMap.put("m", m);
 		modelMap.put("selectid", selectid);
@@ -143,13 +142,12 @@ public class TempletfieldController extends BaseConstroller {
 	
 	private List<HashMap<String,Object>> createList(String parentid,List<Sys_templet> templets,List<Sys_table> tables) {
 		
-		String path = request.getContextPath();
-    	String basePath = request.getScheme() + "://"
-    			+ request.getServerName() + ":" + request.getServerPort()
-    			+ path + "/";
+//		String path = request.getContextPath();
+//    	String basePath = request.getScheme() + "://"
+//    			+ request.getServerName() + ":" + request.getServerPort()
+//    			+ path + "/";
+		String path = getProjectPath();
     	
-    	System.out.println("field path:" + path + "...basepath:" + basePath);
-		
 		List<HashMap<String,Object>> result = new ArrayList<HashMap<String,Object>>();
 		
 		for (Sys_templet templet : templets) {
@@ -303,8 +301,9 @@ public class TempletfieldController extends BaseConstroller {
 	}
 	/**
 	 * 设置排序
-	 * @param id
-	 * @param type
+	 * @param id			要修改的字段id
+	 * @param type			up or down  
+	 * @param accountid		帐户id，或 “SYSTEM”
 	 * @param response
 	 * @throws IOException
 	 */
@@ -321,6 +320,7 @@ public class TempletfieldController extends BaseConstroller {
 			out.print(result);
 			return;
 		}
+		
 		Boolean b = templetfieldService.sort(id, type);
 		if (!b ) {
 			result = "failure";

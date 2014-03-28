@@ -6,9 +6,7 @@ import java.util.List;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_account_tree;
-import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_tree;
-import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface IAccountService {
 	
@@ -150,5 +148,6 @@ public interface IAccountService {
 	 * @return
 	 */
 	public Boolean saveDocAuth(Sys_account_tree tmp);
+	
 	
 }

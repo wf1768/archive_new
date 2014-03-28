@@ -2,6 +2,7 @@ package net.ussoft.archive.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -35,6 +36,9 @@ public class TempletfieldService implements ITempletfieldService {
 	@Resource
 	private CodeDao codeDao;
 
+	/**
+	 * 暂时没有用。做接口的调用如果没有用到就删除
+	 */
 	@Override
 	public ResultInfo getField(String treeid) {
 		ResultInfo info = new ResultInfo();
@@ -67,7 +71,7 @@ public class TempletfieldService implements ITempletfieldService {
 		//获取字段
 		values.clear();
 		values.add(tableList.get(0).getId());
-		List<Sys_templetfield> fieldList = templetfieldDao.search("select * from sys_templetfield where tableid=? and sort != -1", values);
+		List<Sys_templetfield> fieldList = templetfieldDao.search("select * from sys_templetfield where tableid=? and sort <> -1", values);
 		
 		info.setSuccess(true);
 		info.setMsg("获取字段成功。");
@@ -134,7 +138,8 @@ public class TempletfieldService implements ITempletfieldService {
 		}
 		
 		sb.append(";");
-		tableDao.add(sb.toString(), null);
+//		tableDao.add(sb.toString(), null);
+		tableDao.execute(sb.toString());
 		
 //		select max(sort) from sys_templetfield where tableid='1' 
 //		alter table sys_templet add sort int(11) default 0;
@@ -160,10 +165,11 @@ public class TempletfieldService implements ITempletfieldService {
 	public String insert(Sys_templetfield templetfield) {
 		String result = "success";
 		//判断字段英文名是否存在
-		String sql = "select * from  sys_templetfield where englishname=? and tableid=?";
+		String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
 		List<Object> values = new ArrayList<Object>();
 		values.add(templetfield.getEnglishname());
 		values.add(templetfield.getTableid());
+		values.add("SYSTEM");
 		int num = templetfieldDao.getCount(sql, values);
 		
 		if (num >0) {
@@ -174,11 +180,28 @@ public class TempletfieldService implements ITempletfieldService {
 		if (null == templetfield.getTableid() || templetfield.getTableid().equals("")) {
 			return "failure";
 		}
+		//插入的是系统字段
+		templetfield.setAccountid("SYSTEM");
 		
 		Boolean b = saveField(templetfield);
 		
 		if (!b) {
 			return "failure";
+		}
+		
+		//成功插入系统字段后，处理帐户字段
+		Sys_table table = tableDao.get(templetfield.getTableid());
+		//获取多少个帐户对当前表字段有帐户字段
+		sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
+		values.clear();
+		values.add(table.getId());
+//		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
+		List<Map<String, Object>> templetfields = templetfieldDao.searchForMap(sql, values);
+		//为每个帐户插入新字段
+		for (Map<String, Object> map : templetfields) {
+			templetfield.setId(UUID.randomUUID().toString());
+			templetfield.setAccountid(map.get("accountid").toString());
+			templetfieldDao.save(templetfield);
 		}
 		
 		return result;
@@ -201,58 +224,77 @@ public class TempletfieldService implements ITempletfieldService {
 		if (null == tmp || null == table) {
 			return 0;
 		}
-		//如果字段大小有了变化，更新实体表
-		if (tmp.getFieldsize() != templetfield.getFieldsize()) {
-//			alter table sys_account modify ACCOUNTCODE varchar(50) ;
-			StringBuffer sb = new StringBuffer();
-			sb.append("alter table ");
-			sb.append(table.getTablename());
-			sb.append(" modify ");
-			sb.append(tmp.getEnglishname());
-			sb.append(" ").append(tmp.getFieldtype());
-			sb.append("(").append(templetfield.getFieldsize()).append(");");
-			tableDao.add(sb.toString(), null);
-		}
-		//如果默认值有了变化，更新实体表
-		Boolean defaultvalueBoolean = false;
-		if (tmp.getFieldtype().equals("VARCHAR")) {
+		//如果是修改的系统字段，则更新实体表，帐户字段忽略
+		if (tmp.getAccountid().equals("SYSTEM")) {
+			//如果字段大小有了变化，更新实体表
+			if (tmp.getFieldsize() != templetfield.getFieldsize()) {
+//				alter table sys_account modify ACCOUNTCODE varchar(50) ;
+				StringBuffer sb = new StringBuffer();
+				sb.append("alter table ");
+				sb.append(table.getTablename());
+				sb.append(" modify ");
+				sb.append(tmp.getEnglishname());
+				sb.append(" ").append(tmp.getFieldtype());
+				sb.append("(").append(templetfield.getFieldsize()).append(");");
+				tableDao.add(sb.toString(), null);
+			}
+			
+			//如果默认值有了变化，更新实体表
+			Boolean defaultvalueBoolean = false;
 			if (!tmp.getDefaultvalue().equals(templetfield.getDefaultvalue())) {
 				defaultvalueBoolean = true;
 			}
-		}
-		else if (tmp.getFieldtype().equals("INT")) {
-			if (tmp.getDefaultvalue() != templetfield.getDefaultvalue()) {
-				defaultvalueBoolean = true;
+
+			if (defaultvalueBoolean) {
+//				alter table tablename alter column drop default; (若本身存在默认值，则先删除)
+//				alter table tablename alter column set default 't5';(若本身不存在则可以直接设定)
+				StringBuffer sb = new StringBuffer();
+				sb.append("alter table ");
+				sb.append(table.getTablename());
+				sb.append(" alter ");
+				sb.append(tmp.getEnglishname());
+				sb.append(" set default ");
+				if (tmp.getFieldtype().equals("VARCHAR")) {
+					sb.append("'").append(templetfield.getDefaultvalue()).append("'");
+				}
+				else if (tmp.getFieldtype().equals("DATE")) {
+					sb.append("'").append(templetfield.getDefaultvalue()).append("'");
+				}
+				else if (tmp.getFieldtype().equals("INT")) {
+					sb.append(templetfield.getDefaultvalue());
+				}
+				sb.append(";");
+				tableDao.add(sb.toString(), null);
 			}
-		}
-		else if (tmp.getFieldtype().equals("DATE")) {
-			if (!tmp.getDefaultvalue().equals(templetfield.getDefaultvalue())) {
-				defaultvalueBoolean = true;
+			
+			//要更新帐户字段,帐户字段仅更新帐户中文名、长度、默认值。 代码项在代码功能里修改。
+			//其他字段：检索、列表、数据排序、字段排序已交由帐户自己管理
+			
+			//获取除accountid＝“SYSTEM”（系统字段）外的当前表对应的accountid
+			String sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
+			List<Object> values = new ArrayList<Object>();
+			values.add(table.getId());
+			List<Map<String, Object>> accountids = templetfieldDao.searchForMap(sql, values);
+			//为每个帐户修改新字段
+			for (Map<String, Object> map : accountids) {
+				//获取帐户对应修改字段的对象
+				Sys_templetfield accountfield = new Sys_templetfield();
+				accountfield.setAccountid(map.get("accountid").toString());
+				accountfield.setTableid(table.getId());
+				accountfield.setEnglishname(tmp.getEnglishname());
+				accountfield = templetfieldDao.searchOne(accountfield);
+				
+				Sys_templetfield field = new Sys_templetfield();
+				field.setId(accountfield.getId());
+				field.setChinesename(templetfield.getChinesename());
+				field.setFieldsize(templetfield.getFieldsize());
+				field.setDefaultvalue(templetfield.getDefaultvalue());
+				templetfieldDao.update(field);
 			}
-		}
-		if (defaultvalueBoolean) {
-//			alter table tablename alter column drop default; (若本身存在默认值，则先删除)
-//			alter table tablename alter column set default 't5';(若本身不存在则可以直接设定)
-			StringBuffer sb = new StringBuffer();
-			sb.append("alter table ");
-			sb.append(table.getTablename());
-			sb.append(" alter ");
-			sb.append(tmp.getEnglishname());
-			sb.append(" set default ");
-			if (tmp.getFieldtype().equals("VARCHAR")) {
-				sb.append("'").append(templetfield.getDefaultvalue()).append("'");
-			}
-			else if (tmp.getFieldtype().equals("DATE")) {
-				sb.append(templetfield.getDefaultvalue());
-			}
-			else if (tmp.getFieldtype().equals("INT")) {
-				sb.append(templetfield.getDefaultvalue());
-			}
-			sb.append(";");
-			tableDao.add(sb.toString(), null);
 		}
 		
 		Sys_templetfield result = templetfieldDao.update(templetfield);
+		
 		if (null != result) {
 			return 1;
 		}
@@ -287,9 +329,34 @@ public class TempletfieldService implements ITempletfieldService {
 		List<Object> values = new ArrayList<Object>();
 		tableDao.del(sb.toString(), values);
 		
+		//删除帐户字段
+		String sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
+		values.clear();
+		values.add(table.getId());
+		List<Map<String, Object>> accountids = templetfieldDao.searchForMap(sql, values);
+		//为每个帐户删除字段
+		for (Map<String, Object> map : accountids) {
+			//获取要删除的帐户对应字段的对象
+			Sys_templetfield accountfield = new Sys_templetfield();
+			accountfield.setAccountid(map.get("accountid").toString());
+			accountfield.setTableid(table.getId());
+			accountfield.setEnglishname(templetfield.getEnglishname());
+			accountfield = templetfieldDao.searchOne(accountfield);
+			
+			//判断要删除的字段是否有代码
+			if (accountfield.getIscode() == 1) {
+				sql = "delete from sys_code where templetfieldid=?";
+				values.clear();
+				values.add(accountfield.getId());
+				codeDao.del(sql, values);
+			}
+			
+			templetfieldDao.del(accountfield.getId());
+		}
+		
 		//判断要删除的字段是否有代码
 		if (templetfield.getIscode() == 1) {
-			String sql = "delete from sys_code where templetfieldid=?";
+			sql = "delete from sys_code where templetfieldid=?";
 			values.clear();
 			values.add(templetfield.getId());
 			codeDao.del(sql, values);
@@ -324,7 +391,7 @@ public class TempletfieldService implements ITempletfieldService {
 //		select * from sys_templetfield where tableid='1' and sort < 2 order by sort desc limit 1
 		StringBuffer sb = new StringBuffer();
 		sb.append("select * from sys_templetfield where ");
-		sb.append("tableid=?");
+		sb.append("tableid=? and accountid=?");
 		if (type.equals("up")) {
 			sb.append(" and sort < ? ").append("order by sort desc limit 1");
 		}
@@ -334,6 +401,7 @@ public class TempletfieldService implements ITempletfieldService {
 		
 		List<Object> values = new ArrayList<Object>();
 		values.add(templetfield.getTableid());
+		values.add(templetfield.getAccountid());
 		values.add(templetfield.getSort());
 		
 		List<Sys_templetfield> tmpList = templetfieldDao.search(sb.toString(), values);
@@ -342,7 +410,6 @@ public class TempletfieldService implements ITempletfieldService {
 			return false;
 		}
 		Sys_templetfield tmp = tmpList.get(0);
-		
 		
 		//执行update  sort  交换sort值
 		Sys_templetfield result = new Sys_templetfield();
@@ -384,6 +451,9 @@ public class TempletfieldService implements ITempletfieldService {
 		else if (type.equals("isgridshow")) {
 			tmp.setIsgridshow(value);
 		}
+		else if (type.equals("isedit")) {
+			tmp.setIsedit(value);
+		}
 		else if (type.equals("iscopy")) {
 			tmp.setIscopy(value);
 		}
@@ -408,10 +478,11 @@ public class TempletfieldService implements ITempletfieldService {
 		}
 		
 		//判断字段英文名是否存在
-		String sql = "select * from  sys_templetfield where englishname=? and tableid=?";
+		String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
 		List<Object> values = new ArrayList<Object>();
 		values.add(field.getEnglishname());
 		values.add(tableid);
+		values.add("SYSTEM");
 		int num = templetfieldDao.getCount(sql, values);
 		
 		if (num >0) {
@@ -424,18 +495,36 @@ public class TempletfieldService implements ITempletfieldService {
 		targetField.setTableid(tableid);
 		//保存新字段
 		Boolean b = saveField(targetField);
-		
-		if (!b) {
-			return false;
-		}
-		
+		List<Sys_code> codes = new ArrayList<Sys_code>();
 		//插入新字段后，处理字段代码
 		if (field.getIscode() == 1) {
 			//获取原字段的代码
 			values.clear();
 			values.add(fieldid);
 			sql = "select * from sys_code where templetfieldid=? order by codeorder asc";
-			List<Sys_code> codes = codeDao.search(sql, values);
+			codes = codeDao.search(sql, values);
+			if (null != codes && codes.size() > 0) {
+				for (Sys_code code : codes) {
+					code.setId(UUID.randomUUID().toString());
+					code.setTempletfieldid(targetField.getId());
+					codeDao.save(code);
+				}
+			}
+		}
+				
+		
+		//成功插入系统字段后，处理帐户字段
+		Sys_table table = tableDao.get(tableid);
+		//获取多少个帐户对当前表字段有帐户字段
+		sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
+		values.clear();
+		values.add(table.getId());
+		List<Map<String, Object>> templetfields = templetfieldDao.searchForMap(sql, values);
+		//为每个帐户插入新字段
+		for (Map<String, Object> map : templetfields) {
+			targetField.setId(UUID.randomUUID().toString());
+			targetField.setAccountid(map.get("accountid").toString());
+			
 			if (null != codes && codes.size() > 0) {
 				for (Sys_code code : codes) {
 					code.setId(UUID.randomUUID().toString());
@@ -444,6 +533,11 @@ public class TempletfieldService implements ITempletfieldService {
 				}
 			}
 			
+			templetfieldDao.save(targetField);
+		}
+		
+		if (!b) {
+			return false;
 		}
 		return true;
 	}
@@ -620,6 +714,75 @@ public class TempletfieldService implements ITempletfieldService {
 		templetfieldDao.update(tmp);
 		
 		return true;
+	}
+
+	@Transactional("txManager")
+	@Override
+	public List<Sys_templetfield> getAccountTempletfields(String templetid,String tabletype,String accountid) {
+		
+		//根据templetid 和 tabletype 来或者tableid
+		Sys_table table = new Sys_table();
+		table.setTempletid(templetid);
+		table.setTabletype(tabletype);
+		table = tableDao.searchOne(table);
+		
+		if (null == table) {
+			return null;
+		}
+		
+		//根据tableid，获取字段 templetfield的list
+		String sql = "select * from sys_templetfield where tableid=? and accountid=? and sort <> -1 order by sort";
+		List<Object> values = new ArrayList<Object>();
+		values.add(table.getId());
+		values.add(accountid);
+		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
+		
+		//如果没有设置，就参照系统的，添加到帐户本身
+		if (null == templetfields || templetfields.size() == 0) {
+			sql= "select * from sys_templetfield where tableid=? and accountid=? order by sort";
+			values.clear();
+			values.add(table.getId());
+			values.add("SYSTEM");
+			templetfields = templetfieldDao.search(sql, values);
+			
+			//添加帐户自己的字段设置
+			if (null != templetfields && templetfields.size() > 0) {
+				for (Sys_templetfield templetfield : templetfields) {
+					String uuid = UUID.randomUUID().toString();
+					String sysFieldid = templetfield.getId();
+					
+					templetfield.setAccountid(accountid);
+					templetfield.setId(uuid);
+					
+					//判断字段是否有代码
+					if (templetfield.getIscode() == 1) {
+						//获取代码list，并赋予帐户字段相同的代码
+						sql = "select * from sys_code where templetfieldid=?";
+						values.clear();
+						values.add(sysFieldid);
+						List<Sys_code> codes = codeDao.search(sql, values);
+						
+						//将系统字段的代码，copy一份给帐户字段
+						for (Sys_code code : codes) {
+							code.setId(UUID.randomUUID().toString());
+							code.setTempletfieldid(uuid);
+							codeDao.save(code);
+						}
+					}
+					
+					templetfieldDao.save(templetfield);
+				}
+			}
+			
+			templetfields.clear();
+			//插入完毕后，再次读取
+			sql = "select * from sys_templetfield where tableid=? and accountid=? and sort <> -1 order by sort";
+			values.clear();
+			values.add(table.getId());
+			values.add(accountid);
+			templetfields = templetfieldDao.search(sql, values);
+		}
+		return templetfields;
 	}
 
 }

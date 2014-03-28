@@ -13,6 +13,7 @@ public class Sys_config {
 	private String configvalue;
 	private String configmemo;
 	private String configname;
+	private String accountid;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -45,6 +46,12 @@ public class Sys_config {
 	}
 	public void setConfigname(String configname) {
 		this.configname = configname;
+	}
+	public String getAccountid() {
+		return accountid;
+	}
+	public void setAccountid(String accountid) {
+		this.accountid = accountid;
 	}
 	
 }

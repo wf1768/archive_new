@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
+import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
 import net.ussoft.archive.service.ICodeService;
@@ -47,7 +48,7 @@ public class ConfigController extends BaseConstroller {
 		modelMap = super.getModelMap("SYSTEM","CONFIG");
 		
 		//获取config数据
-		List<Sys_config> configList = configService.list();
+		List<Sys_config> configList = configService.list("SYSTEM");
 		modelMap.put("configList", configList);
 		
 		return new ModelAndView("/view/system/config/list",modelMap);
@@ -93,6 +94,25 @@ public class ConfigController extends BaseConstroller {
 		modelMap.put("config", config);
 		modelMap.put("result", result);
 		return new ModelAndView("/view/system/config/edit",modelMap);
+	}
+	
+	@RequestMapping(value="/updateSetShow",method=RequestMethod.POST)
+	public void updateSetShow(Sys_config config,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "failure";
+		if (config == null ) {
+			out.print(result);
+			return;
+		}
+		int num = configService.update(config);
+		if (num > 0 ) {
+			result = "success";
+		}
+		out.print(result);
 	}
 	
 	/**

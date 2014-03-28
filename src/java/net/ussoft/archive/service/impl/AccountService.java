@@ -9,14 +9,19 @@ import javax.annotation.Resource;
 
 import net.ussoft.archive.dao.AccountDao;
 import net.ussoft.archive.dao.AccountTreeDao;
+import net.ussoft.archive.dao.CodeDao;
+import net.ussoft.archive.dao.ConfigDao;
 import net.ussoft.archive.dao.OrgDao;
 import net.ussoft.archive.dao.OrgownerDao;
 import net.ussoft.archive.dao.RoleDao;
+import net.ussoft.archive.dao.TableDao;
+import net.ussoft.archive.dao.TempletfieldDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_role;
+import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IAccountService;
 import net.ussoft.archive.util.CommonUtils;
@@ -42,6 +47,15 @@ public class AccountService implements IAccountService {
 	private OrgownerDao orgownerDao;
 	@Resource
 	private RoleDao roleDao;
+	@Resource
+	private TableDao tableDao;
+	@Resource
+	private ConfigDao configDao;
+	@Resource
+	private TempletfieldDao templetfieldDao;
+	@Resource
+	private CodeDao codeDao;
+	
 
 	/*
 	 * (non-Javadoc)
@@ -124,6 +138,29 @@ public class AccountService implements IAccountService {
 		//删除帐户作为管理者的，与组织机构的关联
 		sql = "delete from sys_orgowner where accountid=?";
 		orgownerDao.del(sql, values);
+		
+		//删除帐户私有配置
+		sql = "delete from sys_config where accountid=?";
+		configDao.del(sql, values);
+		
+		//删除帐户私有字段
+		//首先获取字段list，删除字段代码
+		sql = "select * from sys_templetfield where iscode=1 and accountid=?";
+		List<Sys_templetfield> fields = templetfieldDao.search(sql, values);
+		
+		if (null != fields && fields.size() > 0) {
+			for (Sys_templetfield field : fields) {
+				sql = "delete from sys_code where templetfieldid=?";
+				values.clear();
+				values.add(field.getId());
+				codeDao.del(sql, values);
+			}
+		}
+		
+		sql = "delete from sys_sys_templetfield where accountid=?";
+		values.clear();
+		values.add(id);
+		templetfieldDao.del(sql, values);
 		
 		return accountDao.del(id);
 	}
@@ -588,5 +625,5 @@ public class AccountService implements IAccountService {
 		}
 		return true;
 	}
-
+	
 }

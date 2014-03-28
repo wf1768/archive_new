@@ -125,5 +125,13 @@ update sys_tree r ,sys_templet t set r.sort = t.sort where r.templetid = t.id  a
 alter table sys_templet add parentid varchar(40);
 
 
+--17 在表sys_config表增加accountid，每个帐户可以自己设定配置（每页显示行数、列表字符截取数）.accountid＝“SYSTEM”表示系统配置
+alter table sys_config add accountid varchar(40);
+update sys_config set accountid = 'SYSTEM'
+
+--18 表sys_templetfield表增加accountid，每个帐户可以自己设定字段（仅限字段的排序、gird显示）.accountid＝“SYSTEM”表示系统配置字段
+alter table sys_templetfield  add accountid varchar(40);
+update sys_templetfield set accountid = 'SYSTEM'
+
 
 

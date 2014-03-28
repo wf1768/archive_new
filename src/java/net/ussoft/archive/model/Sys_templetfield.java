@@ -27,6 +27,7 @@ public class Sys_templetfield {
 	private String tableid;
 	private String orderby;
 	private Integer iscopy;
+	private String accountid;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -144,6 +145,12 @@ public class Sys_templetfield {
 	}
 	public void setIscopy(Integer iscopy) {
 		this.iscopy = iscopy;
+	}
+	public String getAccountid() {
+		return accountid;
+	}
+	public void setAccountid(String accountid) {
+		this.accountid = accountid;
 	}
 	
 	

@@ -68,6 +68,10 @@
 		if ($("#isgridshow").is(":checked")) {
 			isgridshow = 1;
 		}
+		var isedit = 0;
+		if ($("#isedit").is(":checked")) {
+			isedit = 1;
+		}
 		/* var iscopy = 0;
 		if ($("#iscopy").is(":checked")) {
 			iscopy = 1;
@@ -90,6 +94,7 @@
 		d.isunique = 0;
 		d.issearch = issearch;
 		d.isgridshow = isgridshow;
+		d.isedit = isedit;
 		//d.iscopy = iscopy;
 		d.orderby = orderby;
 		d.ispk = 0;
@@ -171,6 +176,10 @@
 					<td class="txt1">列表显示 :</td>
 					<td><input type="checkbox" id="isgridshow" name="isgridshow" ></td>
 				</tr>
+				<tr class="tr1">
+					<td class="txt1">著录编辑 :</td>
+					<td><input type="checkbox" id="isedit" name="isedit" ></td>
+				</tr>
 				<!-- <tr class="tr1">
 					<td class="txt1">顺带 :</td>
 					<td><input type="checkbox" id="iscopy" name="iscopy">顺带最近一次录入的值</td>
@@ -182,6 +191,7 @@
 							<option value="">可选择</option>
 							<option value="ASC">正序排序</option>
 							<option value="DESC">倒序排序</option>
+							<option value="GBK">中文排序</option>
 						</select>
 					</td>
 				</tr>
