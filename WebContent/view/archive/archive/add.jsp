@@ -7,12 +7,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
-<link rel="stylesheet" href="${pageContext.request.contextPath}/js/easyvalidator/css/validate.css" type="text/css" />
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.7.1.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/Pinyin.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/easy_validator.pack.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/jquery.bgiframe.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/lhgcalendar/lhgcalendar.min.js"></script>
 <base target="_self">
 
@@ -26,13 +22,16 @@
 	})
 	
 	function save() {
-		
+		//档案数据对象 
 		var d = {};
 		var fieldArray = ${fieldjson};
 		
 		for (var i=0;i<fieldArray.length;i++) {
 			var val = $("#"+fieldArray[i].englishname).val();
 			if (fieldArray[i].fieldtype == 'INT') {
+				if (val == "") {
+					val = 0;
+				}
 				if(isNaN(val)){
 					val = 0;
 				}
@@ -40,18 +39,26 @@
 			d[fieldArray[i].englishname] = val;
 		}
 		
-		d["treeid"] = $("#treeid").val();
+		/* d["treeid"] = $("#treeid").val();
 		d["status"] = $("#status").val();
 		d["tabletype"] = $("#tabletype").val();
-		d["parentid"] = $("#parentid").val();
+		d["parentid"] = $("#parentid").val(); */
 		
-		var myData = JSON.stringify(d); 
+		//系统字段对象
+		var s = {};
+		s.treeid = $("#treeid").val();
+		s.status = $("#status").val();
+		s.tabletype = $("#tabletype").val();
+		s.parentid = $("#parentid").val();
+		
+		var data = JSON.stringify(d);
+		var sys = JSON.stringify(s);
 		
 	    $.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/archive/save.do",
 	        type : 'post',
-	        data:{'str':myData},
+	        data:{'data':data,'sys':sys},
 	        dataType : 'text',
 	        success : function(data) {
 	        	alert(data);
@@ -103,7 +110,7 @@
 									<td>
 										<select id="${item.englishname }" name="${item.englishname }" style="width: 200px">
 											<c:forEach  items="${codeMap[item.id]}" var="item">
-												<option value="${item.id }">${item.columndata }</option>
+												<option value="${item.columndata }">${item.columndata }</option>
 										    </c:forEach>
 										</select>
 									</td>

@@ -38,11 +38,13 @@ $(function() {
 		// $("#fanye").width($("#shuju").height());
 		$("#bodyer_right").width(w);
 		$(".data_table").width(rw);
+		$(".xiangce").width(rw);
 		$(".aa").width(rw);
 		//$(".data_table").height(200);
 		// $("#cssz_table").width(rw);
 		// $("#tb2").height($("#bodyer_right").height() - 55);
 		$(".scrollTable").height($("#bodyer_right").height() - 70);
+		$(".xiangce").height($(".scrollTable").height() - 10);
 		// $("#not").height($("#table_main").height()-60);
 		// $("#ddiv").width(w*0.98-2);
 		
@@ -65,8 +67,10 @@ $(function() {
         $("#bodyer_left").height(755);
         $("#bodyer_right").width(810);
         $(".data_table").width(786);
+        $(".xiangce").width(786);
         $(".aa").width(786);
         $(".scrollTable").height($("#bodyer_right").height() - 70);
+        $(".xiangce").height($(".scrollTable").height() - 10);
 //		var n = $(".scrollTable").height()-$(".aa").height();
 //		$('.data_table').fixHeader({
 //			height : n

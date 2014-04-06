@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
-import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
 import net.ussoft.archive.service.ICodeService;

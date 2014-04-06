@@ -55,7 +55,7 @@ public class EncryService implements IEncryService {
 		
 		List<Sys_init> initList = initDao.search(init);
 		
-		if (null == initList && initList.size() == 0) {
+		if (null == initList || initList.size() == 0) {
 			return false;
 		}
 		

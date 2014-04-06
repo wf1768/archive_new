@@ -10,7 +10,13 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
 <base target="_self">
-
+<style type="text/css">
+a {
+    color: #333333;
+    font-size: 12px;
+    text-decoration: none;
+}
+</style>
 <script>
 	function closepage() {
 		window.returnValue="ok";

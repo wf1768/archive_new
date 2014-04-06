@@ -32,7 +32,7 @@ function del(id) {
 		return;
 	}
 	
-	if (confirm("确定要删除选择的电子全文浏览全县代码吗？删除该代码，将移除组或帐户已设置的全文浏览权限代码。请谨慎操作。")) {
+	if (confirm("确定要删除选择的电子全文浏览权限代码吗？删除该代码，将移除组或帐户已设置的全文浏览权限代码。请谨慎操作。")) {
 	    $.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/config/docauthdelete.do",

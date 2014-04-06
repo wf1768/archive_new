@@ -190,29 +190,29 @@ public class TreeService implements ITreeService {
 					String serverPath = docserver.getServerpath();
 					if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
 						serverPath += "/";
-	                }
-					serverPath += doc.getDocpath(); 
+		            }
+					serverPath += doc.getDocpath();
+					String filename = doc.getDocnewname();
 					FileOperate fo = new FileOperate();
-					boolean b = fo.delFile(serverPath);
-	                //删除文件记录
-	                docDao.del(doc.getId());
+					boolean b = fo.delFile(serverPath + filename);
+		            //删除文件记录
+					docDao.del(doc.getId());
 				}
 				else {
 					//处理ftp删除
-	                FtpUtil util = new FtpUtil();
-	                util.connect(docserver.getServerip(),
-	                        docserver.getServerport(),
-	                        docserver.getFtpuser(),
-	                        docserver.getFtppassword(),
-	                        docserver.getServerpath());
-//	                FileInputStream s = new FileInputStream(newFile);
-//	                util.uploadFile(s, newName);
-	                boolean isDel = util.deleteFile(doc.getDocnewname());
-	                util.closeServer();
-	                if (isDel) {
-	                    //删除文件记录
-	                	docDao.del(doc.getId());
-	                }
+		            FtpUtil util = new FtpUtil();
+		            util.connect(docserver.getServerip(),
+		                    docserver.getServerport(),
+		                    docserver.getFtpuser(),
+		                    docserver.getFtppassword(),
+		                    docserver.getServerpath());
+//		                FileInputStream s = new FileInputStream(newFile);
+//		                util.uploadFile(s, newName);
+		            util.changeDirectory(doc.getDocpath());
+		            boolean isDel = util.deleteFile(doc.getDocnewname());
+		            util.closeServer();
+		            //删除文件记录
+		            docDao.del(doc.getId());
 				}
 			}
 		}
@@ -348,6 +348,15 @@ public class TreeService implements ITreeService {
 		values.add(table.getId());
 		values.add(accountid);
 		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
+		
+		if (null == templetfields || templetfields.size() == 0) {
+			//根据tableid，获取字段 templetfield的list
+			sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM' and sort != -1 order by sort";
+			values.clear();
+			values.add(table.getId());
+			templetfields = templetfieldDao.search(sql, values);
+		}
+		
 		return templetfields;
 	}
 	

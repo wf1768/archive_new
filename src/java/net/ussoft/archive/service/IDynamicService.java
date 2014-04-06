@@ -1,9 +1,12 @@
 package net.ussoft.archive.service;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 
 import net.ussoft.archive.model.PageBean;
+import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.util.resule.ResultInfo;
 
@@ -31,12 +34,40 @@ public interface IDynamicService {
 	
 	/**
 	 * 保存档案数据
-	 * @param treeid
+	 * @param treeid		
 	 * @param archiveList
 	 * @return
 	 */
-	public ResultInfo saveArchive(String treeid,String tabletype,List<Map<String,String>> archiveList);
+	public ResultInfo saveArchive(Map<String, String> sysFieldMap,List<Map<String,String>> archiveList);
+	
+	/**
+	 * 更新档案数据
+	 * @param tabletype			表类型
+	 * @param archiveList
+	 * @return
+	 */
+	public ResultInfo updaetArchive(String tabletype,List<Map<String,String>> archiveList);
+	
+	/**
+	 * 删除档案
+	 * @param treeid
+	 * @param tabletype
+	 * @param ids
+	 * @return
+	 * @throws IOException 
+	 * @throws SocketException 
+	 */
+	public ResultInfo deleteArchive(String treeid,String tabletype,List<String> ids) throws SocketException, IOException;
 
+	/**
+	 * 删除电子全文
+	 * @param docs
+	 * @return
+	 * @throws IOException 
+	 * @throws SocketException 
+	 */
+	public ResultInfo deleteDoc(List<Sys_doc> docs) throws SocketException, IOException;
+	
 	/**
 	 * 查询表数据
 	 * @param searchTxt
@@ -48,5 +79,7 @@ public interface IDynamicService {
 	 * @return
 	 * */
 	public PageBean<Map<String, Object>> search(String searchTxt,String tablename,String treeid,List<Sys_templetfield> tmpFieldLis,int currentPage,int pageSize);
+	
+	public void exeSql(String sql);
 	
 }

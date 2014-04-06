@@ -15,7 +15,7 @@ public class FileOperate {
      * 新建目录   
      *    
      * @param folderPath   
-     *            String 如 c:/fqf   
+     *            String 如 c:/fqf
      * @return boolean   
      */  
     public static boolean newFolder(String folderPath) {
@@ -33,7 +33,19 @@ public class FileOperate {
             return false;
         }
         return  result;
-    }   
+    }
+    
+    /**
+     * 
+     * @param path 文件夹路径
+     */
+    public static void isExist(String path) {
+    	File file = new File(path);
+    	//判断文件夹是否存在,如果不存在则创建文件夹
+    	if (!file.exists()) {
+    		file.mkdir();
+    	}
+    }
   
     /**   
      * 新建文件   

@@ -36,7 +36,7 @@ public interface IDocserverService {
 	 */
 	public Sys_docserver insert(Sys_docserver docserver);
 	
-	public Sys_docserver selectByWhere(Sys_docserver config);
+	public Sys_docserver selectByWhere(Sys_docserver docserver);
 	
 	public int delete(String id);
 }

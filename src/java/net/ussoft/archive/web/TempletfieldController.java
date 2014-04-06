@@ -23,7 +23,6 @@ import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;

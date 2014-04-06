@@ -7,13 +7,17 @@ package net.ussoft.archive.util;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.*;
 import java.net.SocketException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class FtpUtil {
     //private FTPClient ftpClient;
@@ -69,6 +73,7 @@ public class FtpUtil {
 
         //检查远程文件是否存在
         FTPFile[] files = ftpClient.listFiles(new String(remote.getBytes("GBK"),"iso-8859-1"));
+        
         if(files.length != 1){
             System.out.println("远程文件不存在");
             return DownloadStatus.Remote_File_Noexist;
@@ -311,6 +316,10 @@ public class FtpUtil {
             ftpClient.setControlEncoding("GBK");
             System.out.println("Connected to " + server + ".");
             System.out.println(ftpClient.getReplyCode());
+            
+            FTPClientConfig conf = new FTPClientConfig(FTPClientConfig.SYST_NT);  
+            conf.setServerLanguageCode("zh");
+            
             ftpClient.login(user, password);
 
             int reply = ftpClient.getReplyCode();
@@ -327,7 +336,7 @@ public class FtpUtil {
 
         result = true;
         // Path is the sub-path of the FTP path
-        if (path.length() != 0) {
+        if (null != path && path.length() != 0) {
             ftpClient.changeWorkingDirectory(new String(path.getBytes("GBK"),"iso-8859-1"));
         }
 
@@ -510,9 +519,60 @@ public class FtpUtil {
     }*/
 
     public InputStream downFile(String sourceFileName) throws IOException {
-        sourceFileName = new String(sourceFileName.getBytes("GBK"),"iso-8859-1");
+        sourceFileName = new String(sourceFileName.getBytes("utf-8"),"iso-8859-1");
         return ftpClient.retrieveFileStream(sourceFileName);
     }
+    
+    public void downFile(String ip,int port, String username,String password,
+    		String remotePath, String fileName,OutputStream outputStream, HttpServletResponse response) throws SocketException, IOException {
+    	
+    	connect(ip,port,username,password,remotePath);
+    	ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE); 
+    	String[] file =ftpClient.listNames(fileName);
+        ftpClient.enterLocalPassiveMode();
+        String filename = file[0];
+        if (null == fileName || fileName.equals("")) {
+        	ftpClient.logout();
+            closeServer();
+        	return ;
+        }
+        
+        // 这个就就是弹出下载对话框的关键代码
+//        response.setHeader("Content-disposition","attachment;filename=" + URLEncoder.encode(filename, "utf-8"));  
+        // 将文件保存到输出流outputStream中  
+        ftpClient.retrieveFile(new String(filename.getBytes("utf-8"),"ISO-8859-1"), outputStream);  
+        outputStream.flush();  
+   
+        outputStream.close();
+        ftpClient.logout();
+        closeServer();
+    }
+    //测试的方法。暂时保留
+    public void downfile1() {
+    	FTPClient ftpClient = new FTPClient();
+	    String hostName = "192.16.1.11";
+	    String userName = "wangf";
+	    String password = "wf82118";
+	    String remoteDir = "/";
+	    try {
+	      ftpClient.connect(hostName, 21);
+	      ftpClient.setControlEncoding("UTF-8");
+	      ftpClient.login(userName, password);
+	      ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+//	      FTPFile[] files = ftpClient.listFiles(remoteDir);
+//	      for (int i = 0; i < files.length; i++) {
+//	        System.out.println(files[i].getName());
+//	      }
+	      File file = new File("/Users/wangf/develop/111.doc");
+	      FileOutputStream fos = new FileOutputStream(file);
+	      ftpClient.retrieveFile(remoteDir + "/111.doc", fos);
+	      fos.close();
+	    } catch (SocketException e) {
+	      e.printStackTrace();
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	  }
 
     public boolean rename(String oldName, String newName) {
         try {

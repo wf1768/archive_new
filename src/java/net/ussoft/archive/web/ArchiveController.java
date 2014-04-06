@@ -3,6 +3,7 @@ package net.ussoft.archive.web;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +15,23 @@ import javax.servlet.http.HttpServletResponse;
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
+import net.ussoft.archive.model.Sys_doc;
+import net.ussoft.archive.model.Sys_org_tree;
+import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IAccountService;
 import net.ussoft.archive.service.ICodeService;
 import net.ussoft.archive.service.IConfigService;
+import net.ussoft.archive.service.IDocService;
 import net.ussoft.archive.service.IDynamicService;
+import net.ussoft.archive.service.IEncryService;
+import net.ussoft.archive.service.IOrgService;
+import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.resule.ResultInfo;
@@ -60,7 +69,15 @@ public class ArchiveController extends BaseConstroller {
     private  HttpServletRequest request;  
     @Resource
     private ICodeService codeService;
-	
+    
+    @Resource
+    private IDocService docService;
+    @Resource
+    private IOrgService orgService;
+    @Resource
+    private IEncryService encryService;
+    @Resource
+    private ITableService tableService;
 	
 	
 	@RequestMapping(value="/index",method=RequestMethod.GET)
@@ -147,6 +164,11 @@ public class ArchiveController extends BaseConstroller {
 			//如果是文件级，获取对应的案卷级，供文件级页面显示
 			if (tabletype.equals("02")) {
 				List<Sys_templetfield> ajFieldList = treeService.geTempletfields(treeid, "01",account.getId());
+				//如果帐户私有字段为空
+				if (null == ajFieldList || ajFieldList.size() == 0) {
+					ajFieldList = treeService.geTempletfields(treeid, "01");
+				}
+				
 				modelMap.put("ajFieldList", ajFieldList);
 				//获取aj级信息
 				List<Map<String, Object>> maps = dynamicService.getOne(treeid, "01", parentid);
@@ -270,7 +292,7 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	@RequestMapping(value="/save",method=RequestMethod.POST)
-	public void save(String str,HttpServletResponse response) throws IOException {
+	public void save(String data,String sys,HttpServletResponse response) throws IOException {
 		
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -283,15 +305,174 @@ public class ArchiveController extends BaseConstroller {
 //			return;
 //		}
 		
-		@SuppressWarnings({ "unchecked", "unused" })
-		Map<String, String> map = (Map<String, String>) JSON.parse(str);
+		@SuppressWarnings("unchecked")
+		//档案数据
+		Map<String, String> archiveMap = (Map<String, String>) JSON.parse(data);
+		//档案系统字段数据
+		@SuppressWarnings("unchecked")
+		Map<String, String> sysFieldMap = (Map<String, String>) JSON.parse(sys);
+		
+		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
+		archiveList.add(archiveMap);
+		ResultInfo info = dynamicService.saveArchive(sysFieldMap, archiveList);
+		
+		out.print(info.getMsg());
+	}
+	
+	/**
+	 * 打开编辑页面
+	 * @param treeid		档案树节点id
+	 * @param tabletype		表类型  01 or 02
+	 * @param id			档案记录id
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/edit",method=RequestMethod.GET)
+	public ModelAndView edit(String treeid,String tabletype,String id,ModelMap modelMap) {
+		//判断id是否存在
+		if (id == null || id.equals("")) {
+			return null;
+		}
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+				
+		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+		//如果帐户私有字段为空
+		if (null == fields || fields.size() == 0) {
+			fields = treeService.geTempletfields(treeid, tabletype);
+		}
+		
+		modelMap.put("fields", fields);
+		//获取信息
+		List<Map<String, Object>> maps = dynamicService.getOne(treeid, tabletype, id);
+		modelMap.put("maps", maps);
+		
+		String resultsString = JSON.toJSONString(fields);
+		modelMap.put("fieldjson", resultsString);
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		
+		//获取字段代码，前台页面上生成select
+		Map<String, List<Sys_code>> codeMap =  getFieldCode(fields);
+		modelMap.put("codeMap", codeMap);
+		
+		//获取对象
+		return new ModelAndView("/view/archive/archive/edit",modelMap);
+	}
+	
+	@RequestMapping(value="/update",method=RequestMethod.POST)
+	public void update(String data,String tabletype,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		@SuppressWarnings("unchecked")
+		Map<String, String> map = (Map<String, String>) JSON.parse(data);
 		
 		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
 		archiveList.add(map);
-		ResultInfo info = dynamicService.saveArchive(null, null, archiveList);
+		ResultInfo info = dynamicService.updaetArchive(tabletype, archiveList);
 		
 		out.print(info.getMsg());
-	} 
+	}
+	
+	@RequestMapping(value="/delete",method=RequestMethod.POST)
+	public void delete(String treeid,String tabletype,String ids,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		if (null == ids || ids.equals("")) {
+			out.print("未获得要删除的数据，请重新操作或与管理员联系。");
+			return;
+		}
+		
+		String[] idsStrings = ids.split(",");
+		
+		List<String> list = Arrays.asList(idsStrings);
+		
+		ResultInfo info = dynamicService.deleteArchive(treeid, tabletype, list);
+		
+		out.print(info.getMsg());
+	}
+	
+	@RequestMapping(value="/show",method=RequestMethod.GET)
+	public ModelAndView show(String treeid,String tabletype,String id,ModelMap modelMap) throws Exception {
+		//判断id是否存在
+		if (null == id || id.equals("")) {
+			return null;
+		}
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		
+		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+		
+		modelMap.put("fields", fields);
+		//获取档案信息
+		List<Map<String, Object>> maps = dynamicService.getOne(treeid, tabletype, id);
+		
+		
+		if (null == maps || maps.size() == 0) {
+			return null;
+		}
+		modelMap.put("maps", maps);
+		Sys_account_tree account_tree = accountService.getTreeAuth(account.getId(), treeid);
+		if (null == account_tree) {
+			Sys_org_tree org_tree = orgService.getTreeAuth(account.getOrgid(), treeid);
+			modelMap.put("treeauth", org_tree);
+		}
+		else {
+			modelMap.put("treeauth", account_tree);
+		}
+		
+		//获取docauth的code，用于前台doc列表填充
+		Sys_code code = new Sys_code();
+		code.setTempletfieldid("DOCAUTH");
+		List<Sys_code> codes = codeService.selectByWhere(code);
+		HashMap<String, String> codeMap = new HashMap<String, String>();
+		for (Sys_code sys_code : codes) {
+			codeMap.put(sys_code.getId(), sys_code.getColumndata());
+		}
+		modelMap.put("codeMap", codeMap);
+		
+		String resultsString = JSON.toJSONString(fields);
+		modelMap.put("fieldjson", resultsString);
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		
+		Sys_tree tree = treeService.getById(treeid);
+		
+		//获取table
+		Sys_table table = new Sys_table();
+		table.setTempletid(tree.getTempletid());
+		table.setTabletype(tabletype);
+		table = tableService.selectByWhere(table);
+		
+		List<Sys_doc> docs = new ArrayList<Sys_doc>();
+		//获取档案的电子全文  TODO 要获取当前帐户电子全文权限范围的
+		if (maps.get(0).get("isdoc").toString().equals("1")) {
+			String sql = "select * from sys_doc where tableid=? and fileid=?";
+			List<Object> values = new ArrayList<Object>();
+			values.clear();
+			values.add(table.getId());
+			values.add(id);
+			docs = docService.exeSql(sql, values);
+		}
+		Boolean isFileShow = false;
+		//获取有没有全文浏览器，如果没有，前台不显示查看按钮
+		if (encryService.getInit(24)) {
+			isFileShow = true;
+		}
+		modelMap.put("isFileShow", isFileShow);
+		
+		modelMap.put("docs", docs);
+		
+		//获取对象
+		return new ModelAndView("/view/archive/archive/show",modelMap);
+	}
+	
 	
 	/**
 	 * 获取字段的代码项

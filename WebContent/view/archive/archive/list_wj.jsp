@@ -52,7 +52,7 @@
 			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 			treeObj.expandNode(nodes);
 		} else {
-			window.location.href = "${pageContext.request.contextPath}/archive/list.do?selectid=" + nodes.id;
+			window.location.href = "${pageContext.request.contextPath}/archive/list.do?treeid=" + nodes.id;
 		}
 	};
 	$(function() {
@@ -100,7 +100,7 @@
 		var searchTxt = "${searchTxt }";
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/archive/list.do?selectid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&page="+page_index+"&searchTxt="+searchTxt+"&tabletype=02";
+			window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&page="+page_index+"&searchTxt="+searchTxt+"&tabletype=02";
 		}
 	}; 
 
@@ -122,99 +122,119 @@
 		window.location.reload(true);
 	}
 	
+	function search() {
+		var pageno = ${pagebean.pageNo };
+		var searchTxt = $("#searchTxt").val();
+		
+		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&page="+pageno+"&searchTxt="+searchTxt+"&tabletype=02";
+	}
 	
-	
-	//=========以下是其他页面，完事时删除
-
-	function add(treetype) {
+	function add() {
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var nodes = treeObj.getSelectedNodes();
 		if (typeof (nodes[0]) == "undefined") {
 			alert("请选择左侧父档案夹，再创建档案类型夹。");
 			return;
 		}
-		if (nodes[0].treetype != 'F' && nodes[0].treetype != 'FT') {
+		if (nodes[0].treetype != 'W') {
 			alert("请选择左侧档案类型下，再创建档案树或档案夹。");
 			return;
 		}
-		var url = "${pageContext.request.contextPath}/tree/add.do?parentid=" + nodes[0].id + "&treetype="+treetype+"&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/add.do?treeid=" + nodes[0].id + "&parentid=${parentid}&tabletype=02&time=" + Date.parse(new Date());
 		var whObj = {
-			width : 550,
-			height : 300
+			width : 650,
+			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
 	}
 	
 	function edit(id) {
-		var url = "${pageContext.request.contextPath}/tree/edit.do?id=" + id + "&time=" + Date.parse(new Date());
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧父档案节点，再编辑档案。');
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=02&id=" + id + "&time=" + Date.parse(new Date());
 		var whObj = {
-			width : 550,
-			height : 300
+			width : 650,
+			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
 	}
 	
-	function del(id,type) {
-		if (id == "") {
-			alert("没有获得要删除的数据，请重新尝试，或与管理员联系。");
+	function del() {
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧父档案节点，再删除档案。');
 			return;
 		}
-		var str = "";
-		if (type == "FT") {
-			str = "确定要删除选择的档案节点夹吗？将同时删除该档案节点夹下包含的所有档案，及档案数据、电子全文。请谨慎操作。"
-		}
-		else {
-			str = "确定要删除选择的档案节点吗？将同时删除该档案节点下包含的所有档案数据、电子全文。请谨慎操作。"
-		}
 		
-		if (confirm(str)) {
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要要删除的数据。");
+			return;
+		}
+		str = str.substring(0,str.length-1);
+		
+		if (confirm("确定要删除选择的档案吗？将同时删除该档案下包含的档案数据、电子全文。请谨慎操作。")) {
 			$.blockUI({
 				message:"正在进行删除，请稍候...",
 				css: {
                     padding: '15px',
                     width:"300px"
                 } 
-            }); 
-			setTimeout(function () {
+            });
+			setTimeout(function () {  
 				$.ajax({
 					async : false,
-					url : "${pageContext.request.contextPath}/tree/delete.do",
+					url : "${pageContext.request.contextPath}/archive/delete.do",
 					type : 'post',
 					data : {
-						id : id
+						'treeid':treeid,
+						'tabletype':'02',
+						'ids' : str
 					},
 					dataType : 'text',
 					success : function(data) {
 						$.unblockUI();
-						if (data == "success") {
-							alert("删除完毕。");
-						} else if(data == "error") {
-							alert("当前删除的档案节点夹下，还有档案节点夹或档案节点，请先删除下级。");
-						} else {
-							alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
-						}
-						
-						window.location.reload(true);
-					},
-					error: function (err) {  
-						$.unblockUI();
-	                    alert("error:" + err);  
-	                    return false;  
-	                }
+						alert(data);
+					}
 				});
-			},100)
+				
+				window.location.reload(true);
+			},200);  
 		};
 	}
 	
-	function sort(id) {
-		if (id=="") {
-			alert("请先选择要排序的档案节点。");
+	function show(id) {
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再查看档案。');
 			return;
 		}
-		var url = "sort.do?id="+id + "&time="+Date.parse(new Date());
-		var whObj = { width: 440, height: 300 };
-		var result = openShowModalDialog(url,window,whObj);
+		
+		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=02&id=" + id + "&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 650,
+			height : 500
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
+	
+	
+	
+	//=========以下是其他页面，完事时删除
+
 	
 	function move(id) {
 		if (id=="") {
@@ -226,12 +246,6 @@
 		var result = openShowModalDialog(url,window,whObj);
 	}
 	
-	function search() {
-		var pageno = ${pagebean.pageNo };
-		var searchTxt = $("#searchTxt").val();
-		
-		window.location.href="${pageContext.request.contextPath }/archive/list.do?selectid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&page="+pageno+"&searchTxt="+searchTxt+"&tabletype=02";
-	}
 </script>
 
 
@@ -251,7 +265,7 @@
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555; ">
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 			<div class="dqwz_l">当前位置：档案管理
 			<c:if test="${not empty treename}">
 				-${treename }-文件级
@@ -259,15 +273,17 @@
 			</div>
 			<div class="caozuoan">
 				<input type="button" value="添加" class="btn" onClick="add('FT')" />
-				<input type="button" value="删除" class="btn" onClick="add('W')" />
-				<input type="button" value="显示设置" class="btn" onClick="setshow('${templet.id}','02')" />
+				<input type="button" value="删除" class="btn" onClick="del()" />
+				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','02')" />
+				<input type="button" value="挂接" class="btn" onClick="doc()" />
+				<input type="button" value="打印" class="btn" onClick="print_()" />
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 				<input type="button" value="查询" class="btn" onClick="search()" />
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:5555;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
+		<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:999;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
 			<thead>
 				<tr class="tableTopTitle-bg">
 					<td width="40px">行号</td>
@@ -308,7 +324,7 @@
 							</c:forEach>
 					</c:forEach>
 					<td>
-						<a href="javascript:;" onclick="window.location.href='${pageContext.request.contextPath }/archive/list.do?selectid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }'" class="juse">
+						<a href="javascript:;" onclick="window.location.href='${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }'" class="juse">
 							<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/arrow_undo.png" />
 							返回案卷
 						</a>
@@ -370,20 +386,14 @@
 								</c:if>
 							</c:forEach>
 							<td>
-								<a href="javascript:;" onclick="edit('${item.id}')"
-									class="juse"> <img style="margin-bottom: -3px"
-										src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
-										修改
-								</a>
-								<a href="javascript:;" onclick="del('${item.id}','${item.treetype }')"
-									class="juse"> <img style="margin-bottom: -3px"
-										src="${pageContext.request.contextPath}/images/icons/application_form_delete.png" />
-										删除
-								</a>
-								<a href="javascript:;" onclick="move('${item.id}')">
+								<a href="javascript:;" onclick="show('${archiveitem.id }')">
 									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
-									移动
+									详细
 							    </a>
+								<a href="javascript:;" onclick="edit('${archiveitem.id }')">
+									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
+									修改
+								</a>
 							</td>
 						</tr>
 					</c:forEach>

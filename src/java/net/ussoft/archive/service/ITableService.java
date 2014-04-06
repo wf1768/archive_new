@@ -1,17 +1,14 @@
 package net.ussoft.archive.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import net.ussoft.archive.model.Dynamic;
-import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_table;
-import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
 
 
 public interface ITableService {
+	
+	public Sys_table get(String id);
 	
 	/**
 	 * 获取table全部信息
@@ -32,5 +29,12 @@ public interface ITableService {
 	 * @return
 	 * */
 	public List<Sys_table> getTableByTempletid(String templetid);
+	
+	/**
+	 * 根据条件获取数据
+	 * @param role
+	 * @return
+	 */
+	public Sys_table selectByWhere(Sys_table table);
 	
 }

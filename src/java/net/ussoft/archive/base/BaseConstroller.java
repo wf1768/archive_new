@@ -148,6 +148,13 @@ public class BaseConstroller {
 	public String getProjectPath() {
 		return request.getContextPath();
 	}
+	/**
+	 * 获取项目绝对路径 例如：d:/aaa
+	 * @return
+	 */
+	public String getProjectRealPath() {
+		return request.getSession().getServletContext().getRealPath("/");
+	}
 	
 	/**
 	 * 获取项目全路径  例如 http://localhost:8080/archive 
@@ -161,5 +168,6 @@ public class BaseConstroller {
     	
     	return basePath;
 	}
+	
 	
 }

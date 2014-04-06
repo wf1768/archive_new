@@ -52,4 +52,22 @@ public class TableService implements ITableService {
 		return tableList;
 	}
 
+	@Override
+	public Sys_table get(String id) {
+		return tableDao.get(id);
+	}
+
+	@Override
+	public Sys_table selectByWhere(Sys_table table) {
+		if (null == table) {
+			return null;
+		}
+		List<Sys_table> tables = tableDao.search(table);
+		
+		if (null != tables && tables.size() == 1) {
+			return tables.get(0);
+		}
+		return null;
+	}
+
 }

@@ -62,6 +62,7 @@ public class DocserverController extends BaseConstroller {
 		if (docserver != null ) {
 			docserver.setId(UUID.randomUUID().toString());
 		}
+		docserver.setServerpath("");
 		docserver.setServerstate(0);
 		docserver = docserverService.insert(docserver);
 		String result = "添加完成。";
