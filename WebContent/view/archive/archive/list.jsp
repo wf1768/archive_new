@@ -194,7 +194,7 @@
 		});
 		
 		if (str == "") {
-			alert("请先选择要要删除的数据。");
+			alert("请先选择要删除的数据。");
 			return;
 		}
 		str = str.substring(0,str.length-1);
@@ -229,16 +229,41 @@
 		};
 	}
 	
-	//=========以下是其他页面，完事时删除
-	
-	function move(id) {
-		if (id=="") {
-			alert("请先选择要移动的档案档案节点。");
+	function doc() {
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再查看档案电子文件。');
 			return;
 		}
-		var url = "move.do?id="+id + "&time="+Date.parse(new Date());
-		var whObj = { width: 440, height: 500 };
-		var result = openShowModalDialog(url,window,whObj);
+		
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要挂接电子文件的档案数据。");
+			return;
+		}
+		str = str.substring(0,str.length-1);
+		//判断是单个挂接还是多个。
+		var s = str.split(",");// 在每个逗号(,)处进行分解。
+		if (s.length == 1) {
+			var whObj = {
+				width : 650,
+				height : 500
+			};
+		}
+		else {
+			var whObj = {
+				width : 650,
+				height : 500
+			};
+		}
+		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=01&id=" + str + "&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 </script>
@@ -279,7 +304,17 @@
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','01')" />
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
 				<input type="button" value="挂接" class="btn" onClick="doc()" />
-				<input type="button" value="打印" class="btn" onClick="print_()" />
+				<select name="pageselect" onchange="print_(options[selectedIndex].value)" >
+					<option value="ajml">打印案卷目录</option>
+				</select>
+				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
+					<option value="import">数据导入</option>
+					<option value="export">数据导出</option>
+				</select>
+				<!-- <select name="pageselect" onchange="self.location.href=options[selectedIndex].value" >
+					<option value="http://www.baidu.com">百度</option>
+					<option value="http://www.163.com">网易</option>
+				</select>  -->
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 				<input type="button" value="查询" class="btn" onClick="search()" />
 			</div>

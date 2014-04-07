@@ -15,13 +15,6 @@
 
 <script>
 
-	$(function(){
-		var parentWin=window.dialogArguments;
-		//var buttonValue=parentWin.document.getElementByIdx("mybutton2").value;   //获取父窗口中的对象
-		var parentValue=parentWin.nodes;       //获取父窗口中的变量
-		
-	})
-	
 	function down(id) {
         var link = "${pageContext.request.contextPath}/doc/download.do?id=" + id;
         //window.open(link);
@@ -72,39 +65,17 @@
 	}
 	
 </script>
-<title>查看档案</title>
+<title>查看档案电子文件</title>
 </head>
 <body>
 	<table width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>
-                <td colspan="2" align="center">
-                	查看档案
+                <td colspan="6" align="center">
+                	电子文件
                 	<input type="hidden" id="id" name="id" value="${maps[0]['id']}">
                 	<input type="hidden" id="treeid" name="treeid" value="${treeid }">
                 	<input type="hidden" id="tabletype" name="tabletype" value="${tabletype }">
-                </td>
-            </tr>
-            <c:forEach items="${fields}" varStatus="j" var="item">
-				<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-					<tr>
-						<td>${item.chinesename } :</td>
-						<td>${maps[0][item.englishname]}</td>
-					</tr>
-				</c:if>
-			</c:forEach>
-			<tr>
-				<td colspan="2" align="center">
-					<button type="button" onclick="closepage()">关闭</button>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	<table width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
-		<tbody>
-			<tr>
-                <td colspan="6" align="center">
-                	电子文件
                 </td>
             </tr>
             <tr>

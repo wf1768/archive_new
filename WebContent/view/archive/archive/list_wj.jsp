@@ -179,7 +179,7 @@
 		});
 		
 		if (str == "") {
-			alert("请先选择要要删除的数据。");
+			alert("请先选择要删除的数据。");
 			return;
 		}
 		str = str.substring(0,str.length-1);
@@ -231,6 +231,10 @@
 		window.location.reload(true);
 	}
 	
+	function test(v) {
+		alert(v);
+	}
+	
 	
 	
 	//=========以下是其他页面，完事时删除
@@ -277,6 +281,10 @@
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','02')" />
 				<input type="button" value="挂接" class="btn" onClick="doc()" />
 				<input type="button" value="打印" class="btn" onClick="print_()" />
+				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
+					<option value="http://www.baidu.com">百度</option>
+					<option value="http://www.163.com">网易</option>
+				</select>
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 				<input type="button" value="查询" class="btn" onClick="search()" />

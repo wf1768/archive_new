@@ -171,7 +171,7 @@ public class ArchiveController extends BaseConstroller {
 				
 				modelMap.put("ajFieldList", ajFieldList);
 				//获取aj级信息
-				List<Map<String, Object>> maps = dynamicService.getOne(treeid, "01", parentid);
+				List<Map<String, Object>> maps = dynamicService.get(treeid, "01", parentid);
 				modelMap.put("maps", maps);
 				modelMap.put("parentid", parentid);
 				
@@ -344,7 +344,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("fields", fields);
 		//获取信息
-		List<Map<String, Object>> maps = dynamicService.getOne(treeid, tabletype, id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
 		modelMap.put("maps", maps);
 		
 		String resultsString = JSON.toJSONString(fields);
@@ -411,7 +411,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("fields", fields);
 		//获取档案信息
-		List<Map<String, Object>> maps = dynamicService.getOne(treeid, tabletype, id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
 		
 		
 		if (null == maps || maps.size() == 0) {
@@ -471,6 +471,100 @@ public class ArchiveController extends BaseConstroller {
 		
 		//获取对象
 		return new ModelAndView("/view/archive/archive/show",modelMap);
+	}
+	
+	@RequestMapping(value="/doc",method=RequestMethod.GET)
+	public ModelAndView doc(String treeid,String tabletype,String id,ModelMap modelMap) throws Exception {
+		//判断id是否存在
+		if (null == id || id.equals("")) {
+			return null;
+		}
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		
+		Boolean singleArchive = false;
+		String resultUrl = "";
+		
+		String[] idArr = id.split(",");
+		//如果就一个档案，转到单个档案全文页面
+		if (idArr.length == 1) {
+			singleArchive = true;
+			resultUrl = "/view/archive/archive/doc_single";
+		}
+		else {
+			//多个档案，转到批量挂接页面
+			resultUrl = "/view/archive/archive/doc_multiple";
+		}
+		
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		Sys_tree tree = treeService.getById(treeid);
+		
+		//获取table
+		Sys_table table = new Sys_table();
+		table.setTempletid(tree.getTempletid());
+		table.setTabletype(tabletype);
+		table = tableService.selectByWhere(table);
+		
+		//获取档案信息
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
+		modelMap.put("maps", maps);
+		
+		if (singleArchive) {
+			//获取当前帐户与树的权限（下载、查看）
+			Sys_account_tree account_tree = accountService.getTreeAuth(account.getId(), treeid);
+			if (null == account_tree) {
+				Sys_org_tree org_tree = orgService.getTreeAuth(account.getOrgid(), treeid);
+				modelMap.put("treeauth", org_tree);
+			}
+			else {
+				modelMap.put("treeauth", account_tree);
+			}
+			//获取docauth的code，用于前台doc列表填充
+			Sys_code code = new Sys_code();
+			code.setTempletfieldid("DOCAUTH");
+			List<Sys_code> codes = codeService.selectByWhere(code);
+			HashMap<String, String> codeMap = new HashMap<String, String>();
+			for (Sys_code sys_code : codes) {
+				codeMap.put(sys_code.getId(), sys_code.getColumndata());
+			}
+			modelMap.put("codeMap", codeMap);
+			
+			List<Sys_doc> docs = new ArrayList<Sys_doc>();
+			//获取档案的电子全文  TODO 要获取当前帐户电子全文权限范围的
+			if (maps.get(0).get("isdoc").toString().equals("1")) {
+				String sql = "select * from sys_doc where tableid=? and fileid=?";
+				List<Object> values = new ArrayList<Object>();
+				values.clear();
+				values.add(table.getId());
+				values.add(id);
+				docs = docService.exeSql(sql, values);
+			}
+			
+			modelMap.put("docs", docs);
+		}
+		else {
+			List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+			modelMap.put("fields", fields);
+		
+			if (null == maps || maps.size() == 0) {
+				return null;
+			}
+			
+			
+			String resultsString = JSON.toJSONString(fields);
+			modelMap.put("fieldjson", resultsString);
+		}
+		
+		Boolean isFileShow = false;
+		//获取有没有全文浏览器，如果没有，前台不显示查看按钮
+		if (encryService.getInit(24)) {
+			isFileShow = true;
+		}
+		modelMap.put("isFileShow", isFileShow);
+		//获取对象
+		return new ModelAndView(resultUrl,modelMap);
 	}
 	
 	
