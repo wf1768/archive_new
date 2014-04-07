@@ -1,6 +1,7 @@
 package net.ussoft.archive.service.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,11 +135,25 @@ public class DynamicService implements IDynamicService {
 			return null;
 		}
 		
-		sql = "select * from " + tables.get(0).getTablename() + " where id in (" + id + ")";
-//		sql = "select * from " + tables.get(0).getTablename() + " where id=?";
+		String[] ids = id.split(",");
+		List<String> idList = Arrays.asList(ids);
+		
+		StringBuilder sb = new StringBuilder("select * from ");
+		sb.append(tables.get(0).getTablename());
+		sb.append(" where ");
+		sb.append(" id in (");
+		Serializable[] ss=new Serializable[idList.size()];
+		Arrays.fill(ss, "?");
+		sb.append(StringUtils.join(ss,','));
+		sb.append(")");
 		values.clear();
+		values.addAll(idList);
+		
+//		sql = "select * from " + tables.get(0).getTablename() + " where id in (" + id + ")";
+//		sql = "select * from " + tables.get(0).getTablename() + " where id=?";
+//		values.clear();
 //		values.add(id);
-		List<Map<String, Object>> maps = dynamicDao.searchForMap(sql, values);
+		List<Map<String, Object>> maps = dynamicDao.searchForMap(sb.toString(), values);
 		
 		return maps;
 	}

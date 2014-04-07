@@ -229,7 +229,7 @@
 		};
 	}
 	
-	function doc() {
+	function doc(id) {
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧档案节点，再查看档案电子文件。');
@@ -237,16 +237,20 @@
 		}
 		
 		var str = "";
-		
-		$("input[name='checkbox']:checked").each(function () {
-			str+=$(this).val()+ ",";
-		});
-		
-		if (str == "") {
-			alert("请先选择要挂接电子文件的档案数据。");
-			return;
+		if (id != "") {
+			str = id;
 		}
-		str = str.substring(0,str.length-1);
+		else {
+			$("input[name='checkbox']:checked").each(function () {
+				str+=$(this).val()+ ",";
+			});
+			
+			if (str == "") {
+				alert("请先选择要挂接电子文件的档案数据。");
+				return;
+			}
+			str = str.substring(0,str.length-1);
+		}
 		//判断是单个挂接还是多个。
 		var s = str.split(",");// 在每个逗号(,)处进行分解。
 		if (s.length == 1) {
@@ -303,7 +307,7 @@
 				<input type="button" value="删除" class="btn" onClick="del()" />
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','01')" />
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
-				<input type="button" value="挂接" class="btn" onClick="doc()" />
+				<input type="button" value="挂接" class="btn" onClick="doc('')" />
 				<select name="pageselect" onchange="print_(options[selectedIndex].value)" >
 					<option value="ajml">打印案卷目录</option>
 				</select>
@@ -349,7 +353,7 @@
 							</c:if>
 							<c:choose>
 								<c:when test="${archiveitem['isdoc'] == 1 }">
-									<td><a title="电子全文" href="javascript:;" onclick=""><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
+									<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
 								</c:when>
 								<c:otherwise>
 									<td></td>
