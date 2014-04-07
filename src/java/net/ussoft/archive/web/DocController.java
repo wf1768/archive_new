@@ -452,7 +452,7 @@ public class DocController extends BaseConstroller {
         	serverpath = "/";
         }
         else if (!serverpath.substring(serverpath.length()-1,serverpath.length()).equals("/")) {
-			serverpath += "/";
+			serverpath += File.separator;
         }
         String tmppath = serverpath;
         FtpUtil ftpUtil = new FtpUtil();
@@ -467,7 +467,7 @@ public class DocController extends BaseConstroller {
 						FileOperate.isExist(tmppath);
 					}
 					else if (docserver.getServertype().equals("FTP")) {
-						tmppath += str + File.separator;
+						tmppath += str + "/";
 						ftpUtil.connect(docserver.getServerip(),
 						        docserver.getServerport(),
 						        docserver.getFtpuser(),
@@ -479,7 +479,7 @@ public class DocController extends BaseConstroller {
 						}
 						ftpUtil.closeServer();
 					}
-					docpath += str + File.separator;
+					docpath += str + "/";
 					
 				}
 			}
