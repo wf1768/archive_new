@@ -2,8 +2,8 @@
     pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 
@@ -194,41 +194,35 @@
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：集团管理－集团帐户管理</div>
-		<div  class="caozuo">
-            <div class="caozuo_left">
-        	<ul>
-            	<li></li>
-            </ul>
-            </div>
-        	<div  class="caozuo_right">
-        	<ul>
-                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_add.png"  />
-                    添加帐户</a>
-                </li>
-                <li><a href="javascript:;" onclick="move()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_go.png"  />
-                    移动帐户</a>
-                </li>
-                <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
-                    刷新列表</a>
-                </li>
-            </ul>
-            </div>
-            <div style="clear:both"></div>
-         
-        </div>
-		<div class="shuju" id="sj">
-			<table id="cssz_table">
-				<tr class="textCt ertr  hui title1">
-					<td><input type="checkbox" id="checkall"></td>
-					<td><p>#</p></td>
-					<td><p>帐户名称</p></td>
-					<td><p>帐户状态</p></td>
-					<td><p>备注</p></td>
-					<td><p>操作</p></td>
-				</tr>
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
+			<div class="dqwz_l">当前位置：集团管理－集团帐户管理</div>
+			<div  class="caozuoan">
+	            <a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_add.png"  />
+	                    添加帐户</a>
+	            <a href="javascript:;" onclick="move()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/user_go.png"  />
+	                    移动帐户</a>
+	            <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
+	                    刷新列表</a>
+	        </div>
+	        <div style="clear:both"></div>
+	    </div>
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+		    <table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
+				 border=0 cellspacing="1" cellpadding="4" >
+				<thead >
+					<tr class="tableTopTitle-bg">
+						<td><input type="checkbox" id="checkall"></td>
+						<td width="40px">#</td>
+						<td>帐户名称</td>
+						<td>帐户状态</td>
+						<td>帐户角色</td>
+						<td>备注</td>
+						<td width="290px">操作</td>
+					</tr>
+				</thead>
+				<tbody>
 				<c:forEach items="${accounts}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
+					<tr class="table-SbgList">
 						<td><input type="checkbox" name="checkbox" value="${item.id }"></td>
 						<td>${i.index+1 }</td>
 						<td>${item.accountcode}</td>
@@ -264,10 +258,17 @@
 						</td>
 					</tr>
 				</c:forEach>
+				</tbody>
 			</table>
 		</div>
-		<div id="fanye" class="fanye1">
-			<p>共 ${fn:length(accounts) } 条记录</p>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+				 border=0 cellspacing="0" cellpadding="0" >
+				<tr class="table-botton" id="fanye" >
+					<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(accounts) } 行</p></td>
+					<td colspan="14" class="fenye" ></td>
+				</tr>
+			</table>
 		</div>
 	</div>
 	<div style="clear: both"></div>

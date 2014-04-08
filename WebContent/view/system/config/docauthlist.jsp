@@ -4,6 +4,8 @@
 <%@ include file="/view/common/top_menu.jsp"%>
 <%@ include file="/view/common/top_second_menu.jsp"%>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+
 <script type="text/javascript">
 
 function add(){  
@@ -86,36 +88,30 @@ function del(id) {
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：系统维护-系统配置-电子文件权限代码</div>
-		<div  class="caozuo">
-            <div class="caozuo_left">
-        	<ul>
-            	<li></li>
-            </ul>
-            </div>
-        	<div  class="caozuo_right">
-        	<ul>
-                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
-                    添加电子文件权限代码</a>
-                </li>
-                <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
-                    刷新列表</a>
-                </li>
-            </ul>
-            </div>
-            <div style="clear:both"></div>
-         
-        </div>
-		<div class="shuju" id="sj">
-			<table id="cssz_table">
-				<tr class="textCt ertr  hui title1">
-					<td><p>#</p></td>
-					<td><p>代码名称</p></td>
-					<td><p>代码值</p></td>
-					<td><p>操作</p></td>
-				</tr>
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
+			<div class="dqwz_l">当前位置：系统维护-系统配置-电子文件权限代码</div>
+			<div  class="caozuoan">
+	        	<a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
+	                    添加电子文件权限代码</a>
+	            <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
+	                    刷新列表</a>
+	        </div>
+	            <div style="clear:both"></div>
+       	</div>
+		<div class="scrollTable" align="left" style="padding-left:5px; ">
+			<table id="data_table" class="data_table table-Kang" aline="left" width="98%"
+				border=0 cellspacing="1" cellpadding="4">
+				<thead>
+					<tr class="tableTopTitle-bg">
+						<td width="40px">#</td>
+						<td>代码名称</td>
+						<td>代码值</td>
+						<td>操作</td>
+					</tr>
+				</thead>
+				<tbody>
 				<c:forEach items="${docauth}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
+					<tr class="table-SbgList">
 						<td>${i.index+1 }</td>
 						<td>${item.columnname}</td>
 						<td><font color="blue">${item.columndata}</font></td>
@@ -136,11 +132,17 @@ function del(id) {
 				</c:forEach>
 			</table>
 		</div>
-		<div id="fanye" class="fanye1">
-			<p></p>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+				 border=0 cellspacing="0" cellpadding="0" >
+				<tr class="table-botton" id="fanye" >
+					<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(docauth) } 行</p></td>
+					<td colspan="14" class="fenye" ></td>
+				</tr>
+			</table>
 		</div>
-	</div>
 	<div style="clear: both"></div>
+</div>
 </div>
 <!--内容部分结束-->
 

@@ -49,7 +49,6 @@
 	        dataType : 'text',
 	        success : function(data) {
 	        	alert(data);
-	            window.dialogArguments.location.reload();
 	        }
 	    });
 	}

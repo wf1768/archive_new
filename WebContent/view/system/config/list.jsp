@@ -2,39 +2,10 @@
     pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
+<%-- <%@ include file="/view/common/top_second_menu.jsp"%> --%>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <script type="text/javascript">
-<!--
-$(function () {
-    $(window).resize(function () {
-        setUI();
-    }); 
-	$(function(){
-			   	setUI();
-			   });
-    setUI();
-    function setUI() {
-
-    	var winW = $(window).width();
-		var winH = $(window).height();
-        var leftW = $("#bodyer_left").outerWidth();
-        var leftH = $("#bodyer_left").outerHeight();
-		var bottH = $("#footer").outerHeight();
-		var topH1 = $("header").outerHeight();
-		
-        var w = winW - leftW;
-        var rw = w -2 + "px";
-		var h = winH-topH1-bottH-80;
- 
-        $("#bodyer_right").height(leftH);
-		$("#bodyer_left").height(h);
-		$("#fanye").width($("#shuju").height());
-		$("#bodyer_right").width(w);
-        $("#cssz_table").width(rw);
-		$("#sj").height($("#bodyer_right").height() - $("#fanye").height() - 34);
-    }
-});
 
 function openwindow(id){  
 	//var result = window.showModalDialog("edit.do?id="+id,"查看窗口","toolbars=0;location=no;status=no;resizable=no;dialogWidth=700px;dialogHeight=400px;scrollbars=0");
@@ -79,34 +50,47 @@ function openwindow(id){
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：系统维护-系统配置-参数设置</div>
-		<div class="shuju" id="sj">
-			<table id="cssz_table">
-				<tr class="textCt ertr  hui title1">
-					<td><p>#</p></td>
-					<td><p>属性名称</p></td>
-					<td><p>属性值</p></td>
-					<td><p>属性描述</p></td>
-					<td><p>操作</p></td>
-				</tr>
-				<c:forEach items="${configList}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
-						<td>${i.index+1 }</td>
-						<td>${item.configname}</td>
-						<td><font color="blue">${item.configvalue}</font></td>
-						<td>${item.configmemo}</td>
-						<td>
-							<a href="#" onclick="openwindow('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
-								修改
-							</a>
-						</td>
-					</tr>
-				</c:forEach>
-			</table>
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
+			<div class="dqwz">当前位置：系统维护-系统配置-参数设置</div>
 		</div>
-		<div id="fanye" class="fanye1">
-			<p></p>
+		<div class="scrollTable" align="left" style="padding-left:5px; ">
+				<table id="data_table" class="data_table table-Kang" aline="left" width="98%"
+				border=0 cellspacing="1" cellpadding="4">
+					<thead>
+						<tr class="tableTopTitle-bg">
+							<td  width="40px">#</td>
+							<td>属性名称</td>
+							<td>属性值</td>
+							<td>属性描述</td>
+							<td>操作</td>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach items="${configList}" varStatus="i" var="item">
+							<tr class="table-SbgList">
+								<td>${i.index+1 }</td>
+								<td>${item.configname}</td>
+								<td><font color="blue">${item.configvalue}</font></td>
+								<td>${item.configmemo}</td>
+								<td>
+									<a href="#" onclick="openwindow('${item.id}')" class="juse">
+										<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/page_edit.png" />
+										修改
+									</a>
+								</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+		</div>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+					 border=0 cellspacing="0" cellpadding="0" >
+					<tr class="table-botton" id="fanye" >
+						<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(configList) } 行</p></td>
+						<td colspan="14" class="fenye" ></td>
+					</tr>
+				</table>
 		</div>
 	</div>
 	<div style="clear: both"></div>

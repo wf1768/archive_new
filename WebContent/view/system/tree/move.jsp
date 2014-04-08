@@ -10,6 +10,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 
 <script>
@@ -77,8 +78,7 @@
 	        success : function(data) {
 	            if (data == "success") {
 	            	alert("更新完毕。");
-	            	window.location.reload();
-	            	window.dialogArguments.location.reload();
+	            	reload();
 	            } else if (data == "error") {
 	            	alert("不能移动到本身或下级，请重新选择.");
 	            	return;
@@ -94,6 +94,7 @@
 <title>移动档案节点</title>
 </head>
 <body>
+	<a id="reload" href="" style="display:none">reload...</a>
 	<table width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>

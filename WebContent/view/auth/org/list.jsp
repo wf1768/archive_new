@@ -2,8 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
-
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 
@@ -72,7 +71,7 @@
 		var url = "add.do?parentid="+nodes[0].id+"&time="+Date.parse(new Date());
 		var whObj = { width: 340, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
-		//window.location.reload(true); // 刷新窗体
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function del(id) {
@@ -105,7 +104,7 @@
 		var url = "edit.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 340, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
-		//window.location.reload(true); // 刷新窗体
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function refresh() {
@@ -116,6 +115,7 @@
 		var url = "move.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
+		window.location.reload(true);
 	}
 	
 	function setowner(id) {
@@ -128,6 +128,7 @@
 		var url = "setrole.do?orgid="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 740, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function setauth(id) {
@@ -158,43 +159,37 @@
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：权限管理－组织机构管理</div>
-		<div  class="caozuo">
-            <div class="caozuo_left">
-        	<ul>
-            	<li></li>
-            </ul>
-            </div>
-        	<div  class="caozuo_right">
-        	<ul>
-                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
-                    添加组织机构</a>
-                </li>
-                <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
-                    刷新列表</a>
-                </li>
-            </ul>
-            </div>
-            <div style="clear:both"></div>
-         
-        </div>
-		<div class="shuju" id="sj">
-			<table id="cssz_table">
-				<tr class="textCt ertr  hui title1">
-					<td><p>#</p></td>
-					<td><p>机构名称</p></td>
-					<c:if test="${version=='group' }">
-						<td><p>管理者</p></td>
-					</c:if>
-					<td><p>角色</p></td>
-					<td><p>操作</p></td>
-				</tr>
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
+			<div class="dqwz_l">当前位置：权限管理－组织机构管理</div>
+			<div  class="caozuoan">
+	            <a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
+	                    添加组织机构</a>
+	            <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
+	                    刷新列表</a>
+	        </div>
+	        <div style="clear:both"></div>
+	    </div>
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+			<table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
+				 border=0 cellspacing="1" cellpadding="4" >
+				<thead>
+					<tr class="tableTopTitle-bg">
+						<td width="40px">#</td>
+						<td>机构名称</td>
+						<c:if test="${version=='group' }">
+							<td>管理者</td>
+						</c:if>
+						<td>角色</td>
+						<td>操作</td>
+					</tr>
+				</thead>
+				<tbody>
 				<c:forEach items="${childList}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
+					<tr class="table-SbgList">
 						<td>${i.index+1 }</td>
 						<td>${item['orgname']}</td>
 						<c:if test="${version=='group' }">
-						<td>${item['ownerString']}</td>
+							<td>${item['ownerString']}</td>
 						</c:if>
 						<td>${item['roleString']}</td>
 						<td>
@@ -229,9 +224,15 @@
 				</c:forEach>
 			</table>
 		</div>
-		<div id="fanye" class="fanye1">
-			<p>共 ${fn:length(childList) } 条记录</p>
-		</div>
+		<div class="aa" style="margin-left:5px" >
+				<table class=" " aline="left" width="100%" 
+					 border=0 cellspacing="0" cellpadding="0" >
+					<tr class="table-botton" id="fanye" >
+						<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(childList) } 行</p></td>
+						<td colspan="14" class="fenye" ></td>
+					</tr>
+				</table>
+			</div>
 	</div>
 	<div style="clear: both"></div>
 </div>

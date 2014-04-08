@@ -2,7 +2,6 @@
     pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
@@ -75,7 +74,7 @@
 		var url = "${pageContext.request.contextPath}/templetfield/add.do?tableid="+nodes[0].id+"&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
-		//window.location.reload(true); // 刷新窗体
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function delField(id) {
@@ -108,7 +107,7 @@
 		var url = "${pageContext.request.contextPath}/templetfield/edit.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
-		//window.location.reload(true); // 刷新窗体
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function sort(id,type) {

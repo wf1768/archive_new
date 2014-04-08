@@ -8,6 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 
 <script>
@@ -16,12 +17,6 @@
 		window.close();
 	}
 	$(function() {
-		//获取传来的值
-		var result = '${result }';
-		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
-		if (result != "") {
-			alert(result);
-		}
 	})
 	
 	function updateAccount(roleid,accountid) {
@@ -44,7 +39,7 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.location.reload(true);
+		            reload();
 		        }
 		    });
 		}
@@ -54,6 +49,7 @@
 <title>查看被赋予[${role.rolename }]角色的帐户</title>
 </head>
 <body>
+	<a id="reload" href="" style="display:none">reload...</a>
 	<div style="width: 90%;margin: 0 auto;">
 		<table width="90%" cellspacing="0" cellpadding="8" align="center">
 			<caption>拥有 [${role.rolename }] 角色的全部帐户，可以移除帐户的角色。</caption>

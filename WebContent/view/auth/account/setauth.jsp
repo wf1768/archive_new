@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
@@ -370,17 +370,16 @@
 </head>
 <body>
 	<div style="float: left;">
-	<table id="testTable" cellpadding="0" cellspacing="0">
+	<table width="350" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr >
-                <td class="biaoti" colspan="2">为帐户 [${account.accountcode }] 赋予档案使用权</td>
-                <td>&nbsp;</td>
+                <td colspan="2" align="center">为帐户 [${account.accountcode }] 赋予档案使用权</td>
             </tr>
-			<tr class="tr1">
-				<td class="txt1" colspan="2"><ul id="treeDemo" class="ztree"></ul></td>
+			<tr>
+				<td colspan="2"><ul id="treeDemo" class="ztree"></ul></td>
 			</tr>
 			<tr >
-				<td class="caozuo" colspan="2">
+				<td colspan="2">
 					<button type="button" onclick="setchecknodes()">授权</button>
 					<button type="button" onclick="closepage()">关闭</button>
 				</td>

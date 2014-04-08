@@ -25,3 +25,4 @@ function openShowModalDialog(url,param,whparam){
 	     p += 'dialogTop:' + top + 'px;';        
 	  return showModalDialog(url,paramObj,p);  
 }
+

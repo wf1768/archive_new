@@ -9,12 +9,16 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 <style type="text/css">
 a {
     color: #333333;
     font-size: 12px;
     text-decoration: none;
+}
+img {
+    border: 0 none;
 }
 </style>
 <script>
@@ -62,12 +66,22 @@ a {
 		var url = "${pageContext.request.contextPath}/archive/fieldedit.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
-		//window.location.reload(true); // 刷新窗体
+		reload();
 	}
+	
+	/* function reload() {
+		var reload = document.getElementById("reload");
+		reload.click();
+	}
+	
+	$(function(){
+		var url = window.location.href;
+		$("#reload").attr("href",url);
+	}) */
 	
 	function sort(id,type) {
 		$.ajax({
-	        async : true,
+	        async : false,
 	        url : "${pageContext.request.contextPath}/templetfield/sort.do",
 	        type : 'post',
 	        data: {id:id,type:type},
@@ -78,9 +92,9 @@ a {
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 	            }
-	            window.location.reload(true);
 	        }
 	    });
+		reload();
 	}
 	
 	//更新字段的一些属性。例如：检索字段、列表显示等的0和1修改。
@@ -97,24 +111,16 @@ a {
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 	            }
-	            window.location.reload(true);
+	            reload();
 	        }
 	    });
-	}
-	//=====以前的，没用后，删除以下
-	
-	function fieldcode(id) {
-		var url = "${pageContext.request.contextPath}/templetfield/fieldcode.do?id="+id + "&time="+Date.parse(new Date());
-		var whObj = { width: 640, height: 400 };
-		var result = openShowModalDialog(url,window,whObj);
-		window.location.reload(true);
 	}
 	
 </script>
 <title>档案显示设置</title>
-</head>
+</head><a id="reload" href="" style="display:none">reload...</a>
 <body>
-	<table width="99%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+	<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>
                 <td colspan="4" align="center">
@@ -156,10 +162,10 @@ a {
 		</tbody>
 	</table>
 	
-	<table width="99%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+	<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px;margin-bottom: 50px">
 		<thead >
 			<tr>
-	           <td colspan="12" align="center">
+	           <td colspan="13" align="center">
 	           	字段属性显示设置
 	           </td>
 	        </tr>

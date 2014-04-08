@@ -2,15 +2,11 @@
 	pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
-
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
-
-
-
 
 <script>
 	var selectTreeid = 0;
@@ -47,16 +43,22 @@
 		selectTreeid = treeid;
 		selectNode(treeid);
 		
-		$('#checkall').click(function(){
+	});
+	
+	function callback() {
+		var n = $(".scrollTable").height()-$(".aa").height();
+		$('.data_table').fixHeader({
+			height : n
+		});
+		
+		/*$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
 		});
 		//页面加载时，去掉所有checkbox的选择
 		$('input[type="checkbox"]').removeAttr("checked");
 		
-		$('.shiftCheckbox').shiftcheckbox();
-		
-		initgrid();
-	});
+		$('.shiftCheckbox').shiftcheckbox();*/
+	}
 	
 	function refresh() {
 		window.location.reload(true);
@@ -80,6 +82,7 @@
 			height : 200
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	function add() {
@@ -99,6 +102,7 @@
 			height : 300
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function edit(id) {
@@ -109,7 +113,7 @@
 			height : 200
 		};
 		var result = openShowModalDialog(url, window, whObj);
-		//window.location.reload(true); // 刷新窗体
+		window.location.reload(true); // 刷新窗体
 	}
 	
 	function move(id) {
@@ -132,6 +136,7 @@
 		var url = "move.do?id="+str + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
+		window.location.reload(true);
 	}
 	
 	function sort(id) {
@@ -142,6 +147,7 @@
 		var url = "sort.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
+		window.location.reload(true);
 	}
 	
 	function del(id,type) {
@@ -197,28 +203,6 @@
 			},100)
 		};
 	}
-	
-	function initgrid() {
-		var rowNum = '${fn:length(templets) }';
-		if (rowNum == 0) {
-			return;
-		}
-		var jstb1 = document.getElementById("tb1").rows[0];
-		var jstb2 = document.getElementById("tb2").rows[0];
-		//var divw = 0;
-		for ( var i = 0; i < 6; i++) {// “-2”是减去每列左右的边宽
-			jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-			
-			/* if (jstb1.cells[i].clientWidth > jstb2.cells[i].clientWidth) {//如果标题的列宽比数据的列宽还大则用标题的列宽
-				jstb2.cells[i].style.width = parseInt(jstb1.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb1.cells[i].clientWidth) - 2;
-			} else {
-				jstb1.cells[i].style.width = parseInt(jstb2.cells[i].clientWidth)  + "px";
-				//divw += parseInt(jstb2.cells[i].clientWidth) - 2;
-			} */
-		}
-	}
-
 </script>
 
 
@@ -237,8 +221,8 @@
 			</dd>
 		</dl>
 	</div>
-	<div id="bodyer_right" style="background-color: #EFE5E2;">
-		<div class="top_dd">
+	<div id="bodyer_right" >
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
 			<div class="dqwz_l">当前位置：系统配置－档案库维护 </div>
 			<div class="caozuoan">
 				<input type="button" value="添加档案夹" class="btn" onClick="addT()" />
@@ -248,73 +232,71 @@
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="title_div" id="tdiv">
-			<table class="table-Kang " id="tb1" align="center" width="98%"
-				 border=0 cellspacing="0" cellpadding="4" style="margin-top: 10px">
-				<tr class="tableTopTitle-bg">
-					<td><input type="checkbox" id="checkall"></td>
-					<td>序号</td>
-					<td>档案库名称</td>
-					<td>类型</td>
-					<td>排序</td>
-					<td style="border-right:0">操作</td>
-					<td class="last_list" ></td>
-				</tr>
-			</table>
-		</div>
-		<div class="data_div scrollTable" id="ddiv">
-			<table class="title_tb table-Kang1" id="tb2" align="center" width="100%"
-				 border=0 cellspacing="0" cellpadding="4">
-				<c:forEach items="${templets}" varStatus="i" var="item">
-					<tr class="table-SbgList">
-						<td><input type="checkbox" name="checkbox"
-							value="${item.id }" class="shiftCheckbox"></td>
-						<td>${i.index+1 }</td>
-						<td>${item.templetname}</td>
-						<td><c:choose>
-								<c:when test="${item.templettype=='A' }">
-									<font color="blue">标准档案</font>
-								</c:when>
-								<c:when test="${item.templettype=='F' }">
-									<font color="blue">文件级档案</font>
-								</c:when>
-								<c:when test="${item.templettype=='P' }">
-									<font color="blue">多媒体档案</font>
-								</c:when>
-								<c:when test="${item.templettype=='T' }">
-									档案夹
-								</c:when>
-							</c:choose></td>
-						<td><a href="javascript:;" onclick="sort('${item.id}')">${item.sort}</a></td>
-						<td>
-							<a href="javascript:;" onclick="edit('${item.id}')">
-								<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
-								修改
-							</a>
-							<a href="javascript:;" onclick="del('${item.id}','${item.templettype }')">
-								<img style="margin-bottom: -3px"
-								src="${pageContext.request.contextPath}/images/icons/application_form_delete.png" />
-								删除
-							</a>
-							<a href="javascript:;" onclick="move('${item.id}')">
-								<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
-								移动
-						    </a>
-						 </td>
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+			<table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
+				 border=0 cellspacing="1" cellpadding="4" >
+				 <thead >
+					<tr class="tableTopTitle-bg">
+						<td><input type="checkbox" id="checkall"></td>
+						<td>序号</td>
+						<td>档案库名称</td>
+						<td>类型</td>
+						<td>排序</td>
+						<td style="border-right:0">操作</td>
+						<td class="last_list" ></td>
 					</tr>
-				</c:forEach>
-				
+				</thead>
+				<tbody>
+					<c:forEach items="${templets}" varStatus="i" var="item">
+						<tr class="table-SbgList">
+							<td><input type="checkbox" name="checkbox"
+								value="${item.id }" class="shiftCheckbox"></td>
+							<td>${i.index+1 }</td>
+							<td>${item.templetname}</td>
+							<td><c:choose>
+									<c:when test="${item.templettype=='A' }">
+										<font color="blue">标准档案</font>
+									</c:when>
+									<c:when test="${item.templettype=='F' }">
+										<font color="blue">文件级档案</font>
+									</c:when>
+									<c:when test="${item.templettype=='P' }">
+										<font color="blue">多媒体档案</font>
+									</c:when>
+									<c:when test="${item.templettype=='T' }">
+										档案夹
+									</c:when>
+								</c:choose></td>
+							<td><a href="javascript:;" onclick="sort('${item.id}')">${item.sort}</a></td>
+							<td>
+								<a href="javascript:;" onclick="edit('${item.id}')">
+									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
+									修改
+								</a>
+								<a href="javascript:;" onclick="del('${item.id}','${item.templettype }')">
+									<img style="margin-bottom: -3px"
+									src="${pageContext.request.contextPath}/images/icons/application_form_delete.png" />
+									删除
+								</a>
+								<a href="javascript:;" onclick="move('${item.id}')">
+									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
+									移动
+							    </a>
+							 </td>
+						</tr>
+					</c:forEach>
+				</tbody>
 			</table>
 		</div>
-		<div class="aa">
-			<table class=" table-Kang" align="center" width="98%"
-				 border=0 cellspacing="0" cellpadding="4" >
-				<tr class="table-botton" id="fanye" class="fanye1">
-					<TD colspan="14"><p>共 ${fn:length(templets) } 条记录</p></TD>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+				 border=0 cellspacing="0" cellpadding="0" >
+				<tr class="table-botton" id="fanye" >
+					<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(templets) } 行</p></td>
+					<td colspan="14" class="fenye" ></td>
 				</tr>
 			</table>
 		</div>
-		<div style="clear: both"></div>
 	</div>
 	<div style="clear: both"></div>
 </div>

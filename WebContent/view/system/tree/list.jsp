@@ -2,8 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
-<%@ include file="/view/common/top_second_menu.jsp"%>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table1.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
@@ -53,7 +52,7 @@
 		selectTreeid = treeid;
 		selectNode(treeid);
 	});
-
+	
 	function refresh() {
 		window.location.reload(true);
 	}
@@ -75,6 +74,7 @@
 			height : 300
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		refresh();
 	}
 	
 	function edit(id) {
@@ -84,6 +84,7 @@
 			height : 300
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		refresh();
 	}
 	
 	function del(id,type) {
@@ -146,6 +147,7 @@
 		var url = "sort.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 300 };
 		var result = openShowModalDialog(url,window,whObj);
+		refresh();
 	}
 	
 	function move(id) {
@@ -156,6 +158,7 @@
 		var url = "move.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 440, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
+		refresh();
 	}
 </script>
 
@@ -175,8 +178,8 @@
 			</dd>
 		</dl>
 	</div>
-	<div id="bodyer_right" style="background-color: #EFE5E2;">
-		<div class="top_dd" style="margin-bottom: 10px">
+	<div id="bodyer_right">
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 			<div class="dqwz_l">当前位置：系统配置－档案树管理</div>
 			<div class="caozuoan">
 				<input type="button" value="添加档案树夹" class="btn" onClick="add('FT')" />
@@ -185,7 +188,7 @@
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="scrollTable" align="center">
+		<div class="scrollTable" align="left" style="padding-left:5px; ">
 			<table id="data_table" class="data_table table-Kang" id="tb1"
 				align="center" width="96%" border=0 cellspacing="1" cellpadding="4">
 				<thead>
@@ -234,15 +237,15 @@
 			</table>
 
 		</div>
-		<div class="aa" style="margin-left: 3px;">
-			<table class=" table-Kang" align="center" width="99%" border=0
-				cellspacing="0" cellpadding="0">
-				<tr class="table-botton" id="fanye">
-					<td colspan="14"><p>共 ${fn:length(trees) } 条记录</p></td>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+				 border=0 cellspacing="0" cellpadding="0" >
+				<tr class="table-botton" id="fanye" >
+					<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(trees) } 行</p></td>
+					<td colspan="14" class="fenye" ></td>
 				</tr>
 			</table>
 		</div>
-
 	</div>
 	<div style="clear: both"></div>
 </div>

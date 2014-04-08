@@ -62,7 +62,7 @@
 	        dataType : 'text',
 	        success : function(data) {
 	        	alert(data);
-	            window.dialogArguments.location.reload();
+	            //window.dialogArguments.location.reload();
 	        }
 	    });
 	}
@@ -71,62 +71,60 @@
 <title>添加档案</title>
 </head>
 <body>
-	<form action="" method="post">
-		<table width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
-			<tbody>
-				<tr>
-	                <td class="biaoti" colspan="2" align="center">
-	                	添加档案
-	                	<input type="hidden" id="treeid" name="treeid" value="${treeid }">
-	                	<input type="hidden" id="status" name="status" value="${status }">
-	                	<input type="hidden" id="tabletype" name="tabletype" value="${tabletype }">
-	                	<input type="hidden" id="parentid" name="parentid" value="${parentid }">
-	                </td>
-	            </tr>
-	            <c:forEach items="${fields}" varStatus="j" var="item">
-					<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-						<tr>
-							<td>${item.chinesename } :</td>
-							<c:choose>
-								<c:when test="${item.iscode == 0 }">
-									<c:choose>
-										<c:when test="${(item.fieldtype == 'VARCHAR') or (item.fieldtype == 'INT') }">
-											<td><input style="width: 200px" type="text" id="${item.englishname }" name="${item.englishname }" value="${item.defaultvalue == ''?'':item.defaultvalue }"> </td>			
-										</c:when>
-										<c:when test="${item.fieldtype == 'DATE'}">
-											<script>
-												$(function(){
-													$('#${item.englishname }_date').calendar({ id:'#${item.englishname }' });
-												})
-											</script>
-											<td>
-												<input type="text" id="${item.englishname }" name="${item.englishname }" >
-												<img id="${item.englishname }_date" align="absmiddle" src="${pageContext.request.contextPath}/images/icons/iconDate.gif">
-											</td>
-										</c:when>
-									</c:choose>
-								</c:when>
-								<c:when test="${item.iscode == 1 }">
-									<td>
-										<select id="${item.englishname }" name="${item.englishname }" style="width: 200px">
-											<c:forEach  items="${codeMap[item.id]}" var="item">
-												<option value="${item.columndata }">${item.columndata }</option>
-										    </c:forEach>
-										</select>
-									</td>
-								</c:when>
-							</c:choose>
-						</tr>
-					</c:if>
-				</c:forEach>
-				<tr>
-					<td colspan="2" align="center">
-						<button type="button" onclick="save()">保存</button>
-						<button type="button" onclick="closepage()">关闭</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</form>
+	<table width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+			<tr>
+                <td class="biaoti" colspan="2" align="center">
+                	添加档案
+                	<input type="hidden" id="treeid" name="treeid" value="${treeid }">
+                	<input type="hidden" id="status" name="status" value="${status }">
+                	<input type="hidden" id="tabletype" name="tabletype" value="${tabletype }">
+                	<input type="hidden" id="parentid" name="parentid" value="${parentid }">
+                </td>
+            </tr>
+            <c:forEach items="${fields}" varStatus="j" var="item">
+				<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+					<tr>
+						<td>${item.chinesename } :</td>
+						<c:choose>
+							<c:when test="${item.iscode == 0 }">
+								<c:choose>
+									<c:when test="${(item.fieldtype == 'VARCHAR') or (item.fieldtype == 'INT') }">
+										<td><input style="width: 200px" type="text" id="${item.englishname }" name="${item.englishname }" value="${item.defaultvalue == ''?'':item.defaultvalue }"> </td>			
+									</c:when>
+									<c:when test="${item.fieldtype == 'DATE'}">
+										<script>
+											$(function(){
+												$('#${item.englishname }_date').calendar({ id:'#${item.englishname }' });
+											})
+										</script>
+										<td>
+											<input type="text" id="${item.englishname }" name="${item.englishname }" >
+											<img id="${item.englishname }_date" align="absmiddle" src="${pageContext.request.contextPath}/images/icons/iconDate.gif">
+										</td>
+									</c:when>
+								</c:choose>
+							</c:when>
+							<c:when test="${item.iscode == 1 }">
+								<td>
+									<select id="${item.englishname }" name="${item.englishname }" style="width: 200px">
+										<c:forEach  items="${codeMap[item.id]}" var="item">
+											<option value="${item.columndata }">${item.columndata }</option>
+									    </c:forEach>
+									</select>
+								</td>
+							</c:when>
+						</c:choose>
+					</tr>
+				</c:if>
+			</c:forEach>
+			<tr>
+				<td colspan="2" align="center">
+					<button type="button" onclick="save()">保存</button>
+					<button type="button" onclick="closepage()">关闭</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>

@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <base target="_self">
 
@@ -16,6 +16,16 @@
 		window.returnValue="ok";
 		window.close();
 	}
+	
+	function reload() {
+		var reload = document.getElementById("reload");
+		reload.click();
+	}
+	
+	$(function(){
+		var url = window.location.href;
+		$("#reload").attr("href",url);
+	})
 	
 	function removerole(id,roleid) {
 		
@@ -38,10 +48,9 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
 		        }
 		    });
+		    reload();
 		}
 	}
 	
@@ -65,10 +74,9 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
 		        }
 		    });
+		    reload();
 		}
 	}
 	
@@ -76,62 +84,67 @@
 <title>设置帐户角色</title>
 </head>
 <body>
-	<div style="width: 90%;margin: 0 auto;">
-		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>设置帐户 [${account.accountcode }] 的角色。</caption>
-			<thead>
+	<a id="reload" href="" style="display:none">reload...</a>
+	<table width="650" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<thead>
+			<tr>
+	            <td colspan="4" align="center">设置帐户 [${account.accountcode }] 的角色。</td>
+	        </tr>
 			<tr>
 				<th>#</th>
 				<th>角色名称</th>
 				<th>角色描述</th>
 				<th>操作</th>
 			</tr>
-			</thead>
-			<tbody>
-				<c:if test="${role != null }">
-				<tr >
-					<td>1</td>
-					<th>${role.rolename}</th>
-					<td>${role.rolememo}</td>
-					<td>
-						<a href="#" onclick="removerole('${account.id}','${role.id}')" class="juse">移除</a>
-					</td>
-				</tr>
-				</c:if>
-			</tbody>
-		</table>
-	</div>
-	<div>
-		<ul id="treeDemo" class="ztree"></ul>
-		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>选择作为 [${account.accountcode }] 的角色。</caption>
-			<thead>
+		</thead>
+		<tbody>
+			<c:if test="${role != null }">
+			<tr >
+				<td>1</td>
+				<th>${role.rolename}</th>
+				<td>${role.rolememo}</td>
+				<td>
+					<a href="#" onclick="removerole('${account.id}','${role.id}')" class="juse">移除</a>
+				</td>
+			</tr>
+			</c:if>
+		</tbody>
+	</table>
+	<table width="650" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<thead>
+			<tr>
+	            <td colspan="4" align="center">选择作为 [${account.accountcode }] 的角色。</td>
+	        </tr>
 			<tr>
 				<th>#</th>
 				<th>角色名称</th>
 				<th>角色描述</th>
 				<th>操作</th>
 			</tr>
-			</thead>
-			<tbody>
-			<c:forEach items="${sys_roles}" varStatus="i" var="item">
-				<tr >
-					<td>${i.index+1 }</td>
-					<th>${item.rolename}</th>
-					<td>${item.rolememo}</td>
-					<td>
-						<a href="#" onclick="saverole('${account.id}','${item.id}')" class="juse">添加角色</a>
-					</td>
-				</tr>
-			</c:forEach>
-			</tbody>
-			<tfoot>
-				<tr>
-					<th scope="row">Total</th>
-					<td colspan="4">共 ${fn:length(sys_roles) } 条记录</td>
-				</tr>
-			</tfoot>
-		</table>
-	</div>
+		</thead>
+		<tbody>
+		<c:forEach items="${sys_roles}" varStatus="i" var="item">
+			<tr >
+				<td>${i.index+1 }</td>
+				<th>${item.rolename}</th>
+				<td>${item.rolememo}</td>
+				<td>
+					<a href="#" onclick="saverole('${account.id}','${item.id}')" class="juse">添加角色</a>
+				</td>
+			</tr>
+		</c:forEach>
+		</tbody>
+		<tfoot>
+			<tr>
+				<th scope="row">Total</th>
+				<td colspan="4">共 ${fn:length(sys_roles) } 条记录</td>
+			</tr>
+			<tr>
+				<td colspan="4" align="center">
+					<button type="button" onclick="closepage()">关闭</button>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
 </body>
 </html>

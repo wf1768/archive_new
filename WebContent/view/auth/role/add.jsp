@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/easyvalidator/css/validate.css" type="text/css" />
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/easy_validator.pack.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/jquery.bgiframe.min.js"></script>
@@ -22,7 +22,6 @@
 		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
 		if (result != "") {
 			alert(result);
-			window.dialogArguments.location.reload();
 		}
 	})
 	
@@ -32,24 +31,23 @@
 </head>
 <body>
 	<form action="save.do" method="post">
-		<table id="testTable" cellpadding="0" cellspacing="0">
+		<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 			<tbody>
 				<tr >
-	                <td class="biaoti" colspan="2">添加角色</td>
-	                <td>&nbsp;</td>
+	                <td colspan="2" align="center">添加角色</td>
 	            </tr>
-				<tr class="tr1">
-					<td class="txt1">角色名称 :</td>
+				<tr>
+					<td>角色名称 :</td>
 					<td><input type="text" name="rolename" value="${role.rolename }" reg="^.+$" tip="角色名称[必须填写]"></td>
 				</tr>
 				<tr >
-					<td class="txt1">角色描述 :</td>
+					<td>角色描述 :</td>
 					<td>
 						<input name="rolememo" type="text" id="rolememo" value="${role.rolememo }" tip="角色描述[不必须填写] " />
 					</td>
 				</tr>
 				<tr >
-					<td class="caozuo" colspan="2">
+					<td colspan="2" align="center">
 						<button type="submit"><span class="ok">保存</span></button>
 						<button type="button" onclick="closepage()">关闭</button>
 					</td>

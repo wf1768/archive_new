@@ -10,6 +10,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 
 <base target="_self">
 
@@ -42,7 +43,7 @@
 						alert(data);
 					}
 				});
-				window.location.reload(true);
+				reload();
 			},200);  
 		};
 	}
@@ -61,13 +62,14 @@
 			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
+		reload();
 	}
 	
 </script>
 <title>查看档案电子文件</title>
 </head>
 <body>
+	<a id="reload" href="" style="display:none">reload...</a>
 	<table width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>

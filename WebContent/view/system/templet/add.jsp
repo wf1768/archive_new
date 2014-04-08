@@ -48,7 +48,6 @@
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!");
 	            }
-	            window.dialogArguments.location.reload();
 	        }
 	    });
 	}
@@ -86,12 +85,6 @@
 				<td class="txt1">档案类型名称 :</td>
 				<td><input type="text" id=templetname name="templetname" >* </td>
 			</tr>
-			
-			
-			<!-- <tr class="tr1">
-				<td class="txt1">排序 :</td>
-				<td><input type="text" id="sort" name="sort" value="1" reg="^\d+$" tip="大小[必须填写，必须数字] "></td>
-			</tr> -->
 			<tr>
 				<td colspan="2" align="center">
 					<button type="button" onclick="save()">保存</button>

@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <base target="_self">
 
@@ -15,7 +15,7 @@
 	}
 	
 	function updatedocauth() {
-		var id = $("#id").val();
+		var id = '${docauth.id }';
 		var columnname = $("#columnname").val();
 		var columndata = $("#columndata").val();
 		
@@ -44,29 +44,26 @@
 <title>修改电子文件权限代码</title>
 </head>
 <body>
-	<form action="" method="post">
-		<table id="testTable" cellpadding="0" cellspacing="0">
-			<tbody>
-				<tr>
-	                <td class="biaoti" colspan="2">修改电子文件权限代码</td>
-	                <td><input type="hidden" id="id" name="id" value="${docauth.id }"/></td>
-	            </tr>
-				<tr class="tr1">
-					<td class="txt1">代码名称 :</td>
-					<td><input type="text" id="columnname" name="columnname" value="${docauth.columnname }"></td>
-				</tr>
-				<tr class="tr1">
-					<td class="txt1">代码值 :</td>
-					<td><input type="text" id="columndata" name="columndata" value="${docauth.columndata }"></td>
-				</tr>
-				<tr>
-					<td class="caozuo" colspan="2">
-						<button type="button" onclick="updatedocauth()">保存</button>
-						<button type="button" onclick="closepage()">关闭</button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</form>
+	<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+			<tr>
+                <td colspan="2" align="center">修改电子文件权限代码</td>
+            </tr>
+			<tr>
+				<td>代码名称 :</td>
+				<td><input type="text" id="columnname" name="columnname" value="${docauth.columnname }"></td>
+			</tr>
+			<tr>
+				<td>代码值 :</td>
+				<td><input type="text" id="columndata" name="columndata" value="${docauth.columndata }"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					<button type="button" onclick="updatedocauth()">保存</button>
+					<button type="button" onclick="closepage()">关闭</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>

@@ -157,7 +157,7 @@ public class AccountService implements IAccountService {
 			}
 		}
 		
-		sql = "delete from sys_sys_templetfield where accountid=?";
+		sql = "delete from sys_templetfield where accountid=?";
 		values.clear();
 		values.add(id);
 		templetfieldDao.del(sql, values);

@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/easyvalidator/css/validate.css" type="text/css" />
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/easy_validator.pack.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/easyvalidator/js/jquery.bgiframe.min.js"></script>
@@ -23,7 +23,6 @@
 		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
 		if (result != "") {
 			alert(result);
-			window.dialogArguments.location.reload();
 		}
 		//如果返回了对象
 		var serverType = '${docserver.servertype}';
@@ -74,15 +73,13 @@
 </head>
 <body>
 	<form id="localform" action="save.do" method="post">
-		<table id="testTable" cellpadding="0" cellspacing="0">
+		<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 			<tbody>
 				<tr >
-	                <td class="biaoti" colspan="2">添加服务器</td>
-	                <td>&nbsp;</td>
+	                <td colspan="2" align="center">添加服务器</td>
 	            </tr>
-				<tr class="tr1">
-					<td class="txt1">
-						服务器类型 :</td>
+				<tr>
+					<td>服务器类型 :</td>
 					<td>
 						<select class="s" id="servertype_l" name="servertype" reg="[^0]" tip="请先选择创建服务器类型">
 							<option value="FTP">FTP服务器</option>
@@ -90,29 +87,26 @@
 						</select>
 					</td>
 				</tr>
-				<tr >
-					<td class="txt1">
-						服务器名称 :</td>
+				<tr>
+					<td>服务器名称 :</td>
 					<td>
 						<input name="servername" type="text" id="servername" value="${docserver.servername }" reg="^.+$" tip="服务器名称[必须填写] " />
 					</td>
 				</tr>
-				<tr >
-					<td class="txt1">
-						服务器路径 :</td>
+				<tr>
+					<td>服务器路径 :</td>
 					<td>
 						<input name="serverpath" type="text" id="serverpath" value="${docserver.serverpath }" reg="^.+$" tip="服务器路径[必须填写] " />
 					</td>
 				</tr>
-				<tr >
-					<td class="txt1">
-						服务器描述 :</td>
+				<tr>
+					<td>服务器描述 :</td>
 					<td>
 						<input name="servermemo" type="text" id="servermemo" value="${docserver.servermemo }" tip="服务器描述[不必须填写] " />
 					</td>
 				</tr>
-				<tr >
-					<td class="caozuo" colspan="2">
+				<tr>
+					<td  colspan="2" align="center">
 						<input type="submit" value="保存" class="save" />
 						<input type="button" value="关闭" class="close" onclick="closepage()">
 					</td>
@@ -121,62 +115,58 @@
 		</table>
 	</form>
 	<form id="ftpform" style="display: none;" action="save.do" method="post">
-		<table id="testTable" cellpadding="0" cellspacing="0">
+		<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 			<tbody>
 				<tr >
-	                <td class="biaoti" colspan="2">添加服务器</td>
-	                <td>&nbsp;</td>
+	                <td colspan="2" align="center">添加服务器</td>
 	            </tr>
-				<tr class="tr1">
-					<td class="txt1">
-						服务器类型 :</td>
+				<tr>
+					<td>服务器类型 :</td>
 					<td>
 						<select class="s" id="servertype_f" name="servertype" reg="[^0]" tip="请先选择创建服务器类型">
 							<option value="FTP">FTP服务器</option>
 							<option value="LOCAL">服务器本地目录</option>
-						</select><!-- <span name="easyTip"></span> -->
+						</select>
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">
-						服务器名称 :</td>
+					<td>服务器名称 :</td>
 					<td>
 						<input name="servername" type="text" id="servername" value="${docserver.servername }" reg="^.+$" tip="服务器名称[必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">
-						服务器IP :</td>
+					<td>服务器IP :</td>
 					<td>
 						<input name="serverip" type="text" id="serverip" value="${docserver.serverip }" reg="^.+$" tip="服务器IP地址[必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">FTP帐户 :</td>
+					<td>FTP帐户 :</td>
 					<td>
 						<input name="ftpuser" type="text" id="ftpuser" value="${docserver.ftpuser }" reg="^.+$" tip="FTP服务器登录帐户名[必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">FTP密码 :</td>
+					<td>FTP密码 :</td>
 					<td>
 						<input name="ftppassword" type="text" id="ftppassword" value="${docserver.ftppassword }" reg="^.+$" tip="FTP服务器登录密码[必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">FTP端口 :</td>
+					<td>FTP端口 :</td>
 					<td>
 						<input name="serverport" type="text" id="serverport" value="${docserver.serverport }" reg="^.+$" value="21" tip="FTP服务器端口[必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="txt1">服务器描述 :</td>
+					<td>服务器描述 :</td>
 					<td>
 						<input name="servermemo" type="text" id="servermemo" value="${docserver.servermemo }" tip="服务器描述[不必须填写] " />
 					</td>
 				</tr>
 				<tr>
-					<td class="caozuo" colspan="2">
+					<td colspan="2" align="center">
 						<input type="submit" value="保存" class="save"/>
 						<input type="button" value="关闭" class="close" onclick="closepage()">
 					</td>

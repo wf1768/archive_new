@@ -111,7 +111,6 @@
 	            } else {
 	            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!");
 	            }
-	            window.dialogArguments.location.reload();
 	        }
 	    });
 	}

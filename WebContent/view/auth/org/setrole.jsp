@@ -6,8 +6,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 
 <script>
@@ -38,8 +39,7 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
+		            reload();
 		        }
 		    });
 		}
@@ -66,21 +66,13 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
+		            reload();
 		        }
 		    });
 		}
 	}
 	
 	$(function() {
-		//获取传来的值
-		var result = '${result }';
-		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
-		if (result != "") {
-			alert(result);
-			window.dialogArguments.location.reload();
-		}
 	})
 	
 	
@@ -88,10 +80,13 @@
 <title>设置组角色</title>
 </head>
 <body>
-	<div style="width: 90%;margin: 0 auto;">
-		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>设置 [${org.orgname }] 组的角色。</caption>
+	<a id="reload" href="" style="display:none">reload...</a>
+	<div >
+		<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 			<thead>
+			<tr>
+				<td colspan="4" align="center">设置 [${org.orgname }] 组的角色。</td>
+			</tr>
 			<tr>
 				<th>#</th>
 				<th>角色名称</th>
@@ -115,9 +110,11 @@
 	</div>
 	<div>
 		<ul id="treeDemo" class="ztree"></ul>
-		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>选择作为 [${org.orgname }] 的角色。</caption>
+		<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 			<thead>
+			<tr>
+				<td colspan="4" align="center">选择作为 [${org.orgname }] 的角色。</td>
+			</tr>
 			<tr>
 				<th>#</th>
 				<th>角色名称</th>
@@ -141,6 +138,12 @@
 				<tr>
 					<th scope="row">Total</th>
 					<td colspan="4">共 ${fn:length(sys_roles) } 条记录</td>
+				</tr>
+				<tr>
+					<td colspan="4" align="center">
+						<button type="button" onclick="saveOrg()">保存</button>
+						<button type="button" onclick="closepage()">关闭</button>
+					</td>
 				</tr>
 			</tfoot>
 		</table>

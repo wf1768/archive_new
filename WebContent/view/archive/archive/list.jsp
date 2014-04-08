@@ -137,6 +137,7 @@
 			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	function search() {
@@ -160,6 +161,7 @@
 			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	function show(id) {

@@ -4,13 +4,15 @@
 <%@ include file="/view/common/top_menu.jsp"%>
 <%@ include file="/view/common/top_second_menu.jsp"%>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+
 <script type="text/javascript">
 <!--
 function add(){  
 	var url = "add.do?time="+Date.parse(new Date());
 	var whObj = { width: 340, height: 400 };
 	var result = openShowModalDialog(url,window,whObj);
-	//window.location.reload(true); // 刷新窗体
+	window.location.reload(true); // 刷新窗体
 }
 
 function del(id) {
@@ -110,43 +112,37 @@ function refresh() {
 		</dl>
 	</div>
 	<div id="bodyer_right">
-		<div class="dqwz">当前位置：系统维护-系统配置-文件服务器</div>
-		<div  class="caozuo">
-            <div class="caozuo_left">
-        	<ul>
-            	<li></li>
-            </ul>
-            </div>
-        	<div  class="caozuo_right">
-        	<ul>
-                <li><a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
-                    添加文件服务器</a>
-                </li>
-                <li><a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
-                    刷新列表</a>
-                </li>
-            </ul>
-            </div>
-            <div style="clear:both"></div>
-         
-        </div>
-		<div class="shuju" id="sj">
-			<table id="cssz_table">
-				<tr class="textCt ertr  hui title1">
-					<td><p>#</p></td>
-					<td><p>服务器名称</p></td>
-					<td><p>服务器类型</p></td>
-					<td><p>服务器路径</p></td>
-					<td><p>服务器IP</p></td>
-					<td><p>FTP帐户</p></td>
-					<td><p>FTP密码</p></td>
-					<td><p>FTP端口</p></td>
-					<td><p>状态</p></td>
-					<td><p>描述</p></td>
-					<td><p>操作</p></td>
-				</tr>
+		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
+			<div class="dqwz_l">当前位置：系统维护-系统配置-文件服务器</div>
+			<div  class="caozuoan">
+	        	<a href="javascript:;" onclick="add()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/add.png"  />
+	                    添加文件服务器</a>
+	            <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
+	                    刷新列表</a>
+	        </div>
+	        <div style="clear:both"></div>
+	    </div>
+		<div class="scrollTable" align="left" style="padding-left:5px; " >
+			<table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
+				 border=0 cellspacing="1" cellpadding="4" >
+				<thead >
+					<tr class="tableTopTitle-bg">
+						<td width="40px">#</td>
+						<td>服务器名称</td>
+						<td>服务器类型</td>
+						<td>服务器路径</td>
+						<td>服务器IP</td>
+						<td>FTP帐户</td>
+						<td>FTP密码</td>
+						<td>FTP端口</td>
+						<td>状态</td>
+						<td>描述</td>
+						<td>操作</td>
+					</tr>
+				</thead>
+				<tbody>
 				<c:forEach items="${docserverList}" varStatus="i" var="item">
-					<tr class="textCt ertr  ">
+					<tr class="table-SbgList">
 						<td>${i.index+1 }</td>
 						<td>${item.servername}</td>
 						<td>${item.servertype}</td>
@@ -179,8 +175,14 @@ function refresh() {
 				</c:forEach>
 			</table>
 		</div>
-		<div id="fanye" class="fanye1">
-			<p>共 ${fn:length(docserverList) } 条记录</p>
+		<div class="aa" style="margin-left:5px" >
+			<table class=" " aline="left" width="100%" 
+				 border=0 cellspacing="0" cellpadding="0" >
+				<tr class="table-botton" id="fanye" >
+					<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(docserverList) } 行</p></td>
+					<td colspan="14" class="fenye" ></td>
+				</tr>
+			</table>
 		</div>
 	</div>
 	<div style="clear: both"></div>

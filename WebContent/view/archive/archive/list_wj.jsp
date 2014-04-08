@@ -146,6 +146,7 @@
 			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	function edit(id) {
@@ -162,6 +163,7 @@
 			height : 500
 		};
 		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	function del() {

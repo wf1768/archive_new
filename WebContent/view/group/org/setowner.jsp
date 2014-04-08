@@ -10,6 +10,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 
 <script>
@@ -86,9 +87,8 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
-		        }
+		            //window.dialogArguments.location.reload();
+		            reload();
 		    });
 		}
 	}
@@ -114,8 +114,8 @@
 		            } else {
 		            	alert("可能因为您长时间没有操作，或读取数据时出错，请关闭浏览器，重新登录尝试或与管理员联系!！");
 		            }
-		            window.dialogArguments.location.reload();
-		            window.location.reload();
+		            //window.dialogArguments.location.reload();
+		            reload();
 		        }
 		    });
 		}
@@ -128,13 +128,6 @@
 		selectTreeid = treeid;
 		selectNode(treeid);
 		
-		//获取传来的值
-		var result = '${result }';
-		//如果返回值不为空，说明保存了，弹出提示，刷新父页面
-		if (result != "") {
-			alert(result);
-			window.dialogArguments.location.reload();
-		}
 	})
 	
 	
@@ -142,6 +135,7 @@
 <title>组织机构管理者</title>
 </head>
 <body>
+	<a id="reload" href="" style="display:none">reload...</a>
 	<div style="width: 90%;margin: 0 auto;">
 		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
 			<caption>作为 [${org.orgname }] 组织机构管理者的帐户列表。</caption>
