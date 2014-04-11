@@ -711,9 +711,10 @@ public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements B
 	public List<Map<String,Object>> searchForMap(String sql,List<Object> values){
 		if(StringUtils.isEmpty(sql))return new ArrayList<Map<String,Object>>();
 		if(values==null)values=new ArrayList<Object>();
-		if(log.isDebugEnabled()){
-			log.debug("sql : "+sql+" values:"+ values );
-		}
+//		if(log.isDebugEnabled()){
+//			log.debug("sql : "+sql+" values:"+ values );
+//		}
+		logger.info("sql : "+sql+" values:"+ values);
 		return this.getJdbcTemplate().queryForList(sql, values.toArray());
 	}
 	@Override

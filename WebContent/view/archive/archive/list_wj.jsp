@@ -257,6 +257,8 @@
 		}
 		//判断是单个挂接还是多个。
 		var s = str.split(",");// 在每个逗号(,)处进行分解。
+		var winW = $(window).width();
+		var w = winW * 0.8;
 		if (s.length == 1) {
 			var whObj = {
 				width : 650,
@@ -265,7 +267,7 @@
 		}
 		else {
 			var whObj = {
-				width : 650,
+				width : w,
 				height : 500
 			};
 		}
@@ -315,14 +317,16 @@
 			</c:if>
 			</div>
 			<div class="caozuoan">
-				<input type="button" value="添加" class="btn" onClick="add('FT')" />
+				<input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','02')" />
-				<input type="button" value="挂接" class="btn" onClick="doc()" />
-				<input type="button" value="打印" class="btn" onClick="print_()" />
+				<input type="button" value="挂接" class="btn" onClick="doc('')" />
+				<select name="pageselect" onchange="print_(options[selectedIndex].value)" >
+					<option value="ajml">打印案卷目录</option>
+				</select>
 				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
-					<option value="http://www.baidu.com">百度</option>
-					<option value="http://www.163.com">网易</option>
+					<option value="import">数据导入</option>
+					<option value="export">数据导出</option>
 				</select>
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
@@ -402,7 +406,7 @@
 							<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
 							<c:choose>
 								<c:when test="${archiveitem['isdoc'] == 1 }">
-									<td><a title="电子全文" href="javascript:;" onclick=""><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
+									<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></td>
 								</c:when>
 								<c:otherwise>
 									<td></td>

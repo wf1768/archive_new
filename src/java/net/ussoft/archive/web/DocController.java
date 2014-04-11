@@ -141,7 +141,7 @@ public class DocController extends BaseConstroller {
 //	    }
 	    
 	    String userAgent = request.getHeader("User-Agent"); 
-        if(userAgent != null && userAgent.indexOf("MSIE") == -1) {  
+        if(userAgent != null && userAgent.indexOf("MSIE") == -1) {
             // FF   
             String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
             response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);

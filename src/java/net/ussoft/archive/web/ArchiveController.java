@@ -540,7 +540,32 @@ public class ArchiveController extends BaseConstroller {
 		//获取档案信息
 		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,orderbyString);
 		modelMap.put("maps", maps);
-		modelMap.put("maps_json", JSON.toJSON(maps));
+//		modelMap.put("maps_json", JSON.toJSON(maps));
+		
+		//解决档案信息字符转为json后，特殊字符问题。
+		List<Map<String, Object>> tmpMaps = new ArrayList<Map<String,Object>>();
+		for (Map<String, Object> map : maps) {
+			for (Sys_templetfield field : fieldList) {
+				if (!field.getFieldtype().equals("INT") && field.getSort() >= 0) {
+					Object object = map.get(field.getEnglishname());
+					String tmpStr = "";
+					if (null != object) {
+						tmpStr = object.toString();
+					}
+					
+					if (null != tmpStr && !"".equals(tmpStr)) {
+						tmpStr = tmpStr.replaceAll("\\\\","\\\\\\\\");
+						tmpStr = tmpStr.replace("'","\\\'");
+						tmpStr = tmpStr.replace("\"","\\\"");
+						tmpStr = tmpStr.replaceAll("[\\t\\n\\r]", "");
+					}
+					map.put(field.getEnglishname(), tmpStr);
+				}
+			}
+			tmpMaps.add(map);
+		}
+		
+		modelMap.put("maps_json", JSON.toJSON(tmpMaps));
 		
 		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
 		HashMap<String, Object> configMap = getConfig(account.getId());

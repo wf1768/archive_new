@@ -105,7 +105,6 @@ public class DynamicService implements IDynamicService {
 			}
 		}
 		
-		
 		pageBean = dynamicDao.searchForMap(sql, values, pageBean);
 		
 		return pageBean;
