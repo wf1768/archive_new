@@ -163,7 +163,9 @@ public class TempletfieldService implements ITempletfieldService {
 	@Transactional("txManager")
 	@Override
 	public String insert(Sys_templetfield templetfield) {
+		
 		String result = "success";
+		
 		//判断字段英文名是否存在
 		String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
 		List<Object> values = new ArrayList<Object>();

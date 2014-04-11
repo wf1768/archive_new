@@ -22,7 +22,7 @@
 	function save() {
 		var tableid = $("#tableid").val();
 		var chinesename = $("#chinesename").val();
-		var englishname = $("#englishname").val();
+		var englishname = $("#englishname").val().toUpperCase();
 		
 		var fieldtype = $("#fieldtype").val();
 		var fieldsize = $("#fieldsize").val();

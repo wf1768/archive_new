@@ -16,6 +16,7 @@ public class Sys_doc {
 	private String docext;
 	private String doclength;
 	private String docpath;
+	private String createrid;
 	private String creater;
 	private String createtime;
 	private String fileid;
@@ -52,6 +53,12 @@ public class Sys_doc {
 	}
 	public String getDoctype() {
 		return doctype;
+	}
+	public String getCreaterid() {
+		return createrid;
+	}
+	public void setCreaterid(String createrid) {
+		this.createrid = createrid;
 	}
 	public void setDoctype(String doctype) {
 		this.doctype = doctype;

@@ -10,9 +10,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -46,6 +47,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSON;
 
 
 /**
@@ -131,16 +134,28 @@ public class DocController extends BaseConstroller {
 		response.reset();
 
 		String filename = doc.getDocoldname();
-	    if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0) {  
-	        filename = URLEncoder.encode(filename, "UTF-8");  
-	    } else {  
-	        filename = new String(filename.getBytes("UTF-8"), "ISO8859-1");  
-	    }  
+//	    if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0) {  
+//	        filename = URLEncoder.encode(filename, "UTF-8");  
+//	    } else {  
+//	        filename = new String(filename.getBytes("UTF-8"), "ISO8859-1");  
+//	    }
 	    
+	    String userAgent = request.getHeader("User-Agent"); 
+        if(userAgent != null && userAgent.indexOf("MSIE") == -1) {  
+            // FF   
+            String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);
+        }else{
+            // IE   
+            String enableFileName = new String(filename.getBytes("GBK"), "ISO-8859-1");   
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);
+        }
+	    
+            
 		// 设置response的Header
 //		response.addHeader("Content-Disposition", "attachment;filename="
 //				+ new String(doc.getDocoldname().getBytes("utf-8"), "iso-8859-1")); // 转码之后下载的文件不会出现中文乱码
-		response.addHeader("Content-Disposition", "attachment;filename=" + filename); // 转码之后下载的文件不会出现中文乱码
+//		response.addHeader("Content-Disposition", "attachment;filename=" + filename); // 转码之后下载的文件不会出现中文乱码
 		response.addHeader("Content-Length", "" + doc.getDoclength());
 		
 		if ("LOCAL".equals(docserver.getServertype())) {
@@ -419,6 +434,7 @@ public class DocController extends BaseConstroller {
         doc.setDoctype("0");
         doc.setDocauth("1");
         doc.setDocext(docExt.substring(1).toUpperCase());
+        doc.setCreaterid(sessionAccount.getId());
         doc.setCreater(sessionAccount.getAccountcode());
         doc.setCreatetime(CommonUtils.getTimeStamp());
         if (null != archiveid && !"".equals(archiveid)) {
@@ -531,290 +547,25 @@ public class DocController extends BaseConstroller {
         return tmppath;
     }
     
-	/**
-	 * TODO 旧系统老方法。plupload上传。但是在springmvc下调试不成功，file对象无法获取。现改为springmvc指定200m的每个分包。 有时间调试2m分包上传
-	 * @param request
-	 * @param response
-	 */
-	@RequestMapping(value = "/upload3", method = RequestMethod.POST)
-	public void upload3(HttpServletRequest request,HttpServletResponse response) {
+	
+	@RequestMapping(value="/multiple",method=RequestMethod.POST)
+	public void multiple(String data,String sys,HttpServletResponse response) throws IOException {
 		
-		String treeid = request.getParameter("treeid");
-		String tabletype = request.getParameter("tabletype");
-		String archiveid = request.getParameter("archiveid");
-		
-		
-		Integer chunks = Integer.valueOf(request.getParameter("chunks"));
-		String name = request.getParameter("name");
-		Integer chunk = Integer.valueOf(request.getParameter("chunk"));
-		
-//		File file = (File) request.get
-		
-		//得到当前登录帐户
-    	System.out.println("上传Start：----------------------------");
-        Sys_account sessionAccount = getSessionAccount();
-        if (null == sessionAccount) {
-            return;
-        }
-//        String contextPath = getProjectPath()+ "/file" + File.separator + "upload" + File.separator;
-        String contextPath = "/Users/wangf/develop/testdoc/3/";
-        String dstPath =  contextPath+ name;
-        File dstFile = new File(dstPath);
-        // 文件已存在（上传了同名的文件）
-        if (chunk == 0 && dstFile.exists()) {
-            dstFile.delete();
-            dstFile = new File(dstPath);
-        }
-        
-//        cat(file, dstFile);
-        
-        String sql = "";
-        List<Object> values = new ArrayList<Object>();
-        
-        //获取tree 对象
-		Sys_tree tree = treeService.getById(treeid);
-		//获得tree对应的templet
-		Sys_templet templet = templetService.getByid(tree.getTempletid());
-		//获取table
-		Sys_table table = new Sys_table();
-		table.setTempletid(templet.getId());
-		table.setTabletype(tabletype);
-		table = tableService.selectByWhere(table);
-		
-        if (chunk == chunks - 1) {   // 完成一整个文件;
-        	//声明一个标识，是否是单个文件挂接。如果fileid有值，应该把档案条目的isdos设置为1
-        	boolean isdoc = false;
-        	//获取文件服务器
-        	Sys_docserver docserver = new Sys_docserver();
-        	docserver.setServerstate(1);
-        	docserver = docserverService.selectByWhere(docserver);
-            
-            String docExt = "";//扩展名
-            String oldName = dstFile.getName();
-            String docId = UUID.randomUUID().toString();
-
-            if (oldName.lastIndexOf(".") >= 0) {
-                docExt = oldName.substring(oldName.lastIndexOf("."));
-            }
-            String newName = docId+docExt;
-            File newFile =new File(contextPath+newName);
-            dstFile.renameTo(newFile);
-            Sys_doc doc = new Sys_doc();
-            doc.setId(docId);
-            doc.setDocnewname(newName);
-            doc.setDoclength(CommonUtils.formatFileSize(newFile.length()));
-            doc.setDocoldname(oldName);
-            doc.setDoctype("0");
-            doc.setDocext(docExt.substring(1).toUpperCase());
-            doc.setCreater(sessionAccount.getAccountcode());
-            doc.setCreatetime(CommonUtils.getTimeStamp());
-            if (null != archiveid && !"".equals(archiveid)) {
-            	doc.setFileid(archiveid);
-            	isdoc = true;
-            }
-            else {
-            	doc.setFileid("");
-            }
-            
-            if (null != table) {
-            	doc.setTableid(table.getId());
-            }
-            else {
-            	doc.setTableid("");
-            }
-            
-            if (null != treeid && !"".equals(treeid)) {
-            	doc.setTreeid(treeid);
-            }
-            else {
-            	doc.setTreeid("");
-            }
-            
-            if ("FTP".equals(docserver.getServertype())) {
-                try {
-					FtpUtil util = new FtpUtil();
-					util.connect(docserver.getServerip(),
-					        docserver.getServerport(),
-					        docserver.getFtpuser(),
-					        docserver.getFtppassword(),
-					        docserver.getServerpath());
-					FileInputStream s = new FileInputStream(newFile);
-					util.uploadFile(s, newName);
-					util.closeServer();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-                //ftp上传完成，删除临时文件
-                deleteFile(newFile.getPath());
-            } else if ("LOCAL".equals(docserver.getServertype())){
-                String serverPath = docserver.getServerpath();
-                String savePath = docserver.getServerpath();
-                if (null == serverPath || "".equals(serverPath)) {
-                        return;
-                }
-                else {
-                    if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
-                        savePath += "/";
-                    }
-                }
-                System.out.println("上传文件路径+Name=："+savePath+newName);
-                newFile.renameTo(new File(savePath + newName));
-                System.out.println("上传文件路径+Name=："+savePath+newName+"上传文件结束，upload file over");
-                //删除临时文件.renameTO 的同时，已经删除了，这里再删除一次，避免
-                deleteFile(newFile.getPath());
-            }
-            doc.setDocpath( docserver.getServerpath() + newName);
-            doc.setDocpath(newName);
-            doc.setDocserverid(docserver.getId());
-            docService.insert(doc);
-            //把档案条目的isdoc字段设置
-            if (isdoc) {
-            	sql = "update " + table.getTablename() + " set isdoc = 1 where id='" + archiveid + "'";
-            	dynamicService.exeSql(sql);
-            }
-        }
-        System.out.println("END:---------------------------------");
-        return;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	// TODO 以下没用，参考完了删除
-
-	/**
-	 * 系统维护页面打开系统配置列表
-	 * 
-	 * @param modelMap
-	 * @return
-	 */
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ModelAndView list(ModelMap modelMap) {
-		modelMap = super.getModelMap("SYSTEM", "CONFIG");
-
-		// 获取数据
-		List<Sys_docserver> docserverList = docserverService.list();
-		modelMap.put("docserverList", docserverList);
-
-		return new ModelAndView("/view/system/docserver/list", modelMap);
-	}
-
-	/**
-	 * 打开添加服务器页面
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/add", method = RequestMethod.GET)
-	public String add() {
-		return "/view/system/docserver/add";
-	}
-
-	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public ModelAndView save(Sys_docserver docserver, ModelMap modelMap) {
-
-		if (docserver != null) {
-			docserver.setId(UUID.randomUUID().toString());
-		}
-		docserver.setServerstate(0);
-		docserver = docserverService.insert(docserver);
-		String result = "添加完成。";
-		if (docserver == null) {
-			result = "更新出现错误，请重新尝试，或与管理员联系。";
-		}
-		modelMap.put("docserver", docserver);
-		modelMap.put("result", result);
-		return new ModelAndView("/view/system/docserver/add", modelMap);
-	}
-
-	/**
-	 * 启用服务器
-	 * 
-	 * @param id
-	 * @param request
-	 * @param response
-	 * @throws IOException
-	 */
-	@RequestMapping(value = "/status")
-	public void status(String id, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
-
-		String result = "failure";
-
-		// 更新所有服务器的status为0.
-		int s_num = docserverService.updateState();
-
-		if (s_num <= 0) {
-			out.print(result);
+		
+		if (null == data || data.equals("")) {
+			out.print("未获得要删除的数据，请重新操作或与管理员联系。");
 			return;
 		}
-
-		// 根据id获取服务器对象
-		Sys_docserver docserver = docserverService.selectById(id);
-		if (docserver == null) {
-			out.print(result);
-			return;
-		}
-		docserver.setServerstate(1);
-		int num = docserverService.update(docserver);
-
-		if (num > 0) {
-			result = "success";
-		}
-
-		out.print(result);
+		
+		List<Map<String, String>> docs = (List<Map<String, String>>) JSON.parse(data);
+		Map<String, String> sysMap = (Map<String, String>) JSON.parse(sys);
+		
+		ResultInfo info = docService.multiple(docs, sysMap);
+		
+		out.print(info.getMsg());
 	}
-
-	/**
-	 * 打开服务器编辑页面
-	 * 
-	 * @param id
-	 * @param modelMap
-	 * @return
-	 */
-	@RequestMapping(value = "/edit", method = RequestMethod.GET)
-	public ModelAndView edit(String id, ModelMap modelMap) {
-		// 判断id是否存在
-		if (id == null || id.equals("")) {
-
-		}
-		// 获取对象
-		Sys_docserver docserver = docserverService.selectById(id);
-		modelMap.put("docserver", docserver);
-		return new ModelAndView("/view/system/docserver/edit", modelMap);
-	}
-
-	/**
-	 * 执行更新
-	 * 
-	 * @param id
-	 * @param value
-	 * @param modelMap
-	 * @return
-	 */
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	public ModelAndView update(Sys_docserver docserver, ModelMap modelMap) {
-
-		int num = docserverService.update(docserver);
-		String result = "更新完成。";
-		if (num <= 0) {
-			result = "更新出现错误，请重新尝试，或与管理员联系。";
-		}
-		modelMap.put("docserver", docserver);
-		modelMap.put("result", result);
-		return new ModelAndView("/view/system/docserver/edit", modelMap);
-	}
+	
 }

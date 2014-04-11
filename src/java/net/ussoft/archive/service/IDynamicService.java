@@ -30,7 +30,7 @@ public interface IDynamicService {
 	 * @param id			记录id
 	 * @return
 	 */
-	public List<Map<String, Object>> get(String treeid,String tabletype,String id);
+	public List<Map<String, Object>> get(String treeid,String tabletype,String id,String orderby);
 	
 	/**
 	 * 保存档案数据

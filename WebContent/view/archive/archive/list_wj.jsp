@@ -233,8 +233,45 @@
 		window.location.reload(true);
 	}
 	
-	function test(v) {
-		alert(v);
+	function doc(id) {
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再查看档案电子文件。');
+			return;
+		}
+		
+		var str = "";
+		if (id != "") {
+			str = id;
+		}
+		else {
+			$("input[name='checkbox']:checked").each(function () {
+				str+=$(this).val()+ ",";
+			});
+			
+			if (str == "") {
+				alert("请先选择要挂接电子文件的档案数据。");
+				return;
+			}
+			str = str.substring(0,str.length-1);
+		}
+		//判断是单个挂接还是多个。
+		var s = str.split(",");// 在每个逗号(,)处进行分解。
+		if (s.length == 1) {
+			var whObj = {
+				width : 650,
+				height : 500
+			};
+		}
+		else {
+			var whObj = {
+				width : 650,
+				height : 500
+			};
+		}
+		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=02&id=" + str + "&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	

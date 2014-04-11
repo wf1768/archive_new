@@ -255,6 +255,8 @@
 		}
 		//判断是单个挂接还是多个。
 		var s = str.split(",");// 在每个逗号(,)处进行分解。
+		var winW = $(window).width();
+		var w = winW * 0.8;
 		if (s.length == 1) {
 			var whObj = {
 				width : 650,
@@ -263,7 +265,7 @@
 		}
 		else {
 			var whObj = {
-				width : 650,
+				width : w,
 				height : 500
 			};
 		}

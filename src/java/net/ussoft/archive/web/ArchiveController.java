@@ -171,7 +171,7 @@ public class ArchiveController extends BaseConstroller {
 				
 				modelMap.put("ajFieldList", ajFieldList);
 				//获取aj级信息
-				List<Map<String, Object>> maps = dynamicService.get(treeid, "01", parentid);
+				List<Map<String, Object>> maps = dynamicService.get(treeid, "01", parentid,null);
 				modelMap.put("maps", maps);
 				modelMap.put("parentid", parentid);
 				
@@ -344,7 +344,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("fields", fields);
 		//获取信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,null);
 		modelMap.put("maps", maps);
 		
 		String resultsString = JSON.toJSONString(fields);
@@ -411,7 +411,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("fields", fields);
 		//获取档案信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,null);
 		
 		
 		if (null == maps || maps.size() == 0) {
@@ -507,9 +507,57 @@ public class ArchiveController extends BaseConstroller {
 		table.setTabletype(tabletype);
 		table = tableService.selectByWhere(table);
 		
+		
+		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
+		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
+		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+		
+		if (null == fieldList || fieldList.size() == 0) {
+			fieldList = treeService.geTempletfields(treeid, tabletype);
+		}
+		
+		//获取排序规则
+		String orderbyString = "";
+		for (Sys_templetfield field : fieldList) {
+			if (null != field.getOrderby() && !field.getOrderby().equals("")) {
+				if (field.getFieldtype().equals("INT")) {
+					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+				}
+				else {
+					if (field.getOrderby().equals("GBK")) {
+						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+					}
+					else {
+						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+					}
+				}
+			}
+		}
+		if (orderbyString.length() > 0) {
+			orderbyString = " order by " + orderbyString.substring(0, orderbyString.length()-1);
+		}
+		
 		//获取档案信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,orderbyString);
 		modelMap.put("maps", maps);
+		modelMap.put("maps_json", JSON.toJSON(maps));
+		
+		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
+		HashMap<String, Object> configMap = getConfig(account.getId());
+		//字段截取标准。（列表里字段长度超过标准，被截取)
+		Integer subString = 10;
+		if (null == configMap || configMap.size() == 0) {
+		}
+		else {
+			subString = Integer.parseInt(configMap.get("SUBSTRING").toString());
+		}
+		//防止数字错误
+		if (subString < 0) {
+			subString = 10;
+		}
+		//用来前台判断文字截取多少个
+		modelMap.put("subString", subString);
+		
 		
 		if (singleArchive) {
 			//获取当前帐户与树的权限（下载、查看）
@@ -552,6 +600,20 @@ public class ArchiveController extends BaseConstroller {
 				return null;
 			}
 			
+			Sys_account sessionAccount = getSessionAccount();
+	    	if (null == sessionAccount) {
+	            return null;
+	        }
+	    	//获取当前帐户上传的未挂接的所有电子全文，作为批量挂接
+	    	List<Sys_doc> docs_no = new ArrayList<Sys_doc>();
+	    	String sql = "select * from sys_doc where createrid=? and fileid=?";
+			List<Object> values = new ArrayList<Object>();
+			values.clear();
+			values.add(sessionAccount.getId());
+			values.add("");
+			docs_no = docService.exeSql(sql, values);
+			modelMap.put("docs_no", docs_no);
+			modelMap.put("doc_no_json", JSON.toJSON(docs_no));
 			
 			String resultsString = JSON.toJSONString(fields);
 			modelMap.put("fieldjson", resultsString);

@@ -3,6 +3,7 @@ package net.ussoft.archive.service;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.List;
+import java.util.Map;
 
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.util.resule.ResultInfo;
@@ -37,7 +38,15 @@ public interface IDocService {
 	
 	public Sys_doc selectByWhere(Sys_doc doc);
 	
-	public ResultInfo delete(String id) throws SocketException, IOException;
+	public ResultInfo delete(String idString) throws SocketException, IOException;
 	
 	public List<Sys_doc> exeSql(String sql,List<Object> values);
+	
+	/**
+	 * 批量挂接保存
+	 * @param docs		全文id和档案id的list
+	 * @param sysMap	系统字段map （treeid ，tabletype）
+	 * @return
+	 */
+	public ResultInfo multiple(List<Map<String, String>> docs,Map<String, String> sysMap);
 }

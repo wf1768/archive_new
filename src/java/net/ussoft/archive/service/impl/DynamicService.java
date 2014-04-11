@@ -112,7 +112,7 @@ public class DynamicService implements IDynamicService {
 	}
 	
 	@Override
-	public List<Map<String, Object>> get(String treeid, String tabletype,String id) {
+	public List<Map<String, Object>> get(String treeid, String tabletype,String id,String orderby) {
 		if (null == treeid || treeid.equals("")) {
 			return null;
 		}
@@ -149,10 +149,10 @@ public class DynamicService implements IDynamicService {
 		values.clear();
 		values.addAll(idList);
 		
-//		sql = "select * from " + tables.get(0).getTablename() + " where id in (" + id + ")";
-//		sql = "select * from " + tables.get(0).getTablename() + " where id=?";
-//		values.clear();
-//		values.add(id);
+		if (null != orderby && !"".equals(orderby)) {
+			sb.append(" ").append(orderby);
+		}
+		
 		List<Map<String, Object>> maps = dynamicDao.searchForMap(sb.toString(), values);
 		
 		return maps;

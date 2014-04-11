@@ -133,5 +133,8 @@ update sys_config set accountid = 'SYSTEM'
 alter table sys_templetfield  add accountid varchar(40);
 update sys_templetfield set accountid = 'SYSTEM'
 
+--19、在表sys_doc表增加createrid（varchar 40） 电子文件上传人的帐户id
+alter table sys_doc  add createrid varchar(40);
+
 
 
