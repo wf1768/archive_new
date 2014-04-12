@@ -56,7 +56,7 @@ public class DynamicService implements IDynamicService {
 	
 	@Override
 	public PageBean<Map<String, Object>> archiveList(String treeid,String parentid,String tabletype,String searchTxt,
-			PageBean<Map<String, Object>> pageBean) {
+			Integer status,PageBean<Map<String, Object>> pageBean) {
 		if (null == treeid || treeid.equals("")) {
 			return null;
 		}
@@ -89,10 +89,10 @@ public class DynamicService implements IDynamicService {
 		sql = ArchiveUtil.createSql(tables.get(0).getTablename(), searchTxt, fields);
 		
 		if (sql.contains("WHERE")) {
-			sql += " and treeid=? and status = 0";
+			sql += " and treeid=? and status = " + status;
 		}
 		else {
-			sql += " WHERE treeid=? and status = 0";
+			sql += " WHERE treeid=? and status = " + status;
 		}
 		
 		values.clear();
@@ -111,7 +111,7 @@ public class DynamicService implements IDynamicService {
 	}
 	
 	@Override
-	public List<Map<String, Object>> get(String treeid, String tabletype,String id,String orderby) {
+	public List<Map<String, Object>> get(String treeid, String parentid,String tabletype,List<String> idList,String orderby,Integer status) {
 		if (null == treeid || treeid.equals("")) {
 			return null;
 		}
@@ -134,22 +134,29 @@ public class DynamicService implements IDynamicService {
 			return null;
 		}
 		
-		String[] ids = id.split(",");
-		List<String> idList = Arrays.asList(ids);
-		
+		values.clear();
 		StringBuilder sb = new StringBuilder("select * from ");
 		sb.append(tables.get(0).getTablename());
 		sb.append(" where ");
-		sb.append(" id in (");
-		Serializable[] ss=new Serializable[idList.size()];
-		Arrays.fill(ss, "?");
-		sb.append(StringUtils.join(ss,','));
-		sb.append(")");
-		values.clear();
-		values.addAll(idList);
+		sb.append(" treeid = ?");
+		values.add(treeid);
+		if (idList.size() > 1) {
+			sb.append(" and id in (");
+			Serializable[] ss=new Serializable[idList.size()];
+			Arrays.fill(ss, "?");
+			sb.append(StringUtils.join(ss,','));
+			sb.append(")");
+			values.addAll(idList);
+		}
+		
+		if (null != parentid && !"".equals(parentid)) {
+			sb.append(" and parentid = ?");
+			values.add(parentid);
+		}
+		
 		
 		if (null != orderby && !"".equals(orderby)) {
-			sb.append(" ").append(orderby);
+			sb.append(" order by ").append(orderby);
 		}
 		
 		List<Map<String, Object>> maps = dynamicDao.searchForMap(sb.toString(), values);

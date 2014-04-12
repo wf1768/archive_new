@@ -4,10 +4,13 @@
 <%@ include file="/view/common/top_menu.jsp"%>
 <%-- <%@ include file="/view/common/top_second_menu.jsp"%> --%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/dropmenu/style.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dropmenu/dropmenu.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.jqprint-0.3.js"></script>
 <!-- 分页插件 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
@@ -140,7 +143,7 @@
 		window.location.reload(true);
 	}
 	
-	function search() {
+	function searchData() {
 		var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
@@ -274,6 +277,35 @@
 		window.location.reload(true);
 	}
 	
+	function openprint() {
+		/* $("#bodyer_right").jqprint(); */
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再查看档案电子文件。');
+			return;
+		}
+		
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
+		var whObj = {
+			width : 650,
+			height : 500
+		};
+		
+		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&tabletype=01&ids=" + str + "&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
 </script>
 
 
@@ -307,7 +339,29 @@
 			</c:if>
 			</div>
 			<div class="caozuoan">
-				<input type="button" value="添加" class="btn" onClick="add()" />
+				<div style="float: left;">
+				<ul id="cssdropdown">
+					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
+					<li class="headlink"><a href="javascript:;">数据操作</a>
+						<ul>
+							<li><a href="javascript:;">只文件级</a></li>
+							<li><a href="javascript:;">批量修改</a></li>
+							<li><a href="javascript:;">Excel导入</a></li>
+							<li><a href="javascript:;">导出Excel</a></li>
+						</ul>
+					</li>
+					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','01')">设置</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="doc('')">挂接</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
+				</ul>
+				</div>
+				<div style="float: right;margin-top: 3px;margin-left: 5px">
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
+				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
+				<a href="javascript:;" class="btn" onclick="searchData()">查询</a>
+				</div>
+				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','01')" />
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
@@ -318,13 +372,9 @@
 				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
 					<option value="import">数据导入</option>
 					<option value="export">数据导出</option>
-				</select>
-				<!-- <select name="pageselect" onchange="self.location.href=options[selectedIndex].value" >
-					<option value="http://www.baidu.com">百度</option>
-					<option value="http://www.163.com">网易</option>
-				</select>  -->
+				</select> 
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<input type="button" value="查询" class="btn" onClick="search()" />
+				<input type="button" value="查询" class="btn" onClick="search()" />--%>
 			</div>
 			<div style="clear: both"></div>
 		</div>

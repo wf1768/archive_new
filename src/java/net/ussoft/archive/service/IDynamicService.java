@@ -18,19 +18,23 @@ public interface IDynamicService {
 	 * @param parentid		父节点id。案卷级不用，如果是文件级，就需要
 	 * @param tabletype		表类型  01 or 02
 	 * @param searchTxt		查询值
+	 * @param status		档案状态
 	 * @param pageBean		分页
 	 * @return
 	 */
-	public PageBean<Map<String,Object>> archiveList(String treeid,String parentid,String tabletype,String searchTxt,PageBean<Map<String,Object>> pageBean);
+	public PageBean<Map<String,Object>> archiveList(String treeid,String parentid,String tabletype,String searchTxt,Integer status,PageBean<Map<String,Object>> pageBean);
 	
 	/**
-	 * 获取一条档案记录
+	 * 获取档案记录
 	 * @param treeid		档案树节点id
+	 * @param parentid		父节点id。在tabletype为02时，并且parentid不为null时，增加parentid为查询条件
 	 * @param tabletype		表类型  01 or 02
-	 * @param id			记录id
+	 * @param idList		记录id集合list
+	 * @param orderby		排序规则
+	 * @param status		档案状态
 	 * @return
 	 */
-	public List<Map<String, Object>> get(String treeid,String tabletype,String id,String orderby);
+	public List<Map<String, Object>> get(String treeid,String parentid,String tabletype,List<String> idList,String orderby,Integer status);
 	
 	/**
 	 * 保存档案数据

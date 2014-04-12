@@ -158,8 +158,9 @@ public class ArchiveController extends BaseConstroller {
 			modelMap.put("subString", subString);
 			
 			//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
-			List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
-			fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+			List<Sys_templetfield> fieldList = getTempletfields(treeid, tabletype);
+//			List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
+//			fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
 			
 			//如果是文件级，获取对应的案卷级，供文件级页面显示
 			if (tabletype.equals("02")) {
@@ -171,7 +172,9 @@ public class ArchiveController extends BaseConstroller {
 				
 				modelMap.put("ajFieldList", ajFieldList);
 				//获取aj级信息
-				List<Map<String, Object>> maps = dynamicService.get(treeid, "01", parentid,null);
+				List<String> idList = new ArrayList<String>();
+				idList.add(parentid);
+				List<Map<String, Object>> maps = dynamicService.get(treeid,"", "01", idList,null,null);
 				modelMap.put("maps", maps);
 				modelMap.put("parentid", parentid);
 				
@@ -182,31 +185,35 @@ public class ArchiveController extends BaseConstroller {
 				
 			}
 			
-			if (null == fieldList || fieldList.size() == 0) {
-				fieldList = treeService.geTempletfields(treeid, tabletype);
-			}
+//			if (null == fieldList || fieldList.size() == 0) {
+//				fieldList = treeService.geTempletfields(treeid, tabletype);
+//			}
 			
 			//获取排序规则
-			String orderbyString = "";
-			for (Sys_templetfield field : fieldList) {
-				if (null != field.getOrderby() && !field.getOrderby().equals("")) {
-					if (field.getFieldtype().equals("INT")) {
-						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
-					}
-					else {
-						if (field.getOrderby().equals("GBK")) {
-							orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
-						}
-						else {
-							orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
-						}
-					}
-				}
-			}
-			if (orderbyString.length() > 0) {
-				orderbyString = orderbyString.substring(0, orderbyString.length()-1);
-				pageBean.setOrderBy(orderbyString);
-			}
+//			String orderbyString = "";
+//			for (Sys_templetfield field : fieldList) {
+//				if (null != field.getOrderby() && !field.getOrderby().equals("")) {
+//					if (field.getFieldtype().equals("INT")) {
+//						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//					}
+//					else {
+//						if (field.getOrderby().equals("GBK")) {
+//							orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+//						}
+//						else {
+//							orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//						}
+//					}
+//				}
+//			}
+//			if (orderbyString.length() > 0) {
+//				orderbyString = orderbyString.substring(0, orderbyString.length()-1);
+//				pageBean.setOrderBy(orderbyString);
+//			}
+//			else {
+//				pageBean.setOrderBy("createtime desc");
+//			}
+			pageBean.setOrderBy(getOrderby(fieldList));
 			
 			
 			if (pageSize == 0) {
@@ -219,7 +226,7 @@ public class ArchiveController extends BaseConstroller {
 			}
 			
 			//获取当前treeid下数据
-			pageBean = dynamicService.archiveList(treeid,parentid,tabletype, searchTxt,pageBean);
+			pageBean = dynamicService.archiveList(treeid,parentid,tabletype, searchTxt,0,pageBean);
 			modelMap.put("fields", fieldList);
 			
 			Sys_tree tree = treeService.getById(treeid);
@@ -246,6 +253,54 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	/**
+	 * 获取字段
+	 * @param treeid
+	 * @param tabletype
+	 * @return
+	 */
+	private List<Sys_templetfield> getTempletfields(String treeid,String tabletype) {
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		
+		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
+		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
+		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+		
+		if (null == fieldList || fieldList.size() == 0) {
+			fieldList = treeService.geTempletfields(treeid, tabletype);
+		}
+		return fieldList;
+	}
+	
+	private String getOrderby(List<Sys_templetfield> fieldList) {
+		//获取排序规则
+		String orderbyString = "";
+		for (Sys_templetfield field : fieldList) {
+			if (null != field.getOrderby() && !field.getOrderby().equals("")) {
+				if (field.getFieldtype().equals("INT")) {
+					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+				}
+				else {
+					if (field.getOrderby().equals("GBK")) {
+						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+					}
+					else {
+						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+					}
+				}
+			}
+		}
+		if (orderbyString.length() > 0) {
+			orderbyString = orderbyString.substring(0, orderbyString.length()-1);
+		}
+		else {
+			orderbyString = "createtime desc";
+		}
+		return orderbyString;
+	}
+	
+	
+	/**
 	 * 打开添加页面
 	 * @param	treeid		树节点id
 	 * @param	status		状态值，案卷级-状态：0为正常，1为组卷  。文件级-状态：0为正常，1为组卷，2为零散文件
@@ -260,16 +315,17 @@ public class ArchiveController extends BaseConstroller {
 			tabletype = "01";
 		}
 		
-		//获取当前session登录帐户
-		Sys_account account = getSessionAccount();
-		
-		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
-		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
-		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
-		
-		if (null == fieldList || fieldList.size() == 0) {
-			fieldList = treeService.geTempletfields(treeid, tabletype);
-		}
+		List<Sys_templetfield> fieldList = getTempletfields(treeid, tabletype);
+//		//获取当前session登录帐户
+//		Sys_account account = getSessionAccount();
+//		
+//		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
+//		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
+//		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+//		
+//		if (null == fieldList || fieldList.size() == 0) {
+//			fieldList = treeService.geTempletfields(treeid, tabletype);
+//		}
 		
 		//获取字段代码，前台页面上生成select
 		Map<String, List<Sys_code>> codeMap =  getFieldCode(fieldList);
@@ -297,13 +353,6 @@ public class ArchiveController extends BaseConstroller {
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
-		
-//		String result = "success";
-//		if (templetfield == null || null == templetfield.getEnglishname() || templetfield.getEnglishname().equals("")) {
-//			result = "failure";
-//			out.print(result);
-//			return;
-//		}
 		
 		@SuppressWarnings("unchecked")
 		//档案数据
@@ -333,18 +382,22 @@ public class ArchiveController extends BaseConstroller {
 		if (id == null || id.equals("")) {
 			return null;
 		}
-		//获取当前session登录帐户
-		Sys_account account = getSessionAccount();
-				
-		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
-		//如果帐户私有字段为空
-		if (null == fields || fields.size() == 0) {
-			fields = treeService.geTempletfields(treeid, tabletype);
-		}
+//		//获取当前session登录帐户
+//		Sys_account account = getSessionAccount();
+//				
+//		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+//		//如果帐户私有字段为空
+//		if (null == fields || fields.size() == 0) {
+//			fields = treeService.geTempletfields(treeid, tabletype);
+//		}
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		
 		modelMap.put("fields", fields);
+		
 		//获取信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,null);
+		List<String> idList = new ArrayList<String>();
+		idList.add(id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null);
 		modelMap.put("maps", maps);
 		
 		String resultsString = JSON.toJSONString(fields);
@@ -404,14 +457,17 @@ public class ArchiveController extends BaseConstroller {
 		if (null == id || id.equals("")) {
 			return null;
 		}
-		//获取当前session登录帐户
+//		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
-		
-		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+//		
+//		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		
 		modelMap.put("fields", fields);
 		//获取档案信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,null);
+		List<String> idList = new ArrayList<String>();
+		idList.add(id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null);
 		
 		
 		if (null == maps || maps.size() == 0) {
@@ -509,61 +565,69 @@ public class ArchiveController extends BaseConstroller {
 		
 		
 		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
-		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
-		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+//		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
+//		fieldList = treeService.geTempletfields(treeid, tabletype,account.getId());
+//		
+//		if (null == fieldList || fieldList.size() == 0) {
+//			fieldList = treeService.geTempletfields(treeid, tabletype);
+//		}
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		
-		if (null == fieldList || fieldList.size() == 0) {
-			fieldList = treeService.geTempletfields(treeid, tabletype);
-		}
+//		//获取排序规则
+//		String orderbyString = "";
+//		for (Sys_templetfield field : fields) {
+//			if (null != field.getOrderby() && !field.getOrderby().equals("")) {
+//				if (field.getFieldtype().equals("INT")) {
+//					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//				}
+//				else {
+//					if (field.getOrderby().equals("GBK")) {
+//						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+//					}
+//					else {
+//						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//					}
+//				}
+//			}
+//		}
+//		if (orderbyString.length() > 0) {
+//			orderbyString = " order by " + orderbyString.substring(0, orderbyString.length()-1);
+//		}
+//		else {
+//			orderbyString = " order by createtime desc";
+//		}
 		
-		//获取排序规则
-		String orderbyString = "";
-		for (Sys_templetfield field : fieldList) {
-			if (null != field.getOrderby() && !field.getOrderby().equals("")) {
-				if (field.getFieldtype().equals("INT")) {
-					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
-				}
-				else {
-					if (field.getOrderby().equals("GBK")) {
-						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
-					}
-					else {
-						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
-					}
-				}
-			}
-		}
-		if (orderbyString.length() > 0) {
-			orderbyString = " order by " + orderbyString.substring(0, orderbyString.length()-1);
-		}
+		String orderbyString = getOrderby(fields);
 		
 		//获取档案信息
-		List<Map<String, Object>> maps = dynamicService.get(treeid, tabletype, id,orderbyString);
+		List<String> idList = Arrays.asList(idArr);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, "",tabletype, idList,orderbyString,null);
 		modelMap.put("maps", maps);
 //		modelMap.put("maps_json", JSON.toJSON(maps));
 		
 		//解决档案信息字符转为json后，特殊字符问题。
 		List<Map<String, Object>> tmpMaps = new ArrayList<Map<String,Object>>();
-		for (Map<String, Object> map : maps) {
-			for (Sys_templetfield field : fieldList) {
-				if (!field.getFieldtype().equals("INT") && field.getSort() >= 0) {
-					Object object = map.get(field.getEnglishname());
-					String tmpStr = "";
-					if (null != object) {
-						tmpStr = object.toString();
-					}
-					
-					if (null != tmpStr && !"".equals(tmpStr)) {
-						tmpStr = tmpStr.replaceAll("\\\\","\\\\\\\\");
-						tmpStr = tmpStr.replace("'","\\\'");
-						tmpStr = tmpStr.replace("\"","\\\"");
-						tmpStr = tmpStr.replaceAll("[\\t\\n\\r]", "");
-					}
-					map.put(field.getEnglishname(), tmpStr);
-				}
-			}
-			tmpMaps.add(map);
-		}
+		tmpMaps = doMaps(fields,maps);
+//		for (Map<String, Object> map : maps) {
+//			for (Sys_templetfield field : fields) {
+//				if (!field.getFieldtype().equals("INT") && field.getSort() >= 0) {
+//					Object object = map.get(field.getEnglishname());
+//					String tmpStr = "";
+//					if (null != object) {
+//						tmpStr = object.toString();
+//					}
+//					
+//					if (null != tmpStr && !"".equals(tmpStr)) {
+//						tmpStr = tmpStr.replaceAll("\\\\","\\\\\\\\");
+//						tmpStr = tmpStr.replace("'","\\\'");
+//						tmpStr = tmpStr.replace("\"","\\\"");
+//						tmpStr = tmpStr.replaceAll("[\\t\\n\\r]", "");
+//					}
+//					map.put(field.getEnglishname(), tmpStr);
+//				}
+//			}
+//			tmpMaps.add(map);
+//		}
 		
 		modelMap.put("maps_json", JSON.toJSON(tmpMaps));
 		
@@ -618,7 +682,7 @@ public class ArchiveController extends BaseConstroller {
 			modelMap.put("docs", docs);
 		}
 		else {
-			List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
+//			List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
 			modelMap.put("fields", fields);
 		
 			if (null == maps || maps.size() == 0) {
@@ -652,6 +716,37 @@ public class ArchiveController extends BaseConstroller {
 		modelMap.put("isFileShow", isFileShow);
 		//获取对象
 		return new ModelAndView(resultUrl,modelMap);
+	}
+	
+	/**
+	 * 处理map里的特殊字符
+	 * @param fields
+	 * @param maps
+	 * @return
+	 */
+	private List<Map<String, Object>> doMaps(List<Sys_templetfield> fields,List<Map<String, Object>> maps) {
+		List<Map<String, Object>> tmpMaps = new ArrayList<Map<String,Object>>();
+		for (Map<String, Object> map : maps) {
+			for (Sys_templetfield field : fields) {
+				if (!field.getFieldtype().equals("INT") && field.getSort() >= 0) {
+					Object object = map.get(field.getEnglishname());
+					String tmpStr = "";
+					if (null != object) {
+						tmpStr = object.toString();
+					}
+					
+					if (null != tmpStr && !"".equals(tmpStr)) {
+						tmpStr = tmpStr.replaceAll("\\\\","\\\\\\\\");
+						tmpStr = tmpStr.replace("'","\\\'");
+						tmpStr = tmpStr.replace("\"","\\\"");
+						tmpStr = tmpStr.replaceAll("[\\t\\n\\r]", "");
+					}
+					map.put(field.getEnglishname(), tmpStr);
+				}
+			}
+			tmpMaps.add(map);
+		}
+		return tmpMaps;
 	}
 	
 	
@@ -715,5 +810,59 @@ public class ArchiveController extends BaseConstroller {
 		modelMap.put("field", templetfield);
 		return new ModelAndView("/view/archive/archive/fieldedit",modelMap);
 	}
+	
+	/**
+	 * 打印页面调用。
+	 * @param treeid		treeid
+	 * @param parentid		如果是文件级打印，需要条件parentid
+	 * @param tabletype		01 or 02
+	 * @param ids			如果是打印选择的，ids就是选择的记录id
+	 * @return
+	 */
+	@RequestMapping(value="/openprint",method=RequestMethod.GET)
+	public ModelAndView openprint(String treeid,String parentid,String tabletype,String ids,ModelMap modelMap) {
+		//打印编码
+		//1、案卷目录		AJML
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("ids", ids);
+		modelMap.put("parentid", parentid);
+		
+		return new ModelAndView("/view/archive/archive/print",modelMap);
+	}
+	
+	/**
+	 * 
+	 * @param treeid
+	 * @param parentid		如果是文件级打印，需要条件parentid
+	 * @param tabletype
+	 * @param printcode		打印什么，每个打印有自己的编码，例如要打印案卷目录 为 AJML
+	 * @param printtype		打印的类别。打印选择的，或者打印全部  select  or all
+	 * @param ids			如果是打印选择的，ids就是选择的记录id
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/print",method=RequestMethod.POST)
+	public void print(String treeid,String parentid,String tabletype,String printcode,String printtype,String ids,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
+		String orderby = getOrderby(fields);
+		
+		String[] idsStrings = ids.split(",");
+		List<String> idList = Arrays.asList(idsStrings);
+		
+		List<Map<String, Object>> maps = dynamicService.get(treeid, parentid, tabletype, idList, orderby, 0);
+		
+		List<Map<String,Object>> tmpMaps = doMaps(fields, maps);
+		
+		String result = JSON.toJSONString(tmpMaps);
+		
+		out.print(result);
+	} 
 	
 }
