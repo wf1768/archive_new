@@ -140,7 +140,7 @@ public class DynamicService implements IDynamicService {
 		sb.append(" where ");
 		sb.append(" treeid = ?");
 		values.add(treeid);
-		if (idList.size() > 1) {
+		if (idList.size() > 0) {
 			sb.append(" and id in (");
 			Serializable[] ss=new Serializable[idList.size()];
 			Arrays.fill(ss, "?");

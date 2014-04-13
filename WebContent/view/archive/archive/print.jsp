@@ -44,7 +44,7 @@
 			html += "<table  cellspacing=\"0\" style=\"border-collapse: collapse; border-spacing: 0;background-color: transparent;max-width: 100%\" cellpadding=\"0\" width=\"100%\" class=\"print_font\">";
 	        html += "<thead>";
 	        html += "<tr>";
-	        html += "<th colspan=\"5\">";    
+	        html += "<th colspan=\"5\">";
 	        html += "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">";
 	        html += "<tr align=\"center\">";
 	        html += "<td style=\"text-align:left; font-size: 26px;padding-bottom: 5px;padding-top: 0px\">&nbsp;&nbsp;案 卷 目 录</td>";

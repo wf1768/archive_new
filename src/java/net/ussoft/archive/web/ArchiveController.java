@@ -853,8 +853,12 @@ public class ArchiveController extends BaseConstroller {
 		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		String orderby = getOrderby(fields);
 		
-		String[] idsStrings = ids.split(",");
-		List<String> idList = Arrays.asList(idsStrings);
+		List<String> idList = new ArrayList<String>();
+		
+		if (null != ids && !"".equals(ids)) {
+			String[] idsStrings = ids.split(",");
+			idList = Arrays.asList(idsStrings);
+		}
 		
 		List<Map<String, Object>> maps = dynamicService.get(treeid, parentid, tabletype, idList, orderby, 0);
 		
