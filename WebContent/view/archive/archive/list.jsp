@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.css" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.js"></script>
 <script>
 	$.blockUI({
 		message:"正在进行加载，请稍候...",
@@ -80,6 +82,78 @@
 		selectNode(treeid);
 		
 		$.unblockUI();
+		
+		/**************************************************
+	     * Context-Menu with Sub-Menu
+	     **************************************************/
+	    $.contextMenu({
+	        selector: '.scrollTable', 
+	        callback: function(key, options) {
+	            var m = "clicked: " + key;
+	            window.console && console.log(m) || alert(m); 
+	        },
+	        items: {
+	        	"add": {
+	        		name:"添加",
+	        		icon:"add",
+	        		callback: function(key, options) {
+	        			add();
+	                }
+	        	},
+	        	"del": {
+	        		name:"删除",
+	        		icon:"delete",
+	        		callback: function(key, options) {
+	        			del();
+	                }
+	        	},
+	        	"data": {
+	                "name": "数据操作", 
+	                "items": {
+	                    "fold1a-key1": {
+	                    	name: "只文件级",
+	                    	callback: function(key, options) {
+	                    		//add();
+	    	                }
+	                    },
+	                    "fold1a-key2": {
+	                    	name: "批量修改"
+	                    },
+	                    "fold1a-key3": {
+	                    	name: "Excel导入"
+	                    },
+	                    "fold1a-key4": {
+	                    	name: "导出Excel"
+	                    },
+	                    "fold1a-key5": {
+	                    	name: "数据移动"
+	                    }
+	                }
+	            },
+	        	"sep1": "---------",
+	        	"setshow":{
+	        		name:"设置",
+	        		icon:"cog",
+	        		callback: function(key, options) {
+	        			setshow('${templet.id}','01');
+	                }
+	        	},
+	        	"link":{
+	        		name:"挂接",
+	        		icon:"attach",
+	        		callback:function(key,options) {
+	        			doc("");
+	        		}
+	        	},
+	        	"print":{
+	        		name:"打印",
+	        		icon:"print",
+	        		callback:function(key,options) {
+	        			openprint();
+	        		}
+	        	}
+	        }
+	    });
 	});
 
 	function callback() {
@@ -143,7 +217,7 @@
 		window.location.reload(true);
 	}
 	
-	function searchData() {
+	function search() {
 		var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
@@ -303,7 +377,7 @@
 		
 		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&tabletype=01&ids=" + str + "&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
+		//window.location.reload(true);
 	}
 	
 </script>
@@ -349,6 +423,7 @@
 							<li><a href="javascript:;">批量修改</a></li>
 							<li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
+							<li><a href="javascript:;">数据移动</a></li>
 						</ul>
 					</li>
 					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','01')">设置</a></li>
@@ -359,7 +434,7 @@
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
 					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
-				<a href="javascript:;" class="btn" onclick="searchData()">查询</a>
+					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
 				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />
@@ -454,10 +529,10 @@
 		</div>
 		<div class="aa" style="margin-left:5px" >
 			<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >
-				<tr class="table-botton" id="fanye" >
+				<tr id="fanye" >
 					<c:choose>
 						<c:when test="${pagebean.isPage == true }">
-							<td><p>当前第 ${pagebean.pageNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
+							<td><p style="color: #3366CC;font-weight: bold;">当前第 ${pagebean.pageNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
 							<td id="pagination" class="fenye pagination" ></td>
 						</c:when>
 						<c:otherwise>

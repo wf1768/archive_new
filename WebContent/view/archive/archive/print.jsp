@@ -11,15 +11,25 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.jqprint-0.3.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/print.util.js"></script>
 <base target="_self">
 
 <script>
+
+	var ajh = '${ajh}';
 	function closepage() {
 		window.returnValue="ok";
 		window.close();
 	}
 	
 	$(function(){
+		$('.t').css("display","none");
+		$('#AJML').removeAttr("style");
+		$('#printcode').change(function(){
+			var value=$(this).children('option:selected').val();//这就是selected的值
+			$('.t').css("display","none");
+			$('#'+value).removeAttr("style");
+		})
 	})
 	
 	function onPrint() {
@@ -30,60 +40,22 @@
     }
 	
 	//创建打印数据
-	function create_print_data(data) {
-		var data_json = JSON.parse(data);
-		var html = "";
-		for (var i=0;i<Math.ceil(data_json.length/10);i++) {
-			if (i == (Math.ceil(data_json.length/10) -1)) {
-				html += "<div class=\"my_show\">";
-			}
-			else {
-				html += "<div class=\"my_show\" style=\"page-break-after: always;\">";
-			}
-			//html += "<div class=\"my_show\" style=\"page-break-after: always;\">";
-			html += "<table  cellspacing=\"0\" style=\"border-collapse: collapse; border-spacing: 0;background-color: transparent;max-width: 100%\" cellpadding=\"0\" width=\"100%\" class=\"print_font\">";
-	        html += "<thead>";
-	        html += "<tr>";
-	        html += "<th colspan=\"5\">";
-	        html += "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">";
-	        html += "<tr align=\"center\">";
-	        html += "<td style=\"text-align:left; font-size: 26px;padding-bottom: 5px;padding-top: 0px\">&nbsp;&nbsp;案 卷 目 录</td>";
-	        html += "</tr>";
-	        html += "</table>";
-			html += "</th>";
-			html += "</tr>";
-			html += "<tr style=\"border:1px #000 solid;text-align: center;height: 40px\">";
-			html += "<th style=\"border:1px #000 solid;\">序号</th>";
-			html += "<th style=\"border:1px #000 solid;\">案卷号</th>";
-			html += "<th style=\"border:1px #000 solid;\">题名</th>";
-			html += "<th style=\"border:1px #000 solid;\">页数</th>";
-			html += "<th style=\"border:1px #000 solid;\">备注</th>";
-			html += "</tr>";
-			html += "</thead>";
-			html += "<tbody >";
-			
-			for (var j=i*10;j<i*10+10;j++) {
-				if (j<data_json.length) {
-					html += "<tr class=\"content_tr\" style=\"height:30px;border:1px #000 solid;text-align: center\">";
-					html += "<td style=\"border:1px #000 solid;\">"+ (j+1) +"</td>";
-					html += "<td style=\"border:1px #000 solid;\">"+ data_json[j].AJH +"</td>";
-					html += "<td style=\"border:1px #000 solid;\">"+ data_json[j].TM +"</td>";
-					html += "<td style=\"border:1px #000 solid;\">"+ data_json[j].YS +"</td>";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-				}
-				else {
-					html += "<tr class=\"content_tr\" style=\"height:30px;border:1px #000 solid;text-align: center\">";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-					html += "<td style=\"border:1px #000 solid;\"></td>";
-				}
-			}
-			html += "</tbody>";
-			html += "</table>";
-	        html += "</div>";
+	function create_print_data(printcode,data) {
+		//获取打印字段对应
+		var field = {};
+		if (printcode == 'AJML') {
+			field.ajh = $("#AJML_AJH").val();
+			field.tm = $("#AJML_TM").val();
+			field.ys = $("#AJML_YS").val();
+			field.bz = $("#AJML_BZ").val();
 		}
+		else if (printcode == 'JNML') {
+			field.jnxh = $("#JNML_JNXH").val();
+			field.tm = $("#JNML_TM").val();
+			field.ys = $("#JNML_YS").val();
+			field.bz = $("#JNML_BZ").val();
+		}
+		var html = create_print_html(printcode,field,data,ajh);
 		$("#print_div").html(html);
 	}
 	
@@ -102,76 +74,35 @@
 		d.parentid = '${parentid }';
 		d.ids = '${ids}';
 		
+		
 		d.printcode = $("#printcode").val();
 		d.printtype = $('input:radio[name="printtype"]:checked').val();
 		
 		if (d.printtype == "select_data") {
 			if (d.ids == "") {
+				$.unblockUI();
 				alert("没有选择要打印的档案数据，请重新选择。");
 				return;
 			}
 		}
 		
-		$.ajax({
-	        async : false,
-	        url : "${pageContext.request.contextPath}/archive/print.do",
-	        type : 'post',
-	        data:d,
-	        dataType : 'text',
-	        success : function(data) {
-	        	create_print_data(data);
-	        }
-	    });
+		setTimeout(function () {  
+			$.ajax({
+		        async : false,
+		        url : "${pageContext.request.contextPath}/archive/print.do",
+		        type : 'post',
+		        data:d,
+		        dataType : 'text',
+		        success : function(data) {
+		        	create_print_data(d.printcode,data);
+		        }
+	    	});
+			$.unblockUI();
+			onPrint();
+		},200); 
 		
-		$.unblockUI();
-		onPrint();
+		
 		/* setTimeout("onPrint();",3000);  */
-	}
-	
-	function print_11() {
-		//档案数据对象 
-		var d = {};
-		//var fieldArray = ${fieldjson};
-		
-		for (var i=0;i<fieldArray.length;i++) {
-			var val = $("#"+fieldArray[i].englishname).val();
-			if (fieldArray[i].fieldtype == 'INT') {
-				if (val == "") {
-					val = 0;
-				}
-				if(isNaN(val)){
-					val = 0;
-				}
-			}
-			d[fieldArray[i].englishname] = val;
-		}
-		
-		/* d["treeid"] = $("#treeid").val();
-		d["status"] = $("#status").val();
-		d["tabletype"] = $("#tabletype").val();
-		d["parentid"] = $("#parentid").val(); */
-		
-		//系统字段对象
-		var s = {};
-		s.treeid = $("#treeid").val();
-		s.status = $("#status").val();
-		s.tabletype = $("#tabletype").val();
-		s.parentid = $("#parentid").val();
-		
-		var data = JSON.stringify(d);
-		var sys = JSON.stringify(s);
-		
-	    $.ajax({
-	        async : true,
-	        url : "${pageContext.request.contextPath}/archive/save.do",
-	        type : 'post',
-	        data:{'data':data,'sys':sys},
-	        dataType : 'text',
-	        success : function(data) {
-	        	alert(data);
-	            //window.dialogArguments.location.reload();
-	        }
-	    });
 	}
 	
 </script>
@@ -193,6 +124,137 @@
             			<option value="JNML">文件卷内目录</option>
             		</select>
             	</td>
+            </tr>
+		</tbody>
+	</table>
+	<table class="t" id="AJML" width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+            <tr>
+                <td class="biaoti" colspan="2" align="center">
+                	打印项目配对
+                </td>
+            </tr>
+            <tr >
+            	<td>案卷号</td>
+            	<td>
+            		<select id="AJML_AJH">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'AJH'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>题名</td>
+            	<td>
+            		<select id="AJML_TM">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'TM'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>页数</td>
+            	<td>
+            		<select id="AJML_YS">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'YS'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>备注</td>
+            	<td>
+            		<select id="AJML_BZ">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'BZ'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+		</tbody>
+	</table>
+	<table class="t" id="JNML" width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+            <tr>
+                <td class="biaoti" colspan="2" align="center">
+                	打印项目配对
+                </td>
+            </tr>
+            <tr >
+            	<td>卷内序号</td>
+            	<td>
+            		<select id="JNML_JNXH">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'JNXH'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>题名</td>
+            	<td>
+            		<select id="JNML_TM">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'TM'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>页数</td>
+            	<td>
+            		<select id="JNML_YS">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'YS'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+            <tr>
+            	<td>备注</td>
+            	<td>
+            		<select id="JNML_BZ">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'BZ'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
+		</tbody>
+	</table>
+	<table width="400" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+			<tr>
+                <td class="biaoti" colspan="2" align="center">
+                	打印范围
+                </td>
             </tr>
             <tr>
             	<td>打印范围</td>

@@ -277,17 +277,26 @@ public class ArchiveController extends BaseConstroller {
 		String orderbyString = "";
 		for (Sys_templetfield field : fieldList) {
 			if (null != field.getOrderby() && !field.getOrderby().equals("")) {
-				if (field.getFieldtype().equals("INT")) {
-					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+				if (field.getOrderby().equals("GBK")) {
+					orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+				}
+				else if (field.getOrderby().equals("NUM")) {
+					orderbyString += field.getEnglishname() + "+0,";
 				}
 				else {
-					if (field.getOrderby().equals("GBK")) {
-						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
-					}
-					else {
-						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
-					}
+					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
 				}
+//				if (field.getFieldtype().equals("INT")) {
+//					orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//				}
+//				else {
+//					if (field.getOrderby().equals("GBK")) {
+//						orderbyString += "CONVERT("+field.getEnglishname()+" USING gbk),";
+//					}
+//					else {
+//						orderbyString += field.getEnglishname() + " " + field.getOrderby() + ",";
+//					}
+//				}
 			}
 		}
 		if (orderbyString.length() > 0) {
@@ -823,17 +832,33 @@ public class ArchiveController extends BaseConstroller {
 	public ModelAndView openprint(String treeid,String parentid,String tabletype,String ids,ModelMap modelMap) {
 		//打印编码
 		//1、案卷目录		AJML
+		//2、文件卷内目录
 		
 		modelMap.put("treeid", treeid);
 		modelMap.put("tabletype", tabletype);
 		modelMap.put("ids", ids);
 		modelMap.put("parentid", parentid);
 		
+		//获取字段。用来配对打印项
+		List<Sys_templetfield> templetfields = getTempletfields(treeid, tabletype);
+		
+		modelMap.put("fields", templetfields);
+		
+		//如果tabletype ＝ 02 并且parentid不为空，是文件级打印，先获取案卷号，为了打印显示
+		if (tabletype.equals("02") && null != parentid && !"".equals(parentid)) {
+			//获取aj级信息
+			List<String> idList = new ArrayList<String>();
+			idList.add(parentid);
+			List<Map<String, Object>> maps = dynamicService.get(treeid,"", "01", idList,null,null);
+			modelMap.put("ajh", maps.get(0).get("AJH"));
+			
+		}
+		
 		return new ModelAndView("/view/archive/archive/print",modelMap);
 	}
 	
 	/**
-	 * 
+	 * 获取打印数据
 	 * @param treeid
 	 * @param parentid		如果是文件级打印，需要条件parentid
 	 * @param tabletype

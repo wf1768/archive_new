@@ -79,8 +79,6 @@ public class DynamicService implements IDynamicService {
 			return null;
 		}
 		
-		
-		
 		//获取字段
 		values.clear();
 		values.add(tables.get(0).getId());

@@ -256,6 +256,9 @@ img {
 							<c:when test="${item.orderby=='GBK' }">
 								中文排序
 							</c:when>
+							<c:when test="${item.orderby=='NUM' }">
+								字符型数字排序
+							</c:when>
 						</c:choose>
 					</td>
 					<td>

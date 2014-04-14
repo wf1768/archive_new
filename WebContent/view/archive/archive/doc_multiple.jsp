@@ -465,15 +465,6 @@
 		reload();
 	}
 	
-	function del_tr(){
-	    var tab=document.getElementById('HRSTable');
-	    for(var i=tab.rows.length-1;i>0;i--){
-	        if(tab.rows[i].cells[0].getElementsByTagName('input')[0].checked){
-	             tab.deleteRow(i);
-	        }
-	    }
-	}
-	
 </script>
 <title>批量挂接电子文件</title>
 </head>
@@ -494,7 +485,7 @@
 						自动挂接条件：<span id="linkfield_span" style="color: red;">案卷号.</span>
 						<select id="linkfield">
 							<c:forEach items="${fields}" varStatus="i" var="item">
-								<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
+								<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
 									<option value="${item.englishname }">${item.chinesename }</option>
 								</c:if>
 							</c:forEach>
@@ -574,7 +565,7 @@
 	  	</table>
 	</div>
 	<div class="div3"  style ="border:solid 1px #09aadd;">
-		<table id="table_not" width="600px" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+		<table id="table_not" width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
 			<thead>
 				<tr>
 	                <td colspan="6" align="left">

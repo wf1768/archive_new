@@ -129,6 +129,7 @@
 							<option value="ASC" ${field.orderby=='ASC'?'selected':'' }>正序排序</option>
 							<option value="DESC" ${field.orderby=='DESC'?'selected':'' }>倒序排序</option>
 							<option value="GBK" ${field.orderby=='GBK'?'selected':'' }>中文排序</option>
+							<option value="NUM" ${field.orderby=='NUM'?'selected':'' }>字符型数字排序</option>
 						</select>
 					</td>
 				</tr>

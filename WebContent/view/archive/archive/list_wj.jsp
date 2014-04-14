@@ -4,13 +4,19 @@
 <%@ include file="/view/common/top_menu.jsp"%>
 <%-- <%@ include file="/view/common/top_second_menu.jsp"%> --%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/dropmenu/style.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/dropmenu/dropmenu.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.jqprint-0.3.js"></script>
 <!-- 分页插件 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
+<!-- 右键 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.css" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.js"></script>
 
 <script>
 	$.blockUI({
@@ -77,6 +83,78 @@
 		selectNode(treeid);
 		
 		$.unblockUI();
+		
+		/**************************************************
+	     * Context-Menu with Sub-Menu
+	     **************************************************/
+	    $.contextMenu({
+	        selector: '.scrollTable', 
+	        callback: function(key, options) {
+	            var m = "clicked: " + key;
+	            window.console && console.log(m) || alert(m); 
+	        },
+	        items: {
+	        	"add": {
+	        		name:"添加",
+	        		icon:"add",
+	        		callback: function(key, options) {
+	        			add();
+	                }
+	        	},
+	        	"del": {
+	        		name:"删除",
+	        		icon:"delete",
+	        		callback: function(key, options) {
+	        			del();
+	                }
+	        	},
+	        	"data": {
+	                "name": "数据操作", 
+	                "items": {
+	                    "fold1a-key1": {
+	                    	name: "只文件级",
+	                    	callback: function(key, options) {
+	                    		add();
+	    	                }
+	                    },
+	                    "fold1a-key2": {
+	                    	name: "批量修改"
+	                    },
+	                    "fold1a-key3": {
+	                    	name: "Excel导入"
+	                    },
+	                    "fold1a-key4": {
+	                    	name: "导出Excel"
+	                    },
+	                    "fold1a-key5": {
+	                    	name: "数据移动"
+	                    }
+	                }
+	            },
+	        	"sep1": "---------",
+	        	"setshow":{
+	        		name:"设置",
+	        		icon:"cog",
+	        		callback: function(key, options) {
+	        			setshow('${templet.id}','02');
+	                }
+	        	},
+	        	"link":{
+	        		name:"挂接",
+	        		icon:"attach",
+	        		callback:function(key,options) {
+	        			doc("");
+	        		}
+	        	},
+	        	"print":{
+	        		name:"打印",
+	        		icon:"print",
+	        		callback:function(key,options) {
+	        			openprint();
+	        		}
+	        	}
+	        }
+	    });
 	});
 
 	function callback() {
@@ -276,6 +354,33 @@
 		window.location.reload(true);
 	}
 	
+	function openprint() {
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再查看档案电子文件。');
+			return;
+		}
+		
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
+		var whObj = {
+			width : 650,
+			height : 500
+		};
+		
+		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		//window.location.reload(true);
+	}
 	
 	
 	//=========以下是其他页面，完事时删除
@@ -317,7 +422,30 @@
 			</c:if>
 			</div>
 			<div class="caozuoan">
-				<input type="button" value="添加" class="btn" onClick="add()" />
+				<div style="float: left;z-index:999">
+				<ul id="cssdropdown">
+					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
+					<li class="headlink"><a href="javascript:;">数据操作</a>
+						<ul>
+							<li><a href="javascript:;">只文件级</a></li>
+							<li><a href="javascript:;">批量修改</a></li>
+							<li><a href="javascript:;">Excel导入</a></li>
+							<li><a href="javascript:;">导出Excel</a></li>
+							<li><a href="javascript:;">数据移动</a></li>
+						</ul>
+					</li>
+					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','02')">设置</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="doc('')">挂接</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
+				</ul>
+				</div>
+				<div style="float: right;margin-top: 3px;margin-left: 5px">
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
+				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
+					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+				</div>
+				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','02')" />
 				<input type="button" value="挂接" class="btn" onClick="doc('')" />
@@ -330,11 +458,11 @@
 				</select>
 				<input type="button" value="刷新" class="btn" onClick="refresh()" />
 				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<input type="button" value="查询" class="btn" onClick="search()" />
+				<input type="button" value="查询" class="btn" onClick="search()" /> --%>
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:999;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
+		<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:998;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
 			<thead>
 				<tr class="tableTopTitle-bg">
 					<td width="40px">行号</td>
@@ -453,10 +581,10 @@
 		</div>
 		<div class="aa" style="margin-left:5px" >
 			<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >
-				<tr class="table-botton" id="fanye" >
+				<tr id="fanye" >
 					<c:choose>
 						<c:when test="${pagebean.isPage == true }">
-							<td><p>当前第 ${pagebean.pageNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
+							<td><p style="color: #3366CC;font-weight: bold;">当前第 ${pagebean.pageNo } 页，共 ${pagebean.pageCount } 页，每页 ${pagebean.pageSize } 行，共 ${pagebean.rowCount } 行</p></td>
 							<td id="pagination" class="fenye pagination" ></td>
 						</c:when>
 						<c:otherwise>

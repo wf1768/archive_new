@@ -191,6 +191,7 @@
 							<option value="ASC">正序排序</option>
 							<option value="DESC">倒序排序</option>
 							<option value="GBK">中文排序</option>
+							<option value="NUM">字符型数字排序</option>
 						</select>
 					</td>
 				</tr>
