@@ -73,6 +73,7 @@
 		d.tabletype = '${tabletype }';
 		d.parentid = '${parentid }';
 		d.ids = '${ids}';
+		d.searchTxt = '${searchTxt}';
 		
 		
 		d.printcode = $("#printcode").val();
@@ -84,6 +85,9 @@
 				alert("没有选择要打印的档案数据，请重新选择。");
 				return;
 			}
+		}
+		else {
+			d.ids = "";
 		}
 		
 		setTimeout(function () {  

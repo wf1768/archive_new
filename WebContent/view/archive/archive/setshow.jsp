@@ -116,6 +116,14 @@ img {
 	    });
 	}
 	
+	function fieldcode(id) {
+		var url = "${pageContext.request.contextPath}/templetfield/fieldcode.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 640, height: 400 };
+		var result = openShowModalDialog(url,window,whObj);
+		window.location.reload(true);
+	}
+
+	
 </script>
 <title>档案显示设置</title>
 </head><a id="reload" href="" style="display:none">reload...</a>

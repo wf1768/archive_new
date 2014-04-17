@@ -56,7 +56,7 @@ function ajml_html(field,data) {
 				html += "<td style=\"border:1px #000 solid;\">"+ (field.bz == 'NOTHING' ? '' : data_json[j][field.bz]) +"</td>";
 			}
 			else {
-				html += "<tr class=\"content_tr\" style=\"height:60px;border:1px #000 solid;text-align: center\">";
+				html += "<tr class=\"content_tr\" style=\"height:50px;border:1px #000 solid;text-align: center\">";
 				html += "<td style=\"border:1px #000 solid;\"></td>";
 				html += "<td style=\"border:1px #000 solid;\"></td>";
 				html += "<td style=\"border:1px #000 solid;\"></td>";

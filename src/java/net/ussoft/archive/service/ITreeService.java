@@ -89,7 +89,7 @@ public interface ITreeService {
 	 * @param accountid		字段所属帐户id
 	 * @return
 	 */
-	public List<Sys_templetfield> geTempletfields(String treeid,String tabletype,String accountid);
+	public List<Sys_templetfield> getTempletfields(String treeid,String tabletype,String accountid);
 	
 	/**
 	 * 根据传入的json，增加根节点和图标

@@ -111,14 +111,11 @@
 	        	"data": {
 	                "name": "数据操作", 
 	                "items": {
-	                    "fold1a-key1": {
-	                    	name: "只文件级",
-	                    	callback: function(key, options) {
-	                    		add();
-	    	                }
-	                    },
 	                    "fold1a-key2": {
-	                    	name: "批量修改"
+	                    	name: "批量修改",
+                    		callback: function(key, options) {
+	                    		update_multiple();
+	    	                }
 	                    },
 	                    "fold1a-key3": {
 	                    	name: "Excel导入"
@@ -168,9 +165,24 @@
 		
 		$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
+		    if (this.checked) {
+		    	$('input[name="checkbox"]').parents('tr').addClass('selected');
+		    }
+		    else {
+		    	$('input[name="checkbox"]').parents('tr').removeClass("selected");
+		    }
 		});
 		
 		$('input[type="checkbox"]').removeAttr("checked");
+		
+		$('input[name="checkbox"]').click(function(){
+		    if (this.checked) {
+		    	$(this).parents('tr').addClass('selected');
+            }  
+            else {  
+            	$(this).parents('tr').removeClass("selected");
+            }
+		});
 		
 		$('.shiftCheckbox').shiftcheckbox();
 	}
@@ -201,10 +213,10 @@
 	}
 	
 	function search() {
-		var pageno = ${pagebean.pageNo };
+		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
-		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&page="+pageno+"&searchTxt="+searchTxt+"&tabletype=02";
+		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&searchTxt="+searchTxt+"&tabletype=02";
 	}
 	
 	function add() {
@@ -377,9 +389,40 @@
 			height : 500
 		};
 		
-		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&searchTxt=${searchTxt }&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		//window.location.reload(true);
+	}
+	
+	function update_multiple() {
+		
+		var treeid = '${selectid}';
+		if (treeid == '') {
+			alert('请选择左侧档案节点，再编辑档案。');
+			return;
+		}
+		
+		var str = "";
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要批量编辑的数据。");
+			return;
+		}
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=02&id=" + str + "&multiple=true&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
 	}
 	
 	
@@ -428,8 +471,7 @@
 					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
-							<li><a href="javascript:;">只文件级</a></li>
-							<li><a href="javascript:;">批量修改</a></li>
+							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
 							<li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
 							<li><a href="javascript:;">数据移动</a></li>

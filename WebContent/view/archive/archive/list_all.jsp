@@ -93,13 +93,6 @@
 	            window.console && console.log(m) || alert(m); 
 	        },
 	        items: {
-	        	"add": {
-	        		name:"添加",
-	        		icon:"add",
-	        		callback: function(key, options) {
-	        			add();
-	                }
-	        	},
 	        	"del": {
 	        		name:"删除",
 	        		icon:"delete",
@@ -110,20 +103,11 @@
 	        	"data": {
 	                "name": "数据操作", 
 	                "items": {
-	                    "fold1a-key1": {
-	                    	name: "只文件级",
-	                    	callback: function(key, options) {
-	                    		allwj();
-	    	                }
-	                    },
 	                    "fold1a-key2": {
 	                    	name: "批量修改",
 	                    	callback: function(key, options) {
 	                    		update_multiple();
 	    	                }
-	                    },
-	                    "fold1a-key3": {
-	                    	name: "Excel导入"
 	                    },
 	                    "fold1a-key4": {
 	                    	name: "导出Excel"
@@ -138,7 +122,7 @@
 	        		name:"设置",
 	        		icon:"cog",
 	        		callback: function(key, options) {
-	        			setshow('${templet.id}','01');
+	        			setshow('${templet.id}','02');
 	                }
 	        	},
 	        	"link":{
@@ -189,12 +173,11 @@
 		
 		$('.shiftCheckbox').shiftcheckbox();
 	}
-	
 	function pageselectCallback(page_index, jq){
 		var searchTxt = "${searchTxt }";
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&page="+page_index+"&searchTxt="+searchTxt;
+			window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&allwj=true&parentid=${parentid}&tabletype=02&page="+page_index+"&searchTxt="+searchTxt;
 		}
 	}; 
 
@@ -214,10 +197,6 @@
 		};
 		var result = openShowModalDialog(url, window, whObj);
 		window.location.reload(true);
-	}
-	
-	function showWj(id) {
-		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }&searchTxt_aj=${searchTxt }&tabletype=02";
 	}
 	
 	function add() {
@@ -240,7 +219,7 @@
 		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
-		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&searchTxt="+searchTxt;
+		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&allwj=true&parentid=${parentid}&tabletype=02&searchTxt="+searchTxt;
 	}
 	
 	function edit(id) {
@@ -251,7 +230,7 @@
 			return;
 		}
 		
-		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=01&id=" + id + "&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=02&id=" + id + "&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 650,
 			height : 500
@@ -268,7 +247,7 @@
 			return;
 		}
 		
-		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=01&id=" + id + "&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=02&id=" + id + "&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 650,
 			height : 500
@@ -312,7 +291,7 @@
 					type : 'post',
 					data : {
 						'treeid':treeid,
-						'tabletype':'01',
+						'tabletype':'02',
 						'ids' : str
 					},
 					dataType : 'text',
@@ -365,7 +344,7 @@
 				height : 500
 			};
 		}
-		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=01&id=" + str + "&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=02&id=" + str + "&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		window.location.reload(true);
 	}
@@ -394,23 +373,9 @@
 			height : 500
 		};
 		
-		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&tabletype=01&ids=" + str + "&searchTxt=${searchTxt }&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		//window.location.reload(true);
-	}
-	
-	function allwj() {
-		var str = "";
-		
-		$("input[name='checkbox']:checked").each(function () {
-			str+=$(this).val()+ ",";
-		});
-		
-		if (str != "") {
-			str = str.substring(0,str.length-1);
-		}
-		
-		window.location.href = "${pageContext.request.contextPath}/archive/list.do?treeid=${selectid}&allwj=true&parentid="+str+"&tabletype=02";
 	}
 	
 	function update_multiple() {
@@ -435,7 +400,7 @@
 			str = str.substring(0,str.length-1);
 		}
 		
-		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=01&id=" + str + "&multiple=true&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=02&id=" + str + "&multiple=true&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 850,
 			height : 600
@@ -464,33 +429,19 @@
 	</div>
 	<div id="bodyer_right">
 		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
-			<div class="dqwz_l">当前位置：档案管理
-			<c:if test="${not empty treename}">
-				<c:choose>
-					<c:when test="${templet.templettype == 'A' }">
-						-${treename }-案卷级
-					</c:when>
-					<c:otherwise>
-						-${treename }-文件级
-					</c:otherwise>
-				</c:choose>
-			</c:if>
-			</div>
+			<div class="dqwz_l">当前位置：档案管理-${treename }-案卷下全部文件级</div>
 			<div class="caozuoan">
 				<div style="float: left;">
 				<ul id="cssdropdown">
-					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
-							<li><a href="javascript:;" onclick="allwj()">只文件级</a></li>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
 							<li><a href="javascript:;">数据移动</a></li>
 						</ul>
 					</li>
-					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','01')">设置</a></li>
+					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','02')">设置</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="doc('')">挂接</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
 				</ul>
@@ -500,20 +451,6 @@
 				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
 					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
-				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
-				<input type="button" value="删除" class="btn" onClick="del()" />
-				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','01')" />
-				<input type="button" value="刷新" class="btn" onClick="refresh()" />
-				<input type="button" value="挂接" class="btn" onClick="doc('')" />
-				<select name="pageselect" onchange="print_(options[selectedIndex].value)" >
-					<option value="ajml">打印案卷目录</option>
-				</select>
-				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
-					<option value="import">数据导入</option>
-					<option value="export">数据导出</option>
-				</select> 
-				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<input type="button" value="查询" class="btn" onClick="search()" />--%>
 			</div>
 			<div style="clear: both"></div>
 		</div>
@@ -524,9 +461,6 @@
 					<tr class="tableTopTitle-bg">
 						<td width="30px"><input type="checkbox" id="checkall"></td>
 						<td width="40px">行号</td>
-						<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-							<td width="40px">文件级</td>
-						</c:if>
 						<td width="40px">全文</td>
 						<c:forEach items="${fields}" varStatus="i" var="item">
 							<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
@@ -541,9 +475,6 @@
 						<tr class="table-SbgList">
 							<td><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
 							<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
-							<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-								<td><a title="文件级" href="javascript:;" onclick="showWj('${archiveitem.id}')"><img src="${pageContext.request.contextPath }/images/icons/page.png" ></a></td>
-							</c:if>
 							<c:choose>
 								<c:when test="${archiveitem['isdoc'] == 1 }">
 									<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>

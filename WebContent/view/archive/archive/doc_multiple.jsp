@@ -40,7 +40,7 @@
 	
 	.selected {
 		background:#b8e4f9;
-	}  
+	}
 </style>
 
 <script>

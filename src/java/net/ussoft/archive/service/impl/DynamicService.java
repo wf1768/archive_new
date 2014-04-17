@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import net.ussoft.archive.dao.DocDao;
 import net.ussoft.archive.dao.DocserverDao;
@@ -20,6 +21,7 @@ import net.ussoft.archive.dao.TempletDao;
 import net.ussoft.archive.dao.TempletfieldDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
+import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_table;
@@ -28,6 +30,8 @@ import net.ussoft.archive.model.Sys_templetfield;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IDynamicService;
 import net.ussoft.archive.util.ArchiveUtil;
+import net.ussoft.archive.util.CommonUtils;
+import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.FileOperate;
 import net.ussoft.archive.util.FtpUtil;
 import net.ussoft.archive.util.resule.ResultInfo;
@@ -53,9 +57,11 @@ public class DynamicService implements IDynamicService {
 	private DocserverDao docserverDao;
 	@Resource
 	private DocDao docDao;
+	@Resource
+	private HttpServletRequest request;
 	
 	@Override
-	public PageBean<Map<String, Object>> archiveList(String treeid,String parentid,String tabletype,String searchTxt,
+	public PageBean<Map<String, Object>> archiveList(String treeid,Boolean allwj,String parentid,String tabletype,String searchTxt,
 			Integer status,PageBean<Map<String, Object>> pageBean) {
 		if (null == treeid || treeid.equals("")) {
 			return null;
@@ -64,27 +70,15 @@ public class DynamicService implements IDynamicService {
 		String sql = "";
 		List<Object> values = new ArrayList<Object>();
 		
-		//获取tree 对象
-		Sys_tree tree = treeDao.get(treeid);
-		//获得tree对应的templet
-		Sys_templet templet = templetDao.get(tree.getTempletid());
-		
-		//获取table
-		sql = "select * from sys_table where templetid=? and tabletype=?";
-		values.add(templet.getId());
-		values.add(tabletype);
-		List<Sys_table> tables = tableDao.search(sql, values);
-		
-		if (null == tables || tables.size() != 1) {
+		Sys_table tables =  getTable(treeid,tabletype);
+		if (null == tables) {
 			return null;
 		}
 		
 		//获取字段
-		values.clear();
-		values.add(tables.get(0).getId());
-		List<Sys_templetfield> fields = templetfieldDao.search("select * from sys_templetfield where tableid=? and accountid='SYSTEM'", values);
+		List<Sys_templetfield> fields = getTempletfields(treeid,tabletype);
 		
-		sql = ArchiveUtil.createSql(tables.get(0).getTablename(), searchTxt, fields);
+		sql = ArchiveUtil.createSql(tables.getTablename(), searchTxt, fields);
 		
 		if (sql.contains("WHERE")) {
 			sql += " and treeid=? and status = " + status;
@@ -94,12 +88,32 @@ public class DynamicService implements IDynamicService {
 		}
 		
 		values.clear();
-		values.add(tree.getId());
-		
-		if (tabletype.equals("02")) {
+		values.add(treeid);
+		//如果是文件级，并且不显示全文件，赋予parentid
+		if (tabletype.equals("02") && allwj == false) {
 			if (null != parentid && !parentid.equals("")) {
 				sql += " and parentid=?";
 				values.add(parentid);
+			}
+		}
+		//如果是全文件，判断要取文件级的范围，部分案卷级的全部文件，还是全部案卷级的文件
+		if (allwj) {
+			if (null != parentid && !"".equals(parentid)) {
+				
+				String[] idArr = parentid.split(",");
+				List<String> idList = Arrays.asList(idArr);
+				
+				StringBuilder sb = new StringBuilder();
+				if (null != idList && idList.size() > 0) {
+					sb.append(" and parentid in (");
+					Serializable[] ss=new Serializable[idList.size()];
+					Arrays.fill(ss, "?");
+					sb.append(StringUtils.join(ss,','));
+					sb.append(")");
+					values.addAll(idList);
+					
+					sql += sb.toString();
+				}
 			}
 		}
 		
@@ -108,12 +122,7 @@ public class DynamicService implements IDynamicService {
 		return pageBean;
 	}
 	
-	@Override
-	public List<Map<String, Object>> get(String treeid, String parentid,String tabletype,List<String> idList,String orderby,Integer status) {
-		if (null == treeid || treeid.equals("")) {
-			return null;
-		}
-		
+	private Sys_table getTable(String treeid,String tabletype) {
 		String sql = "";
 		List<Object> values = new ArrayList<Object>();
 		
@@ -127,18 +136,79 @@ public class DynamicService implements IDynamicService {
 		values.add(templet.getId());
 		values.add(tabletype);
 		List<Sys_table> tables = tableDao.search(sql, values);
+		return tables.get(0);
+	}
+	/**
+	 * 获取档案字段，先获取登录帐户私有字段，没有设置就获取系统字段
+	 * @param treeid
+	 * @param tabletype
+	 * @return
+	 */
+	private List<Sys_templetfield> getTempletfields(String treeid,String tabletype) {
 		
-		if (null == tables || tables.size() != 1) {
+		Sys_account accountSession = (Sys_account) CommonUtils.getSessionAttribute(request, Constants.user_in_session);
+		
+		Sys_table table = getTable(treeid, tabletype);
+		
+		if (null == table) {
 			return null;
 		}
 		
+		//根据tableid，获取字段 templetfield的list
+		String sql = "select * from sys_templetfield where tableid=? and accountid=?  order by sort";
+		List<Object> values = new ArrayList<Object>();
+		values.add(table.getId());
+		values.add(accountSession.getId());
+		List<Sys_templetfield> templetfields = templetfieldDao.search(sql, values);
+		
+		if (null == templetfields || templetfields.size() == 0) {
+			//根据tableid，获取字段 templetfield的list
+			sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM'  order by sort";
+			values.clear();
+			values.add(table.getId());
+			templetfields = templetfieldDao.search(sql, values);
+		}
+		
+		return templetfields;
+	}
+	
+	@Override
+	public List<Map<String, Object>> get(String treeid, String parentid,String tabletype,List<String> idList,String orderby,Integer status,String searchTxt) {
+		if (null == treeid || treeid.equals("")) {
+			return null;
+		}
+		
+		String sql = "";
+		List<Object> values = new ArrayList<Object>();
+		
+		Sys_table tables =  getTable(treeid,tabletype);
+		
+		if (null == tables) {
+			return null;
+		}
+		
+		//获取字段
+		List<Sys_templetfield> fields = getTempletfields(treeid,tabletype);
+		
+		sql = ArchiveUtil.createSql(tables.getTablename(), searchTxt, fields);
+				
+		if (sql.contains("WHERE")) {
+			sql += " and treeid=? ";
+		}
+		else {
+			sql += " WHERE treeid=? ";
+		}
+		
+		if (null != status) {
+			sql += " and status = " + status;
+			values.add(status);
+		}
+		
 		values.clear();
-		StringBuilder sb = new StringBuilder("select * from ");
-		sb.append(tables.get(0).getTablename());
-		sb.append(" where ");
-		sb.append(" treeid = ?");
 		values.add(treeid);
-		if (idList.size() > 0) {
+		
+		StringBuilder sb = new StringBuilder();
+		if (null != idList && idList.size() > 0) {
 			sb.append(" and id in (");
 			Serializable[] ss=new Serializable[idList.size()];
 			Arrays.fill(ss, "?");
@@ -146,10 +216,24 @@ public class DynamicService implements IDynamicService {
 			sb.append(")");
 			values.addAll(idList);
 		}
-		
+	
 		if (null != parentid && !"".equals(parentid)) {
-			sb.append(" and parentid = ?");
-			values.add(parentid);
+			String[] pidArr = parentid.split(",");
+			List<String> pidList = Arrays.asList(pidArr);
+			
+//			StringBuilder sb = new StringBuilder();
+			if (null != pidList && pidList.size() > 0) {
+				sb.append(" and parentid in (");
+				Serializable[] ss=new Serializable[pidList.size()];
+				Arrays.fill(ss, "?");
+				sb.append(StringUtils.join(ss,','));
+				sb.append(")");
+				values.addAll(idList);
+				
+//				sql += sb.toString();
+			}
+//			sb.append(" and parentid = ?");
+//			values.add(parentid);
 		}
 		
 		
@@ -157,14 +241,40 @@ public class DynamicService implements IDynamicService {
 			sb.append(" order by ").append(orderby);
 		}
 		
-		List<Map<String, Object>> maps = dynamicDao.searchForMap(sb.toString(), values);
+		
+//		values.clear();
+//		StringBuilder sb = new StringBuilder("select * from ");
+//		sb.append(tables.get(0).getTablename());
+//		sb.append(" where ");
+//		sb.append(" treeid = ?");
+//		values.add(treeid);
+//		if (idList.size() > 0) {
+//			sb.append(" and id in (");
+//			Serializable[] ss=new Serializable[idList.size()];
+//			Arrays.fill(ss, "?");
+//			sb.append(StringUtils.join(ss,','));
+//			sb.append(")");
+//			values.addAll(idList);
+//		}
+//		
+//		if (null != parentid && !"".equals(parentid)) {
+//			sb.append(" and parentid = ?");
+//			values.add(parentid);
+//		}
+//		
+//		
+//		if (null != orderby && !"".equals(orderby)) {
+//			sb.append(" order by ").append(orderby);
+//		}
+		
+		List<Map<String, Object>> maps = dynamicDao.searchForMap(sql + sb.toString(), values);
 		
 		return maps;
 	}
 	
 	@Transactional("txManager")
 	@Override
-	public ResultInfo saveArchive(Map<String, String> sysFieldMap,List<Map<String, String>> archiveList) {
+	public ResultInfo insertArchive(Map<String, String> sysFieldMap,List<Map<String, String>> archiveList) {
 		
 		String treeid = sysFieldMap.get("treeid");
 		String tabletype = sysFieldMap.get("tabletype");
@@ -202,23 +312,11 @@ public class DynamicService implements IDynamicService {
 			return info;
 		}
 		
-		List<Object> values=new ArrayList<Object>();
-		values.add(tree.getTempletid());
-		values.add(tabletype);
-		//根据templetid获取tableid
-		List<Sys_table> tableList = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
-		
-		
-		//获取templet
-//		Sys_templet templet = templetDao.get(tree.getTempletid());
-//		//获取字段
-//		values.clear();
-//		values.add(tableList.get(0).getId());
-//		List<Sys_templetfield> fieldList = templetfieldDao.search("select * from sys_templetfield where tableid=? and accountid='SYSTEM'  and sort != -1 order by sort", values);
+		Sys_table table = getTable(treeid, tabletype);
 		
 		for (int i=0;i<archiveList.size();i++) {
 			StringBuilder sb=new StringBuilder("insert into ");
-			sb.append(tableList.get(0).getTablename());
+			sb.append(table.getTablename());
 			
 			List<String> columns=new ArrayList<String>();
 			List<Object> par =new ArrayList<Object>();
@@ -286,31 +384,12 @@ public class DynamicService implements IDynamicService {
 			return info;
 		}
 		
-		//获取tree对象
-		Sys_tree tree = treeDao.get(treeid);
-		if (tree == null) {
-			info.setSuccess(false);
-			info.setMsg("根据参数treeid，没有获得tree对象。");
-			return info;
-		}
 		
-		List<Object> values=new ArrayList<Object>();
-		values.add(tree.getTempletid());
-		values.add(tabletype);
-		//根据templetid获取tableid
-		List<Sys_table> tableList = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
-		
-		
-		//获取templet
-//		Sys_templet templet = templetDao.get(tree.getTempletid());
-//		//获取字段
-//		values.clear();
-//		values.add(tableList.get(0).getId());
-//		List<Sys_templetfield> fieldList = templetfieldDao.search("select * from sys_templetfield where tableid=? and accountid='SYSTEM'  and sort != -1 order by sort", values);
+		Sys_table table = getTable(treeid, tabletype);
 		
 		for (int i=0;i<archiveList.size();i++) {
 			StringBuilder sb=new StringBuilder("update ");
-			sb.append(tableList.get(0).getTablename());
+			sb.append(table.getTablename());
 			sb.append(" set ");
 			
 			List<String> columns=new ArrayList<String>();
@@ -334,6 +413,132 @@ public class DynamicService implements IDynamicService {
 			dynamicDao.add(sb.toString(), par);
 			
 		}
+		
+		info.setSuccess(true);
+		info.setMsg("处理数据成功。");
+		
+		return info;
+	}
+	
+	@Transactional("txManager")
+	@Override
+	public ResultInfo updateReplace(String treeid, String tabletype,
+			List<String> ids, String tc_th_field, String th_key, String th_value) {
+		
+		ResultInfo info = new ResultInfo();
+		
+		if (null == ids || "".equals(ids)) {
+			info.setSuccess(false);
+			info.setMsg("没有获得更新参数。");
+			return info;
+		}
+		
+		if (null == treeid || treeid.equals("")) {
+			info.setSuccess(false);
+			info.setMsg("没有获得treeid参数。");
+			return info;
+		}
+		
+		if (null == tabletype || tabletype.equals("")) {
+			info.setSuccess(false);
+			info.setMsg("没有获得tabletype参数。");
+			return info;
+		}
+		
+		
+		Sys_table table = getTable(treeid, tabletype);
+		
+//		update A_74 set name = replace(name,"实际","aa")
+		
+		StringBuilder sb=new StringBuilder("update ");
+		sb.append(table.getTablename());
+		sb.append(" set ");
+		sb.append(tc_th_field);
+		sb.append(" = replace(").append(tc_th_field).append(",").append("'").append(th_key).append("','").append(th_value).append("')");
+		
+		List<Object> values = new ArrayList<Object>();
+		if (null != ids && ids.size() > 0) {
+			sb.append(" where id in (");
+			Serializable[] ss=new Serializable[ids.size()];
+			Arrays.fill(ss, "?");
+			sb.append(StringUtils.join(ss,','));
+			sb.append(")");
+			values.addAll(ids);
+		}
+		
+			
+		dynamicDao.add(sb.toString(), values);
+			
+		
+		info.setSuccess(true);
+		info.setMsg("处理数据成功。");
+		
+		return info;
+	}
+	
+	@Transactional("txManager")
+	@Override
+	public ResultInfo updateHigh(String treeid, String tabletype,
+			List<String> ids, String tc_th_field, String firstField,
+			String txt, String secondField) {
+		
+		ResultInfo info = new ResultInfo();
+		
+		if (null == ids || "".equals(ids)) {
+			info.setSuccess(false);
+			info.setMsg("没有获得更新参数。");
+			return info;
+		}
+		
+		if (null == treeid || treeid.equals("")) {
+			info.setSuccess(false);
+			info.setMsg("没有获得treeid参数。");
+			return info;
+		}
+		
+		if (null == tabletype || tabletype.equals("")) {
+			info.setSuccess(false);
+			info.setMsg("没有获得tabletype参数。");
+			return info;
+		}
+		
+		
+		Sys_table table = getTable(treeid, tabletype);
+		
+//		update A_74 set pass = CONCAT_WS('-', pass,name)
+		
+		StringBuilder sb=new StringBuilder("update ");
+		sb.append(table.getTablename());
+		sb.append(" set ");
+		sb.append(tc_th_field);
+		sb.append(" = CONCAT_WS('").append(txt).append("',");
+		if (null == firstField || "".equals(firstField)) {
+			sb.append("'',");
+		}
+		else {
+			sb.append(firstField).append(",");
+		}
+		
+		if (null == secondField || "".equals(secondField)) {
+			sb.append("'')");
+		}
+		else {
+			sb.append(secondField).append(")");
+		}
+		
+		List<Object> values = new ArrayList<Object>();
+		if (null != ids && ids.size() > 0) {
+			sb.append(" where id in (");
+			Serializable[] ss=new Serializable[ids.size()];
+			Arrays.fill(ss, "?");
+			sb.append(StringUtils.join(ss,','));
+			sb.append(")");
+			values.addAll(ids);
+		}
+		
+		System.out.println(sb.toString());
+		dynamicDao.add(sb.toString(), values);
+			
 		
 		info.setSuccess(true);
 		info.setMsg("处理数据成功。");
@@ -397,7 +602,7 @@ public class DynamicService implements IDynamicService {
 	 * @throws SocketException
 	 * @throws IOException
 	 */
-	private void exeDelete(String tableid,String tablename,List<String> ids) throws SocketException, IOException {
+	private void execDelete(String tableid,String tablename,List<String> ids) throws SocketException, IOException {
 		String sql = "";
 		List<Object> values=new ArrayList<Object>();
 		
@@ -460,13 +665,13 @@ public class DynamicService implements IDynamicService {
 		//首先判断是不是案卷级，如果是案卷，要先删除文件级电子全文、文件级
 		Sys_templet templet = templetDao.get(tree.getTempletid());
 		if (!templet.getTemplettype().equals("F") && tabletype.equals("01")) {
-			values.clear();
-			values.add(tree.getTempletid());
-			values.add("02");
-			//根据templetid获取tableid
-			List<Sys_table> wjTable = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
-			
-			String wjTableNameString = wjTable.get(0).getTablename();
+//			values.clear();
+//			values.add(tree.getTempletid());
+//			values.add("02");
+//			//根据templetid获取tableid
+//			List<Sys_table> wjTable = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
+			Sys_table wjTable = getTable(treeid, "02");
+			String wjTableNameString = wjTable.getTablename();
 			//获取文件级，并删除
 			for (int i=0;i<ids.size();i++) {
 				//删除文件级有电子全文的
@@ -482,7 +687,7 @@ public class DynamicService implements IDynamicService {
 					for (Map<String, Object> map : wjList) {
 						wjids.add(map.get("id").toString());
 					}
-					exeDelete(wjTable.get(0).getId(), wjTableNameString, wjids);
+					execDelete(wjTable.getId(), wjTableNameString, wjids);
 				}
 				//删除所有文件级
 				sql = "delete from " + wjTableNameString + " where treeid=? and parentid=?";
@@ -499,7 +704,7 @@ public class DynamicService implements IDynamicService {
 		//根据templetid获取tableid
 		List<Sys_table> tableList = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
 		
-		exeDelete(tableList.get(0).getId(), tableList.get(0).getTablename(), ids);
+		execDelete(tableList.get(0).getId(), tableList.get(0).getTablename(), ids);
 		
 		info.setSuccess(true);
 		info.setMsg("处理数据成功。");
@@ -536,6 +741,14 @@ public class DynamicService implements IDynamicService {
 	@Override
 	public void exeSql(String sql) {
 		dynamicDao.execute(sql);
+	}
+
+	@Override
+	public ResultInfo updateSequence(String treeid, String tabletype,
+			List<String> ids, String tc_th_field, Integer xl_begin,
+			Integer xl_size) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

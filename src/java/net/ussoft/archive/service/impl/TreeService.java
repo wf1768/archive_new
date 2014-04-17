@@ -325,7 +325,7 @@ public class TreeService implements ITreeService {
 	}
 	
 	@Override
-	public List<Sys_templetfield> geTempletfields(String treeid,
+	public List<Sys_templetfield> getTempletfields(String treeid,
 			String tabletype,String accountid) {
 		
 		//获取tree对象，来获取templetid
@@ -343,7 +343,7 @@ public class TreeService implements ITreeService {
 		}
 		
 		//根据tableid，获取字段 templetfield的list
-		String sql = "select * from sys_templetfield where tableid=? and accountid=? and sort != -1 order by sort";
+		String sql = "select * from sys_templetfield where tableid=? and accountid=?  order by sort";
 		List<Object> values = new ArrayList<Object>();
 		values.add(table.getId());
 		values.add(accountid);
@@ -351,7 +351,7 @@ public class TreeService implements ITreeService {
 		
 		if (null == templetfields || templetfields.size() == 0) {
 			//根据tableid，获取字段 templetfield的list
-			sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM' and sort != -1 order by sort";
+			sql = "select * from sys_templetfield where tableid=? and accountid='SYSTEM'  order by sort";
 			values.clear();
 			values.add(table.getId());
 			templetfields = templetfieldDao.search(sql, values);
