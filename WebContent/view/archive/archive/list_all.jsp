@@ -373,7 +373,7 @@
 			height : 500
 		};
 		
-		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&searchTxt=${searchTxt }&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		//window.location.reload(true);
 	}

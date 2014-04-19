@@ -1,5 +1,6 @@
 package net.ussoft.archive.web;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -34,17 +36,20 @@ import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.service.ITreeService;
+import net.ussoft.archive.util.Excel;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 
 /**
  * 档案管理
@@ -379,7 +384,7 @@ public class ArchiveController extends BaseConstroller {
 		modelMap.put("codeMap", codeMap);
 		
 		String url = "/view/archive/archive/edit";
-		if (null != multiple || multiple == true) {
+		if (null != multiple && multiple == true) {
 			//获取templet
 			Sys_templet templet = treeService.getTemplet(treeid);
 			modelMap.put("templet", templet);
@@ -491,23 +496,58 @@ public class ArchiveController extends BaseConstroller {
 		else if (tc_radio.equals("xl")) {
 			//如果是序列修改
 			
+			String xl_first = parMap.get("xl_first");
+			String xl_txt = parMap.get("xl_txt");
 			Integer xl_begin = Integer.valueOf(parMap.get("xl_begin"));
 			Integer xl_size = Integer.valueOf(parMap.get("xl_size"));
 			
-			List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
-			
-			String[] idArr = ids.split(",");
-			
-			Integer num = xl_begin;
-			for (int i=0;i<idArr.length;i++) {
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("id", idArr[i]);
-				map.put("treeid", treeid);
-				map.put(tc_th_field, num.toString());
-				archiveList.add(map);
-				num += xl_size;
+			if ("".equals(xl_first) && "".equals(xl_txt)) {
+				List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
+				
+				String[] idArr = ids.split(",");
+				
+				Integer num = xl_begin;
+				for (int i=0;i<idArr.length;i++) {
+					
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("id", idArr[i]);
+					map.put("treeid", treeid);
+					map.put(tc_th_field, num.toString());
+					archiveList.add(map);
+					num += xl_size;
+				}
+				info = dynamicService.updaetArchive(tabletype, archiveList);
 			}
-			info = dynamicService.updaetArchive(tabletype, archiveList);
+			else {
+				//如果序列更新里，包含了序列字段、序列值
+				String[] idArr = ids.split(",");
+				List<String> idList = Arrays.asList(idArr);
+				
+				List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
+				String orderby = getOrderby(fields);
+				
+				List<Map<String, Object>> archiveList = dynamicService.get(treeid, "", tabletype, idList, orderby, null, null);
+				
+				List<Map<String, String>> updateMaps = new ArrayList<Map<String,String>>();
+				Integer num = xl_begin;
+				for (int i=0;i<archiveList.size();i++) {
+					String first = "";
+					if (!"".equals(xl_first)) {
+						first = archiveList.get(i).get(xl_first).toString();
+					}
+					
+					String updateValue = first + xl_txt + num.toString();
+					
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("id", archiveList.get(i).get("id").toString());
+					map.put("treeid", treeid);
+					map.put(tc_th_field, updateValue);
+					updateMaps.add(map);
+					num += xl_size;
+				}
+				info = dynamicService.updaetArchive(tabletype, updateMaps);
+			}
+			
 		}
 		
 		out.print(info.getMsg());
@@ -870,10 +910,12 @@ public class ArchiveController extends BaseConstroller {
 		
 		//如果tabletype ＝ 02 并且parentid不为空，是文件级打印，先获取案卷号，为了打印显示
 		if (tabletype.equals("02") && null != parentid && !"".equals(parentid)) {
-			List<Sys_templetfield> ajfields = getTempletfields(treeid, "01");
 			//获取aj级信息
-			List<String> idList = new ArrayList<String>();
-			idList.add(parentid);
+			String[] pidArr = parentid.split(",");
+			List<String> idList = Arrays.asList(pidArr);
+			
+//			List<String> idList = new ArrayList<String>();
+//			idList.add(parentid);
 			List<Map<String, Object>> maps = dynamicService.get(treeid,"", "01", idList,null,null,null);
 			modelMap.put("ajh", maps.get(0).get("AJH"));
 			
@@ -917,6 +959,68 @@ public class ArchiveController extends BaseConstroller {
 		String result = JSON.toJSONString(tmpMaps);
 		
 		out.print(result);
-	} 
+	}
+	
+	public ModelAndView importArchive(String data,ModelMap modelMap) {
+		@SuppressWarnings("unchecked")
+		Map<String, String> parMap = (Map<String, String>) JSON.parse(data);
+		
+		String treeid = parMap.get("treeid");
+		String tabletype = parMap.get("tabletype");
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		
+		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param treeid		树节点id
+	 * @param tabletype		01 or 02
+	 * @param status		状态值，案卷级-状态：0为正常，1为组卷  。文件级-状态：0为正常，1为组卷，2为零散文件
+	 * @param request
+	 * @return
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/upload.do",method=RequestMethod.POST)
+    public ModelAndView upload(@RequestParam("file") MultipartFile file,String treeid,String tabletype,Integer status,HttpServletRequest request,ModelMap modelMap) throws IOException {
+		
+//        String path = request.getRealPath("/upload");
+		//获取临时文件的绝对路径
+		String path = getProjectRealPath() + "file" +File.separator + "upload" + File.separator;
+		File excFile = new File(path+"/"+file.getOriginalFilename());
+        //FileCopyUtils.copy(file.getBytes(),excFile);
+        
+		//得到excel表内容
+		Excel e = new Excel();
+        Vector v = null;
+        
+        try {
+            v = e.readFromExcel(excFile);
+        }
+        catch (Exception e1) {
+//            out.write("<script>parent.showCallback('failure','Excel文件读取错误，请检查Excel文件中是否包含上传数据。')</script>");
+            return null;
+        }
+        
+      //得到excel表第一行列头，作为字段名称
+		String excelFieldName = "";
+		if (v.size() >= 2) {
+			excelFieldName = (String) v.get(0);
+		}
+		else {
+	//      			out.write("<script>parent.showCallback('failure','Excel文件读取错误，请检查Excel文件中是否包含上传数据。')</script>");
+			return null;
+		}
+		
+		List<String> excelField = Arrays.asList(v.get(0).toString().split("&&"));
+        
+		for (String string : excelField) {
+			System.out.println(string + "  ====================");
+		}
+		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
+    }
 	
 }

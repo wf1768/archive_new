@@ -198,14 +198,15 @@ public class DynamicService implements IDynamicService {
 		else {
 			sql += " WHERE treeid=? ";
 		}
+		values.add(treeid);
 		
 		if (null != status) {
-			sql += " and status = " + status;
+//			sql += " and status = " + status;
+			sql += " and status = ?";
 			values.add(status);
 		}
 		
-		values.clear();
-		values.add(treeid);
+		
 		
 		StringBuilder sb = new StringBuilder();
 		if (null != idList && idList.size() > 0) {
@@ -228,7 +229,7 @@ public class DynamicService implements IDynamicService {
 				Arrays.fill(ss, "?");
 				sb.append(StringUtils.join(ss,','));
 				sb.append(")");
-				values.addAll(idList);
+				values.addAll(pidList);
 				
 //				sql += sb.toString();
 			}

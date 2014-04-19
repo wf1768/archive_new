@@ -27,16 +27,18 @@
 		var fieldArray = ${fieldjson};
 		
 		for (var i=0;i<fieldArray.length;i++) {
-			var val = $("#"+fieldArray[i].englishname).val();
-			if (fieldArray[i].fieldtype == 'INT') {
-				if (val == "") {
-					val = 0;
+			if (fieldArray[i].sort > 0) {
+				var val = $("#"+fieldArray[i].englishname).val();
+				if (fieldArray[i].fieldtype == 'INT') {
+					if (val == "") {
+						val = 0;
+					}
+					if(isNaN(val)){
+						val = 0;
+					}
 				}
-				if(isNaN(val)){
-					val = 0;
-				}
+				d[fieldArray[i].englishname] = val;
 			}
-			d[fieldArray[i].englishname] = val;
 		}
 		
 		/* d["treeid"] = $("#treeid").val();

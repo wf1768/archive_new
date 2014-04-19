@@ -152,8 +152,6 @@
 		d.tc_th_field = xl_th_field;
 		d.tc_radio = "xl";
 
-		var xl_first = $("#xl_first").val();
-		var xl_txt = $("#xl_txt").val();
 		var xl_begin = $("#xl_begin").val();
 		var xl_size = $("#xl_size").val();
 
@@ -170,8 +168,6 @@
 		}
 		d.xl_begin = xl_begin;
 		d.xl_size = xl_size;
-		d.xl_first = xl_first;
-		d.xl_txt = xl_txt;
 		update(d);
 	}
 
@@ -312,22 +308,14 @@
 										<option value="${item.englishname }">${item.chinesename }</option>
 									</c:if>
 								</c:forEach>
-							</select>=
+							</select>
 						</td>
 						<td class="notcss">
-							<select id="xl_first">
-								<option value="" >请选择</option>
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-										<option value="${item.englishname }">${item.chinesename }</option>
-									</c:if>
-								</c:forEach>
-							</select> + 
-							<input type="text" id="xl_txt"> + 
 							起始值 
-							<input type="text" style="width: 40px;" value="1" id="xl_begin">
+							<input type="text" value="1" id="xl_begin">
 							 步长
-							<input type="text" style="width: 40px;" value="1" id="xl_size">
+							<input type="text" value="1" id="xl_size">
+							
 						</td>
 						<td class="notcss">
 							<button type="button" onclick="update_xl()">更改</button>
