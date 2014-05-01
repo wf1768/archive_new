@@ -24,28 +24,25 @@ function callback() {
 <%@ include file="/view/common/top_menu.jsp"%>
 
 	<div id="bodyer2">
-        <div id="icon">
+        <div id="icon" style="text-align:center;">
               <ul>
-                 <li><img src="images/icon_01.png" width="125" height="118"/></li>
-                 <li><img src="images/icon_02.png" width="125" height="118"/></li>
-                 <li><img src="images/icon_03.png" width="125" height="118"/></li>
-                 <li><img src="images/icon_04.png" width="125" height="118"/></li>
-                 <li><img src="images/icon_05.png" width="125" height="118"/></li>
-                 <li><img src="images/icon_06.png" width="125" height="118"/></li>
+              	<c:if test="${CONFIG == true }">
+              		<li><a href="${pageContext.request.contextPath}/config/list.do"><img src="images/icon_01.png" width="125" height="118"/></a></li>
+              	</c:if>
+              	<c:if test="${ACCOUNT == true }">
+              		<li><a href="${pageContext.request.contextPath}/account/list.do"><img src="images/icon_02.png" width="125" height="118"/></a></li>
+              	</c:if>
+              	<c:if test="${ARCHIVE == true }">
+              		<li><a href="${pageContext.request.contextPath}/archive/list.do"><img src="images/icon_04.png" width="125" height="118"/></a></li>
+              	</c:if>
+              	<c:if test="${SEARCH == true }">
+              		<li><a href="${pageContext.request.contextPath}/intelligent/list.do"><img src="images/icon_05.png" width="125" height="118"/></a></li>
+              	</c:if>
+              	<c:if test="${SEARCHFILE == true }">
+              		<li><a href="${pageContext.request.contextPath}/fulltext/list.do"><img src="images/icon_06.png" width="125" height="118"/></a></li>
+              	</c:if>
               </ul>
         </div>
     </div>
-<%-- <div class="container ">
-	<div class="row">
-		<div class="span12">
-			你好:<%=request.getAttribute("username")%>，密码：<%=request.getAttribute("pass") %>
-	
-			${sessionScope.CURRENT_USER_IN_SESSION.accountcode } <a
-				href="${pageContext.request.contextPath}/account/list.do ">帐户管理</a>
-		</div>
-	</div>
-</div> --%>
-
-
-    </body>
+</body>
 </html>

@@ -3,6 +3,7 @@ $(function() {
 	$(window).resize(function() {
 		if ($(this).width() >1024) {
             setUI();
+            callback();
         }
         else {
             setUI2();
@@ -10,6 +11,8 @@ $(function() {
 	});
 	$(function() {
 		setUI();
+		//执行回调函数，callback函数执行一些辅助操作，例如checkbox事件的绑定，在list页面，如果没有辅助操作，也要加上个空的callback
+		callback();
 	});
 	setUI();
 	function setUI() {
@@ -48,8 +51,8 @@ $(function() {
 		// $("#not").height($("#table_main").height()-60);
 		// $("#ddiv").width(w*0.98-2);
 		
-		//执行回调函数，callback函数执行一些辅助操作，例如checkbox事件的绑定，在list页面，如果没有辅助操作，也要加上个空的callback
-		callback();
+		
+		
 	}
 	
 	function setUI2() {
@@ -77,7 +80,7 @@ $(function() {
 //			
 //		});
 		//执行回调函数，callback函数执行一些辅助操作，例如checkbox事件的绑定，在list页面，如果没有辅助操作，也要加上个空的callback
-		callback();
+        callback();
 
     }
 

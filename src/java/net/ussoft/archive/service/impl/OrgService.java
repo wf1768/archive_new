@@ -15,6 +15,7 @@ import net.ussoft.archive.dao.RoleDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_orgowner;
@@ -22,7 +23,6 @@ import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.util.CommonUtils;
-import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,10 +109,27 @@ public class OrgService implements IOrgService {
 			return 0;
 		}
 		
-		//删除组下的帐户及子组的全部帐户
 		String sql = "";
-		sql = "delete from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
 		List<Object> values = new ArrayList<Object>();
+		//删除组下所有帐户与档案树的关联
+		sql = "delete from sys_account_tree where accountid in (select id from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%'))";
+		accountDao.del(sql, values);
+		
+		//删除组下所有帐户的私有配置
+		sql = "delete from sys_config where accountid in (select id from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%'))";
+		accountDao.del(sql, values);
+		
+		//删除组下所有帐户的私有字段设置的代码
+		sql = "delete from sys_code where templetfieldid in (select id from sys_templetfield where accountid in (select id from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')))";
+		accountDao.del(sql, values);
+		
+		//删除组下所有帐户的私有字段
+		sql = "delete from sys_templetfield where accountid in (select id from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%'))";
+		accountDao.del(sql, values);
+		
+		//删除组下的帐户及子组的全部帐户
+		sql = "delete from sys_account where orgid in (select id from sys_org where treenode = '"+org.getTreenode()+"' or treenode like '"+org.getTreenode()+"#%')";
+		
 		accountDao.del(sql, values);
 		
 		//TODO 因集团版删除组涉及到很多方面，这个等做完帐户管理、角色管理、档案类型管理等再做
@@ -514,6 +531,26 @@ public class OrgService implements IOrgService {
 	@Transactional("txManager")
 	@Override
 	public Boolean saveTreeAuth(Sys_org_tree tmp) {
+		
+		//0说明是树的根节点，要处理当前帐户所有有权限的树节点同样的全文访问权
+		if ("0".equals(tmp.getTreeid())) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where treetype =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getOrgid());
+			values.add("W");
+			
+			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
+			
+			for (Sys_org_tree sys_org_tree : childList) {
+				sys_org_tree.setFilescan(tmp.getFilescan());
+				sys_org_tree.setFiledown(tmp.getFiledown());
+				sys_org_tree.setFileprint(tmp.getFileprint());
+				
+				orgtreeDao.update(sys_org_tree);
+			}
+			return true;
+		}
+				
 		//获取对象
 		Sys_org_tree oTree = new Sys_org_tree();
 		oTree.setOrgid(tmp.getOrgid());
@@ -531,11 +568,11 @@ public class OrgService implements IOrgService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
-			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+		if (!tree.getTreetype().equals("W")) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(tmp.getOrgid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
 			
@@ -599,7 +636,6 @@ public class OrgService implements IOrgService {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Transactional("txManager")
 	@Override
 	public Boolean saveDataAuth(Sys_org_tree org_tree, String tabletype,
@@ -616,12 +652,12 @@ public class OrgService implements IOrgService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
+		if (tree.getTreetype().equals("F") || tree.getTreetype().equals("FT")) {
 			//如果是夹，则获取夹下面的子节点
-			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(org_tree.getOrgid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
 			
@@ -683,6 +719,23 @@ public class OrgService implements IOrgService {
 	@Transactional("txManager")
 	@Override
 	public Boolean saveDocAuth(Sys_org_tree tmp) {
+		
+		//0说明是树的根节点，要处理当前帐户所有有权限的树节点同样的全文访问权
+		if ("0".equals(tmp.getTreeid())) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where treetype =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getOrgid());
+			values.add("W");
+			
+			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
+			
+			for (Sys_org_tree sys_org_tree : childList) {
+				sys_org_tree.setDocauth(tmp.getDocauth());
+				orgtreeDao.update(sys_org_tree);
+			}
+			return true;
+		}
+				
 		//获取对象
 		Sys_org_tree oTree = new Sys_org_tree();
 		oTree.setOrgid(tmp.getOrgid());
@@ -700,11 +753,11 @@ public class OrgService implements IOrgService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
-			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where parentid =?)";
+		if (!tree.getTreetype().equals("W")) {
+			String sql = "select * from sys_org_tree where orgid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(tmp.getOrgid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_org_tree> childList = orgtreeDao.search(sql, values);
 			

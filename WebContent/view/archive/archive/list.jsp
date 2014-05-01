@@ -86,11 +86,9 @@
 		/**************************************************
 	     * Context-Menu with Sub-Menu
 	     **************************************************/
-	    $.contextMenu({
+	    /* $.contextMenu({
 	        selector: '.scrollTable', 
 	        callback: function(key, options) {
-	            var m = "clicked: " + key;
-	            window.console && console.log(m) || alert(m); 
 	        },
 	        items: {
 	        	"add": {
@@ -156,7 +154,7 @@
 	        		}
 	        	}
 	        }
-	    });
+	    }); */
 	});
 
 	function callback() {
@@ -174,7 +172,6 @@
 		    	$('input[name="checkbox"]').parents('tr').removeClass("selected");
 		    }
 		});
-		
 		$('input[type="checkbox"]').removeAttr("checked");
 		
 		$('input[name="checkbox"]').click(function(){
@@ -185,7 +182,6 @@
             	$(this).parents('tr').removeClass("selected");
             }
 		});
-		
 		$('.shiftCheckbox').shiftcheckbox();
 	}
 	
@@ -236,6 +232,12 @@
 	}
 	
 	function search() {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再检索档案。');
+			return;
+		}
 		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
@@ -243,9 +245,9 @@
 	}
 	
 	function edit(id) {
-		
 		var treeid = '${selectid}';
-		if (treeid == '') {
+		
+		if (treeid == '' || treeid == '0') {
 			alert('请选择左侧档案节点，再编辑档案。');
 			return;
 		}
@@ -260,9 +262,9 @@
 	}
 	
 	function show(id) {
-		
 		var treeid = '${selectid}';
-		if (treeid == '') {
+		
+		if (treeid == '' || treeid == '0') {
 			alert('请选择左侧档案节点，再查看档案。');
 			return;
 		}
@@ -277,10 +279,10 @@
 	}
 	
 	function del() {
-		
 		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧父档案节点，再删除档案。');
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再删除档案。');
 			return;
 		}
 		
@@ -327,8 +329,10 @@
 	}
 	
 	function doc(id) {
+		
 		var treeid = '${selectid}';
-		if (treeid == '') {
+		
+		if (treeid == '' || treeid == '0') {
 			alert('请选择左侧档案节点，再查看档案电子文件。');
 			return;
 		}
@@ -371,10 +375,10 @@
 	
 	function openprint() {
 		/* $("#bodyer_right").jqprint(); */
-		
 		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧档案节点，再查看档案电子文件。');
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再打印。');
 			return;
 		}
 		
@@ -389,7 +393,7 @@
 		}
 		
 		var whObj = {
-			width : 650,
+			width : 750,
 			height : 500
 		};
 		
@@ -399,6 +403,19 @@
 	}
 	
 	function allwj() {
+		var treeid = '${selectid}';
+		
+		var templettype = '${templet.templettype }';
+		
+		if (templettype != 'A' && templettype != 'P' ) {
+			alert("纯文件级档案类型，已经是全部文件了，不能查看全文件级。");
+			return;
+		}
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再查看文件级。');
+			return;
+		}
 		var str = "";
 		
 		$("input[name='checkbox']:checked").each(function () {
@@ -415,7 +432,8 @@
 	function update_multiple() {
 		
 		var treeid = '${selectid}';
-		if (treeid == '') {
+		
+		if (treeid == '' || treeid == '0') {
 			alert('请选择左侧档案节点，再编辑档案。');
 			return;
 		}
@@ -476,17 +494,23 @@
 			</c:if>
 			</div>
 			<div class="caozuoan">
-				<div style="float: left;">
+				<div style="float: right;margin-top: 3px;margin-left: 5px">
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
+					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+				</div>
+				<div style="float: right;">
 				<ul id="cssdropdown">
 					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
+							<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
 							<li><a href="javascript:;" onclick="allwj()">只文件级</a></li>
+							</c:if>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;">Excel导入</a></li>
+							<!-- <li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
-							<li><a href="javascript:;">数据移动</a></li>
+							<li><a href="javascript:;">数据移动</a></li> -->
 						</ul>
 					</li>
 					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','01')">设置</a></li>
@@ -494,11 +518,7 @@
 					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
 				</ul>
 				</div>
-				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
-				</div>
+				
 				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />
 				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','01')" />

@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <base target="_self">
@@ -59,43 +59,43 @@
 <title>设置数据访问权限</title>
 </head>
 <body>
-	<div style="width: 90%;margin: 0 auto;">
-		<table id="cssz_table" border="1" cellpadding="1" cellspacing="0" width="100%">
-			<caption>设置帐户 [${account.accountcode }] 对于 [${tree.treename }] 档案节点的数据访问权限。</caption>
-			<thead>
-			<tr>
+	<table width="90%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+		<thead>
+			<tr >
+                <td colspan="3" align="center">设置帐户 [${account.accountcode }] 对于 [${tree.treename }] 档案节点的数据访问权限。</td>
+            </tr>
+			<tr align="center">
 				<th>字段</th>
 				<th>关系符</th>
 				<th>值</th>
 			</tr>
-			</thead>
-			<tbody>
-			<tr>
-				<td>
-					<select id="selectField">
-						<c:forEach  items="${templetfields}" var="item">
-							<c:if test="${item.sort > 0}">
-							<option value="${item.englishname }">${item.chinesename }</option>
-							</c:if>
-					    </c:forEach>
-					</select>
-				</td>
-				<td>
-					<select id="oper" class="input-small">
-						<option value="equal">等于</option>
-						<option value="like">包含</option>
-					</select>
-				</td>
-				<td>
-					<input id="dataAuthValue" value="" type="text"/>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="3"><button onclick="saveDataAuth()">保存</button><button type="button" onclick="closepage()">关闭</button></td>
-				
-			</tr>
-			</tbody>
-		</table>
-	</div>
+		</thead>
+		<tbody>
+		<tr align="center">
+			<td>
+				<select id="selectField">
+					<c:forEach  items="${templetfields}" var="item">
+						<c:if test="${item.sort > 0}">
+						<option value="${item.englishname }">${item.chinesename }</option>
+						</c:if>
+				    </c:forEach>
+				</select>
+			</td>
+			<td>
+				<select id="oper">
+					<option value="equal">等于</option>
+					<option value="like">包含</option>
+				</select>
+			</td>
+			<td>
+				<input id="dataAuthValue" value="" type="text"/>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" align="center"><button onclick="saveDataAuth()">保存</button><button type="button" onclick="closepage()">关闭</button></td>
+			
+		</tr>
+		</tbody>
+	</table>
 </body>
 </html>

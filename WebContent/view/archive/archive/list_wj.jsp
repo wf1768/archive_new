@@ -87,7 +87,7 @@
 		/**************************************************
 	     * Context-Menu with Sub-Menu
 	     **************************************************/
-	    $.contextMenu({
+	    /* $.contextMenu({
 	        selector: '.scrollTable', 
 	        callback: function(key, options) {
 	            var m = "clicked: " + key;
@@ -151,7 +151,7 @@
 	        		}
 	        	}
 	        }
-	    });
+	    }); */
 	});
 
 	function callback() {
@@ -198,6 +198,14 @@
 	}
 	
 	function setshow(templetid,tabletype) {
+		
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧父档案树节点，再设置显示设置。');
+			return;
+		}
+		
 		if (templetid == "") {
 			alert("请选择左侧父档案树节点，再设置显示设置。");
 			return;
@@ -212,6 +220,12 @@
 	}
 	
 	function search() {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再检索档案。');
+			return;
+		}
 		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
@@ -219,17 +233,13 @@
 	}
 	
 	function add() {
-		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		var nodes = treeObj.getSelectedNodes();
-		if (typeof (nodes[0]) == "undefined") {
-			alert("请选择左侧父档案夹，再创建档案类型夹。");
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再创建档案。');
 			return;
 		}
-		if (nodes[0].treetype != 'W') {
-			alert("请选择左侧档案类型下，再创建档案树或档案夹。");
-			return;
-		}
-		var url = "${pageContext.request.contextPath}/archive/add.do?treeid=" + nodes[0].id + "&parentid=${parentid}&tabletype=02&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/add.do?treeid=" + treeid + "&parentid=${parentid}&tabletype=02&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 650,
 			height : 500
@@ -241,8 +251,9 @@
 	function edit(id) {
 		
 		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧父档案节点，再编辑档案。');
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再编辑档案。');
 			return;
 		}
 		
@@ -258,8 +269,9 @@
 	function del() {
 		
 		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧父档案节点，再删除档案。');
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再删除档案。');
 			return;
 		}
 		
@@ -308,7 +320,8 @@
 	function show(id) {
 		
 		var treeid = '${selectid}';
-		if (treeid == '') {
+		
+		if (treeid == '' || treeid == '0') {
 			alert('请选择左侧档案节点，再查看档案。');
 			return;
 		}
@@ -384,7 +397,7 @@
 		}
 		
 		var whObj = {
-			width : 650,
+			width : 750,
 			height : 500
 		};
 		
@@ -464,27 +477,26 @@
 			</c:if>
 			</div>
 			<div class="caozuoan">
-				<div style="float: left;z-index:999">
+				<div style="float: right;margin-top: 3px;margin-left: 5px">
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
+					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+				</div>
+				<div style="float: right;z-index:999">
 				<ul id="cssdropdown">
 					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;">Excel导入</a></li>
+							<!-- <li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
-							<li><a href="javascript:;">数据移动</a></li>
+							<li><a href="javascript:;">数据移动</a></li> -->
 						</ul>
 					</li>
 					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','02')">设置</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="doc('')">挂接</a></li>
 					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
 				</ul>
-				</div>
-				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
 				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
 				<input type="button" value="删除" class="btn" onClick="del()" />

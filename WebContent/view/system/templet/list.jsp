@@ -168,7 +168,7 @@
 				message:"正在进行删除，请稍候...",
 				css: {
                     padding: '15px',
-                    width:"300px",
+                    width:"300px"
                 } 
             }); 
             //setTimeout($.unblockUI, 5000);
@@ -269,6 +269,10 @@
 								</c:choose></td>
 							<td><a href="javascript:;" onclick="sort('${item.id}')">${item.sort}</a></td>
 							<td>
+								<a href="javascript:;" onclick="sort('${item.id}')">
+									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/up.png" />
+									排序
+								</a>
 								<a href="javascript:;" onclick="edit('${item.id}')">
 									<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
 									修改

@@ -1,10 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8"%>
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
 
 
 <script>
@@ -41,6 +43,8 @@
 		var treeid = "${selectid}";
 		selectTreeid = treeid;
 		selectNode(treeid);
+		//$("#data_table").animate({scrollTop: $("#0dfcc112-21e6-4c03-bb13-a30989346a2c").offset().top}, 1000);
+		//$(".scrollTable").animate({scrollTop: -1200}, 1000);
 		
 	});
 	
@@ -50,13 +54,17 @@
 			height : n
 		});
 		
-		/* $('#checkall').click(function(){
+		$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
 		});
 		
 		$('input[type="checkbox"]').removeAttr("checked");
 		
-		$('.shiftCheckbox').shiftcheckbox(); */
+		$('.shiftCheckbox').shiftcheckbox();
+		
+		var jscroll = getCookie('jscroll');
+		$('.body-wrapper').scrollTop(jscroll);
+		delCookie('jscroll');//删除cookie
 	}
 	
 	function addField(){
@@ -111,6 +119,9 @@
 	}
 	
 	function sort(id,type) {
+		var jscroll = $('.body-wrapper').scrollTop();
+		setCookie('jscroll',jscroll);
+		
 		$.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/templetfield/sort.do",
@@ -175,12 +186,27 @@
 		window.location.reload(true);
 	}
 	
-	function fieldcopy(id) {
+	function fieldcopy() {
+		
+		var str = "";
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要复制的档案字段属性。");
+			return;
+		}
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
 		$.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/templetfield/fieldcopy.do",
 	        type : 'post',
-	        data: {id:id},
+	        data: {id:str},
 	        dataType : 'text',
 	        success : function(data) {
 	            if (data == "success") {
@@ -224,32 +250,31 @@
 
 
 <!--内容部分开始-->
-
 <div id="bodyer">
 	<div id="bodyer_left">
 		<dl>
 			<dt>
-				<a href="#" class="blue"><img src="${pageContext.request.contextPath}/images/i1_03.png" width="29" height="22" class="tubiao" />
-					<span>
-					<c:choose>
-						<c:when test="${m=='c' }">
+				<a href="#" class="blue"><img
+					src="${pageContext.request.contextPath}/images/i1_03.png"
+					width="29" height="22" class="tubiao" /> <span> <c:choose>
+							<c:when test="${m=='c' }">
 							档案模版维护
 						</c:when>
-						<c:otherwise>
+							<c:otherwise>
 							库结构维护
 						</c:otherwise>
-					</c:choose>
-						
-					</span>
-				</a>
+						</c:choose>
+
+				</span> </a>
 			</dt>
 			<dd>
 				<ul id="treeDemo" class="ztree"></ul>
 			</dd>
 		</dl>
 	</div>
-	<div id="bodyer_right" >
-		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:5555;">
+	<div id="bodyer_right">
+		<div class="top_dd"
+			style="margin-bottom: 10px; position: relative; z-index: 5555;">
 			<div class="dqwz_l">
 				<c:choose>
 					<c:when test="${m=='c' }">当前位置：系统配置－档案模版维护</c:when>
@@ -259,63 +284,72 @@
 				</c:choose>
 			</div>
 			<div class="caozuoan">
-				<a href="javascript:;" onclick="addField()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_add.png"  />
-                    添加字段</a>
-				<a href="javascript:;" onclick="fieldpaste()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/paste.png"  />
-                    粘贴字段</a>
-                <a href="javascript:;" onclick="refresh()"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png"  />
-                    刷新列表</a>
+				<a href="javascript:;" onclick="addField()">
+					<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_form_add.png" />
+					添加字段
+				</a>
+				<a href="javascript:;" onclick="fieldcopy()">
+					<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/copy.png" />
+					复制字段
+				</a>
+				<a href="javascript:;" onclick="fieldpaste()">
+					<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/paste.png" />
+					粘贴字段
+				</a>
+				<a href="javascript:;" onclick="refresh()"><img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/arrow_refresh.png" />
+					刷新列表
+				</a>
 			</div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="scrollTable" align="left" style="padding-left:5px; " >
-		    <table id="data_table"   class="data_table table-Kang" aline="left" width="98%" 
-				 border=0 cellspacing="1" cellpadding="4" >
-				<thead >
-				<tr class="tableTopTitle-bg">
-					<td><input type="checkbox" id="checkall"></td>
-					<td>序号</td>
-					<td>中文名称</td>
-					<td>名称</td>
-					<td>类型</td>
-					<td>长度</td>
-					<td>默认值</td>
-					<!-- <td>必著</td>
+		<div class="scrollTable" align="left" style="padding-left: 5px;">
+			<table id="data_table" class="data_table table-Kang" aline="left"
+				width="98%" border=0 cellspacing="1" cellpadding="4">
+				<thead>
+					<tr class="tableTopTitle-bg">
+						<td><input type="checkbox" id="checkall"></td>
+						<td>序号</td>
+						<td>中文名称</td>
+						<td>名称</td>
+						<td>类型</td>
+						<td>长度</td>
+						<td>默认值</td>
+						<!-- <td>必著</td>
 					<td>唯一</td> -->
-					<td title="字段将作为智能检索、高级检索的检索项">检索</td>
-					<td title="字段将在档案数据列表里出现">列表</td>
-					<td title="增加档案时，作为档案著录项">编辑</td>
-					<!-- <td>顺带</td> -->
-					<td>数据排序</td>
-					<td>代码项</td>
-					<td>字段排序</td>
-					<td>操作</td>
-                    
-				</tr>
+						<td title="字段将作为智能检索、高级检索的检索项">检索</td>
+						<td title="字段将在档案数据列表里出现">列表</td>
+						<td title="增加档案时，作为档案著录项">编辑</td>
+						<!-- <td>顺带</td> -->
+						<td>数据排序</td>
+						<td>代码项</td>
+						<td>字段排序</td>
+						<td>操作</td>
+
+					</tr>
 				</thead>
 				<tbody>
-				<c:forEach items="${templetfields}" varStatus="i" var="item">
-					<tr class="table-SbgList">
-						<td><input type="checkbox" name="checkbox" value="${item.id }"></td>
-						<td>${i.index+1 }</td>
-						<td>${item.chinesename}</td>
-						<td>${item.englishname}</td>
-						<td>
-							<c:choose>
-								<c:when test="${item.fieldtype=='VARCHAR' }">
-									字符串
-								</c:when>
-								<c:when test="${item.fieldtype=='DATE' }">
-									日期型
-								</c:when>
-								<c:when test="${item.fieldtype=='INT' }">
-									整数型
-								</c:when>
-							</c:choose>
-						</td>
-						<td>${item.fieldsize}</td>
-						<td>${item.defaultvalue}</td>
-						<%-- <td>
+					<c:forEach items="${templetfields}" varStatus="i" var="item">
+						<tr id="${item.id }" class="table-SbgList">
+							<td><input type="checkbox" name="checkbox" value="${item.id }" class="shiftCheckbox"></td>
+							<td>${i.index+1 }</td>
+							<td>${item.chinesename}</td>
+							<td>${item.englishname}</td>
+							<td>
+								<c:choose>
+									<c:when test="${item.fieldtype=='VARCHAR' }">
+										字符串
+									</c:when>
+									<c:when test="${item.fieldtype=='DATE' }">
+										日期型
+									</c:when>
+									<c:when test="${item.fieldtype=='INT' }">
+										整数型
+									</c:when>
+								</c:choose>
+							</td>
+							<td>${item.fieldsize}</td>
+							<td>${item.defaultvalue}</td>
+							<%-- <td>
 							<c:if test="${item.isrequire==1 }">
 								<a href="javascript:;"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
 							</c:if>
@@ -325,46 +359,59 @@
 								<a href="javascript:;"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
 							</c:if>
 						</td> --%>
-						<td>
-							<c:choose>
-								<c:when test="${item.issearch==1 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
-								</c:when>
-								<c:when test="${item.issearch==0 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',1)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
-								</c:when>
-								<c:otherwise>
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',1)">未知</a>
-								</c:otherwise>
-							</c:choose>
-						</td>
-						<td>
-							<c:choose>
-								<c:when test="${item.isgridshow==1 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isgridshow',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
-								</c:when>
-								<c:when test="${item.isgridshow==0 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isgridshow',1)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
-								</c:when>
-								<c:otherwise>
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isgridshow',1)">未知</a>
-								</c:otherwise>
-							</c:choose>
-						</td>
-						<td>
-							<c:choose>
-								<c:when test="${item.isedit==1 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
-								</c:when>
-								<c:when test="${item.isedit==0 }">
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',1)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
-								</c:when>
-								<c:otherwise>
-									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','isedit',1)">未知</a>
-								</c:otherwise>
-							</c:choose>
-						</td>
-						<%-- <td>
+							<td>
+								<c:choose>
+									<c:when test="${item.issearch==1 }">
+										<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',0)">
+											<img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png">
+										</a>
+									</c:when>
+									<c:when test="${item.issearch==0 }">
+										<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',1)">
+											<img alt="是" src="${pageContext.request.contextPath}/images/icons/delete.png">
+										</a>
+									</c:when>
+									<c:otherwise>
+										<a href="javascript:;" onclick="updateOtherInfo('${item.id}','issearch',1)">未知</a>
+									</c:otherwise>
+								</c:choose></td>
+							<td><c:choose>
+									<c:when test="${item.isgridshow==1 }">
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isgridshow',0)"><img
+											alt="是"
+											src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
+									</c:when>
+									<c:when test="${item.isgridshow==0 }">
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isgridshow',1)"><img
+											alt="是"
+											src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
+									</c:when>
+									<c:otherwise>
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isgridshow',1)">未知</a>
+									</c:otherwise>
+								</c:choose></td>
+							<td><c:choose>
+									<c:when test="${item.isedit==1 }">
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isedit',0)"><img
+											alt="是"
+											src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
+									</c:when>
+									<c:when test="${item.isedit==0 }">
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isedit',1)"><img
+											alt="是"
+											src="${pageContext.request.contextPath}/images/icons/delete.png"></a>
+									</c:when>
+									<c:otherwise>
+										<a href="javascript:;"
+											onclick="updateOtherInfo('${item.id}','isedit',1)">未知</a>
+									</c:otherwise>
+								</c:choose></td>
+							<%-- <td>
 							<c:choose>
 								<c:when test="${item.iscopy==1 }">
 									<a href="javascript:;" onclick="updateOtherInfo('${item.id}','iscopy',0)"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
@@ -377,69 +424,65 @@
 								</c:otherwise>
 							</c:choose>
 						</td> --%>
-						<td>
-							<c:choose>
-								<c:when test="${item.orderby=='ASC' }">
+							<td><c:choose>
+									<c:when test="${item.orderby=='ASC' }">
 									正序排序
 								</c:when>
-								<c:when test="${item.orderby=='DESC' }">
+									<c:when test="${item.orderby=='DESC' }">
 									倒序排序
 								</c:when>
-								<c:when test="${item.orderby=='GBK' }">
+									<c:when test="${item.orderby=='GBK' }">
 									中文排序
 								</c:when>
-								<c:when test="${item.orderby=='NUM' }">
+									<c:when test="${item.orderby=='NUM' }">
 									字符型数字排序
 								</c:when>
-							</c:choose>
-						</td>
-						<td>
-							<c:if test="${item.iscode==1 }">
-								<a href="javascript:;" onclick="fieldcode('${item.id}')"><img alt="是" src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
-							</c:if>
-						</td>
-						<td>
-						<c:if test="${!i.first }">
-							<a href="javascript:;" onclick="sort('${item.id}','up')"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/up.png" /></a>
-						</c:if>
-						<c:if test="${!i.last }">
-							<a href="javascript:;" onclick="sort('${item.id}','down')"><img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/down.png" /></a>
-						</c:if>
-						</td>
-						<td>
-							<a href="javascript:;" onclick="editField('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
-								修改
+								</c:choose></td>
+							<td><c:if test="${item.iscode==1 }">
+									<a href="javascript:;" onclick="fieldcode('${item.id}')"><img
+										alt="是"
+										src="${pageContext.request.contextPath}/images/icons/accept.png"></a>
+								</c:if></td>
+							<td><c:if test="${!i.first }">
+									<a href="javascript:;" onclick="sort('${item.id}','up')"><img
+										style="margin-bottom: -3px"
+										src="${pageContext.request.contextPath}/images/icons/up.png" /></a>
+								</c:if> <c:if test="${!i.last }">
+									<a href="javascript:;" onclick="sort('${item.id}','down')"><img
+										style="margin-bottom: -3px"
+										src="${pageContext.request.contextPath}/images/icons/down.png" /></a>
+								</c:if></td>
+							<td><a href="javascript:;" onclick="editField('${item.id}')"
+								class="juse"> <img style="margin-bottom: -3px"
+									src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
+									修改
+							</a> <a href="javascript:;" onclick="delField('${item.id}')"
+								class="juse"> <img style="margin-bottom: -3px"
+									src="${pageContext.request.contextPath}/images/icons/application_form_delete.png" />
+									删除
+							</a> <a href="javascript:;" onclick="fieldcode('${item.id}')"
+								class="juse"> <img style="margin-bottom: -3px"
+									src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
+									代码
 							</a>
-							<a href="javascript:;" onclick="delField('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_delete.png" />
-								删除
-							</a>
-							<a href="javascript:;" onclick="fieldcode('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
-								代码
-							</a>
-							<a href="javascript:;" onclick="fieldcopy('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/copy.png" />
-								复制
-							</a>
-						</td>
-					</tr>
-				</c:forEach>
+							</td>
+						</tr>
+					</c:forEach>
 				</tbody>
 			</table>
-           
-		   </div>
-           <div class="aa" style="margin-left:5px" >
-				<table class=" " aline="left" width="100%" 
-					 border=0 cellspacing="0" cellpadding="0" >
-					<tr class="table-botton" id="fanye" >
-						<td colspan="14"><p>当前第 1 页，共 1 页，共 ${fn:length(templetfields) } 行</p></td>
-						<td colspan="14" class="fenye" ></td>
-					</tr>
-				</table>
-			</div>
+
 		</div>
+		<div class="aa" style="margin-left: 5px">
+			<table class=" " aline="left" width="100%" border=0 cellspacing="0"
+				cellpadding="0">
+				<tr class="table-botton" id="fanye">
+					<td colspan="14"><p>当前第 1 页，共 1 页，共
+							${fn:length(templetfields) } 行</p></td>
+					<td colspan="14" class="fenye"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
 	<div style="clear: both"></div>
 </div>
 

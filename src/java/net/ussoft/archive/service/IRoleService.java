@@ -65,4 +65,11 @@ public interface IRoleService {
 	 * @param roleid
 	 */
 	public void setFunctions(List<String> funList,String roleid);
+	
+	/**
+	 * 当前帐户对某个功能，是否有权限。主要为主页main的快捷方式，单个获取，主页显示哪些功能快捷方式图标
+	 * @param funid
+	 * @return
+	 */
+	public Boolean getRoleFun(String funid);
 }

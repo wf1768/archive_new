@@ -141,7 +141,6 @@
 				</tr>
 				<tr>
 					<td colspan="4" align="center">
-						<button type="button" onclick="saveOrg()">保存</button>
 						<button type="button" onclick="closepage()">关闭</button>
 					</td>
 				</tr>

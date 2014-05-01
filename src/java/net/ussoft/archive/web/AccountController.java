@@ -474,7 +474,7 @@ public class AccountController extends BaseConstroller {
 	}
 	
 	/**
-	 * 保存组的树节点赋权
+	 * 保存树节点赋权
 	 * @param orgid
 	 * @param treeids
 	 * @param response

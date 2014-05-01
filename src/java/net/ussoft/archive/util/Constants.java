@@ -18,7 +18,7 @@ public class Constants{
 	 * 字段copy时，记录copy的字段id
 	 */
 	public static final String field_copy_session = "CURRENT_FIELD_COPY_SESSION";
-
+	
 	/**
 	 * 总行数
 	 */

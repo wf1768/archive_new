@@ -42,7 +42,6 @@ import net.ussoft.archive.util.resule.ResultInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -218,7 +217,7 @@ public class ArchiveController extends BaseConstroller {
 		//返回的url。返回案卷页，或是文件级页
 		String url = "/view/archive/archive/list";
 		if (null != templet && templet.getTemplettype().equals("F")) {
-			url = "/view/archive/archive/list_wj";
+			url = "/view/archive/archive/list";
 		}
 		if (tabletype.equals("02") && allwj==false) {
 			url = "/view/archive/archive/list_wj";
@@ -323,7 +322,13 @@ public class ArchiveController extends BaseConstroller {
 		
 		return "/view/archive/archive/add";
 	}
-	
+	/**
+	 * 添加保存
+	 * @param data
+	 * @param sys
+	 * @param response
+	 * @throws IOException
+	 */
 	@RequestMapping(value="/save",method=RequestMethod.POST)
 	public void save(String data,String sys,HttpServletResponse response) throws IOException {
 		
@@ -383,12 +388,12 @@ public class ArchiveController extends BaseConstroller {
 		Map<String, List<Sys_code>> codeMap =  getFieldCode(fields);
 		modelMap.put("codeMap", codeMap);
 		
+		//获取templet
+		Sys_templet templet = treeService.getTemplet(treeid);
+		modelMap.put("templet", templet);
+		
 		String url = "/view/archive/archive/edit";
 		if (null != multiple && multiple == true) {
-			//获取templet
-			Sys_templet templet = treeService.getTemplet(treeid);
-			modelMap.put("templet", templet);
-			
 			Sys_account account = getSessionAccount();
 			//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
 			HashMap<String, Object> configMap = getConfig(account.getId());
@@ -903,6 +908,10 @@ public class ArchiveController extends BaseConstroller {
 		modelMap.put("parentid", parentid);
 		modelMap.put("searchTxt", searchTxt);
 		
+		//获取templet，用来判断是否是纯文件级档案类型
+		Sys_templet templet = treeService.getTemplet(treeid);
+		modelMap.put("templet", templet);
+		
 		//获取字段。用来配对打印项
 		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		
@@ -918,6 +927,7 @@ public class ArchiveController extends BaseConstroller {
 //			idList.add(parentid);
 			List<Map<String, Object>> maps = dynamicService.get(treeid,"", "01", idList,null,null,null);
 			modelMap.put("ajh", maps.get(0).get("AJH"));
+			modelMap.put("bgqx", maps.get(0).get("BGQX"));
 			
 		}
 		

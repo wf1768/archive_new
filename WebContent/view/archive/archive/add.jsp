@@ -19,6 +19,7 @@
 	}
 	
 	$(function(){
+		$('table input:first').focus();
 	})
 	
 	function save() {
@@ -78,10 +79,6 @@
 			<tr>
                 <td class="biaoti" colspan="2" align="center">
                 	添加档案
-                	<input type="hidden" id="treeid" name="treeid" value="${treeid }">
-                	<input type="hidden" id="status" name="status" value="${status }">
-                	<input type="hidden" id="tabletype" name="tabletype" value="${tabletype }">
-                	<input type="hidden" id="parentid" name="parentid" value="${parentid }">
                 </td>
             </tr>
             <c:forEach items="${fields}" varStatus="j" var="item">
@@ -128,5 +125,9 @@
 			</tr>
 		</tbody>
 	</table>
+	<input type="hidden" id="treeid" name="treeid" value="${treeid }">
+   	<input type="hidden" id="status" name="status" value="${status }">
+   	<input type="hidden" id="tabletype" name="tabletype" value="${tabletype }">
+   	<input type="hidden" id="parentid" name="parentid" value="${parentid }">
 </body>
 </html>

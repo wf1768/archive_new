@@ -66,6 +66,13 @@
 		
 		$('input[type="checkbox"]').removeAttr("checked");
 	});
+	
+	function callback() {
+		var n = $(".scrollTable").height()-$(".aa").height();
+		$('.data_table').fixHeader({
+			height : n
+		});
+	}
 
 
 	function add(){

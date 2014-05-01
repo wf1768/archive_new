@@ -5,17 +5,21 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import net.ussoft.archive.dao.AccountDao;
 import net.ussoft.archive.dao.FunctionDao;
 import net.ussoft.archive.dao.OrgDao;
 import net.ussoft.archive.dao.RoleDao;
 import net.ussoft.archive.dao.RoleFuntionDao;
+import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_function;
+import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.model.Sys_role;
 import net.ussoft.archive.model.Sys_role_function;
 import net.ussoft.archive.service.IRoleService;
 import net.ussoft.archive.util.CommonUtils;
+import net.ussoft.archive.util.Constants;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +38,8 @@ public class RoleService implements IRoleService {
 	private RoleFuntionDao roleFuntionDao;
 	@Resource
 	private FunctionDao functionDao;
+	@Resource
+	private HttpServletRequest request;
 
 	@Override
 	public Sys_role getById(String id) {
@@ -156,6 +162,37 @@ public class RoleService implements IRoleService {
 		
 		roleFuntionDao.batchAdd("insert into sys_role_function (id,roleid,functionid) values (?,?,?)", values2);
 		
+	}
+
+	@Override
+	public Boolean getRoleFun(String funid) {
+		Sys_account accountSession = (Sys_account) CommonUtils.getSessionAttribute(request, Constants.user_in_session);
+		if (null == accountSession) {
+			return false;
+		}
+		String roleid = "";
+		//如果帐户的角色为空，就读取帐户组的角色
+		if (null == accountSession.getRoleid() || "".equals(accountSession.getRoleid())) {
+			Sys_org org = orgDao.get(accountSession.getOrgid());
+			roleid = org.getRoleid();
+		}
+		else {
+			roleid = accountSession.getRoleid();
+		}
+		
+		if (null == roleid || "".equals(roleid)) {
+			return false;
+		}
+		
+		Sys_role_function role_function = new Sys_role_function();
+		role_function.setFunctionid(funid);
+		role_function.setRoleid(roleid);
+		Sys_role_function tmp = roleFuntionDao.searchOne(role_function);
+		
+		if (null == tmp) {
+			return false;
+		}
+		return true;
 	}
 
 

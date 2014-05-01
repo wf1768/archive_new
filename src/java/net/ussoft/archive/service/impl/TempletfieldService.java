@@ -395,10 +395,10 @@ public class TempletfieldService implements ITempletfieldService {
 		sb.append("select * from sys_templetfield where ");
 		sb.append("tableid=? and accountid=?");
 		if (type.equals("up")) {
-			sb.append(" and sort < ? ").append("order by sort desc limit 1");
+			sb.append(" and sort < ? and sort > 0 ").append("order by sort desc limit 1");
 		}
 		else if (type.equals("down")) {
-			sb.append(" and sort > ? ").append("order by sort asc limit 1");
+			sb.append(" and sort > ? and sort > 0 ").append("order by sort asc limit 1");
 		}
 		
 		List<Object> values = new ArrayList<Object>();
@@ -473,74 +473,75 @@ public class TempletfieldService implements ITempletfieldService {
 	@Override
 	public Boolean fieldpaste(String fieldid, String tableid) {
 		
-		//获取copy字段实体
-		Sys_templetfield field = templetfieldDao.get(fieldid);
-		if (null == field) {
-			return false;
-		}
+		String[] idsStrings = fieldid.split(",");
 		
-		//判断字段英文名是否存在
-		String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
-		List<Object> values = new ArrayList<Object>();
-		values.add(field.getEnglishname());
-		values.add(tableid);
-		values.add("SYSTEM");
-		int num = templetfieldDao.getCount(sql, values);
-		
-		if (num >0) {
-			return false;
-		}
-		
-		//更换id和tableid，插入数据库新的字段
-		Sys_templetfield targetField = field;
-		targetField.setId(UUID.randomUUID().toString());
-		targetField.setTableid(tableid);
-		//保存新字段
-		Boolean b = saveField(targetField);
-		List<Sys_code> codes = new ArrayList<Sys_code>();
-		//插入新字段后，处理字段代码
-		if (field.getIscode() == 1) {
-			//获取原字段的代码
-			values.clear();
-			values.add(fieldid);
-			sql = "select * from sys_code where templetfieldid=? order by codeorder asc";
-			codes = codeDao.search(sql, values);
-			if (null != codes && codes.size() > 0) {
-				for (Sys_code code : codes) {
-					code.setId(UUID.randomUUID().toString());
-					code.setTempletfieldid(targetField.getId());
-					codeDao.save(code);
-				}
+		for (String id : idsStrings) {
+			//获取copy字段实体
+			Sys_templetfield field = templetfieldDao.get(id);
+			if (null == field) {
+				continue;
 			}
-		}
-				
-		
-		//成功插入系统字段后，处理帐户字段
-		Sys_table table = tableDao.get(tableid);
-		//获取多少个帐户对当前表字段有帐户字段
-		sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
-		values.clear();
-		values.add(table.getId());
-		List<Map<String, Object>> templetfields = templetfieldDao.searchForMap(sql, values);
-		//为每个帐户插入新字段
-		for (Map<String, Object> map : templetfields) {
+			
+			//判断字段英文名是否存在
+			String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
+			List<Object> values = new ArrayList<Object>();
+			values.add(field.getEnglishname());
+			values.add(tableid);
+			values.add("SYSTEM");
+			int num = templetfieldDao.getCount(sql, values);
+			
+			if (num >0) {
+				continue;
+			}
+			
+			//更换id和tableid，插入数据库新的字段
+			Sys_templetfield targetField = field;
 			targetField.setId(UUID.randomUUID().toString());
-			targetField.setAccountid(map.get("accountid").toString());
-			
-			if (null != codes && codes.size() > 0) {
-				for (Sys_code code : codes) {
-					code.setId(UUID.randomUUID().toString());
-					code.setTempletfieldid(targetField.getId());
-					codeDao.save(code);
+			targetField.setTableid(tableid);
+			//保存新字段
+			Boolean b = saveField(targetField);
+			List<Sys_code> codes = new ArrayList<Sys_code>();
+			//插入新字段后，处理字段代码
+			if (field.getIscode() == 1) {
+				//获取原字段的代码
+				values.clear();
+				values.add(id);
+				sql = "select * from sys_code where templetfieldid=? order by codeorder asc";
+				codes = codeDao.search(sql, values);
+				if (null != codes && codes.size() > 0) {
+					for (Sys_code code : codes) {
+						code.setId(UUID.randomUUID().toString());
+						code.setTempletfieldid(targetField.getId());
+						codeDao.save(code);
+					}
 				}
 			}
+					
 			
-			templetfieldDao.save(targetField);
+			//成功插入系统字段后，处理帐户字段
+			Sys_table table = tableDao.get(tableid);
+			//获取多少个帐户对当前表字段有帐户字段
+			sql = "select accountid,count(*) as count from sys_templetfield where tableid=? and accountid <> 'SYSTEM' group by accountid having count>0";
+			values.clear();
+			values.add(table.getId());
+			List<Map<String, Object>> templetfields = templetfieldDao.searchForMap(sql, values);
+			//为每个帐户插入新字段
+			for (Map<String, Object> map : templetfields) {
+				targetField.setId(UUID.randomUUID().toString());
+				targetField.setAccountid(map.get("accountid").toString());
+				
+				if (null != codes && codes.size() > 0) {
+					for (Sys_code code : codes) {
+						code.setId(UUID.randomUUID().toString());
+						code.setTempletfieldid(targetField.getId());
+						codeDao.save(code);
+					}
+				}
+				
+				templetfieldDao.save(targetField);
+			}
 		}
 		
-		if (!b) {
-			return false;
-		}
 		return true;
 	}
 	

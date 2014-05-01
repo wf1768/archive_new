@@ -18,6 +18,53 @@
 		window.close();
 	}
 	
+	function insert() {
+		//档案数据对象 
+		var d = {};
+		var fieldArray = ${fieldjson};
+		
+		for (var i=0;i<fieldArray.length;i++) {
+			if (fieldArray[i].sort > 0) {
+				var val = $("#"+fieldArray[i].englishname).val();
+				if (fieldArray[i].fieldtype == 'INT') {
+					if (val == "") {
+						val = 0;
+					}
+					if(isNaN(val)){
+						val = 0;
+					}
+				}
+				d[fieldArray[i].englishname] = val;
+			}
+		}
+		
+		//系统字段对象
+		var s = {};
+		s.treeid = '${maps[0].treeid}';
+		s.status = '${maps[0].status}';
+		s.tabletype = $("#tabletype").val();
+		
+		var templettype = '${templet.templettype}';
+		if (templettype != 'F' && s.tabletype == '02') {
+			s.parentid = '${maps[0].parentid}';
+		}
+		
+		var data = JSON.stringify(d);
+		var sys = JSON.stringify(s);
+		
+	    $.ajax({
+	        async : true,
+	        url : "${pageContext.request.contextPath}/archive/save.do",
+	        type : 'post',
+	        data:{'data':data,'sys':sys},
+	        dataType : 'text',
+	        success : function(data) {
+	        	alert(data);
+	            //window.dialogArguments.location.reload();
+	        }
+	    });
+	}
+	
 	function save() {
 		
 		var d = {};
@@ -108,8 +155,9 @@
 				</c:forEach>
 				<tr>
 					<td colspan="2" align="center">
-						<button type="button" onclick="save()">保存</button>
+						<button type="button" onclick="save()">保存修改</button>
 						<button type="button" onclick="closepage2()">关闭</button>
+						<button type="button" title="将数据另存为新记录" onclick="insert()">另存为新记录</button>
 					</td>
 				</tr>
 			</tbody>

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
 	<script type="text/javascript">
 	<!--
 	function quit() {
@@ -7,6 +8,12 @@
             window.location.href = "${pageContext.request.contextPath}/logout.do";
         };
     }
+	
+	function updatepass(id) {
+		var url = "${pageContext.request.contextPath}/account/updatepass.do?id="+id + "&time="+Date.parse(new Date());
+		var whObj = { width: 440, height: 300 };
+		var result = openShowModalDialog(url,window,whObj);
+	}
 	//-->
 	</script>
 	
@@ -35,7 +42,7 @@
             	<a href="javascript:;" onclick="quit()">退出</a>
            </div>
            <div class="user">
-           		欢迎 <a href="#" title="点击修改帐户信息">${sessionScope.CURRENT_USER_IN_SESSION.accountcode } </a>。
+           		欢迎 <a href="#" title="点击修改帐户信息" onclick="updatepass('${sessionScope.CURRENT_USER_IN_SESSION.id }')">${sessionScope.CURRENT_USER_IN_SESSION.accountcode } </a>。
            </div>
 		   <div style="clear: both"></div>
 		</div>

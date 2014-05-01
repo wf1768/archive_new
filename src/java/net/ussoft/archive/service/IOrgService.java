@@ -8,7 +8,6 @@ import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_org;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_tree;
-import net.ussoft.archive.util.resule.ResultInfo;
 
 public interface IOrgService {
 	

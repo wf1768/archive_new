@@ -390,15 +390,15 @@ public class TreeService implements ITreeService {
 				((JSONObject) jsonArray.get(i)).put("isParent", true);
 			}
 			if (typeString.equals("F")) {
-				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/icons/1.gif");
-				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/icons/2.gif");
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"/images/icons/1.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"/images/icons/2.gif");
 			}
 			if (typeString.equals("T") || typeString.equals("FT")) {
-				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"images/folder.gif");
-				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"images/folder-open.gif");
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"/images/folder.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"/images/folder-open.gif");
 			}
 			if (typeString.equals("W")) {
-				((JSONObject) jsonArray.get(i)).put("icon", basePath+"images/icons/page.png");
+				((JSONObject) jsonArray.get(i)).put("icon", basePath+"/images/icons/page.png");
 			}
 			
 		}

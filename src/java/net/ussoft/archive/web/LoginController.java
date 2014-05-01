@@ -14,6 +14,7 @@ import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_function;
 import net.ussoft.archive.service.IAccountService;
+import net.ussoft.archive.service.IRoleService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.Logger;
@@ -36,6 +37,8 @@ public class LoginController extends BaseConstroller {
 	
 	@Resource
 	private IAccountService accountService;
+	@Resource
+	private IRoleService roleService;
 	
 	@Autowired
 	private Producer captchaProducer = null;
@@ -95,15 +98,35 @@ public class LoginController extends BaseConstroller {
 			//设置哪个功能为焦点功能
 			modelMap.put("focus_first", "index");
 //			modelMap.put("focus_second", "");
+			modelMap.put("CONFIG", main_fun("2"));
+			modelMap.put("ACCOUNT", main_fun("18"));
+			modelMap.put("ARCHIVE", main_fun("6"));
+			modelMap.put("SEARCH", main_fun("10"));
+			modelMap.put("SEARCHFILE", main_fun("12"));
 			return new ModelAndView("/view/main", modelMap);
 		}else {
 			modelMap.put("result", "输入的帐户名 或密码错误，请重新输入。");
 			return new ModelAndView("login",modelMap);
 		}
 	}
+	/**
+	 * 根据functionid 获取当前帐户对功能是否有权限。主要用于主页的快捷方式显示
+	 * @param funid
+	 * @return
+	 */
+	private Boolean main_fun(String funid) {
+		return roleService.getRoleFun(funid);
+	}
+	
 	@RequestMapping(value="/main",method=RequestMethod.GET)
 	public ModelAndView main() {
 		ModelMap modelMap = super.getModelMap("index","");
+		modelMap.put("CONFIG", main_fun("2"));
+		modelMap.put("ACCOUNT", main_fun("18"));
+		modelMap.put("ARCHIVE", main_fun("6"));
+		modelMap.put("SEARCH", main_fun("10"));
+		modelMap.put("SEARCHFILE", main_fun("12"));
+		
 		return new ModelAndView("/view/main", modelMap);
 	}
 	@RequestMapping(value="/logout")

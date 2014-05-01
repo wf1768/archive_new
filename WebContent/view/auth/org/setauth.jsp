@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/form.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
@@ -41,6 +41,14 @@
 		}
 	};
 	
+	function intoTbody(who,colspanNum) {
+		var tbody = "<tr>";
+		tbody += "<td colspan=\""+colspanNum+"\" align=\"center\"></td>";
+		tbody += "</tr>";
+		
+		$("#"+who).html(tbody);
+	}
+	
 	function onClick(e,treeId, treeNode) {
 		var zTree = $.fn.zTree.getZTreeObj("treeDemo");
 		zTree.expandNode(treeNode);
@@ -72,8 +80,12 @@
 		            	$('#fileprint').attr("checked",true);
 		            }
 		            $('.btn').removeAttr("disabled");
-		            if (myData.filter != "") {
+		            if (myData.filter != null && myData.filter != "") {
 		            	showDataAuth(myData.id,myData.filter,treetype);
+		            }
+		            else {
+		            	intoTbody("ajAuth",4);
+		            	intoTbody("wjAuth",4);
 		            }
 		            $("#docauth").val(myData.docauth);
 	            }
@@ -83,6 +95,8 @@
             		$("#docauth").attr("disabled","disabled");
             		$("#ajAuth").html('');
             		$("#wjAuth").html('');
+            		intoTbody("ajAuth",4);
+            		intoTbody("wjAuth",4);
 	            }
 	            
 	        }
@@ -133,7 +147,7 @@
 			fileprint = 1;
 		}
 		var b = true;
-		if (node.treetype == "F") {
+		if (node.treetype != "W") {
 			if (!confirm("选择的是档案夹，将对档案夹下的所有档案节点赋予相同的电子文件权限，是否继续？")) {
 				b = false;
 			}
@@ -170,7 +184,7 @@
 		var docauth = $("#docauth").val();
 		
 		var b = true;
-		if (node.treetype == "F") {
+		if (node.treetype != "W") {
 			if (!confirm("选择的是档案夹，将对档案夹下的所有档案节点赋予相同的电子文件浏览范围权限，是否继续？")) {
 				b = false;
 			}
@@ -238,6 +252,16 @@
 			return;
 		}
 		node = nodes[0];
+		
+		if (node.id == '0') {
+			alert("记录权限只能按档案类型来创建，请重新选择。");
+			return;
+		}
+		
+		if (node.treetype == "T") {
+			alert("记录权限只能按档案类型来创建，请重新选择。");
+			return;
+		}
 		
 		var b = true;
 		if (node.treetype == "F") {
@@ -309,6 +333,17 @@
 				createDataAuthTable(orgtreeid,'wjAuth',JSON.stringify(array[i]));
 			}
 		}
+		
+		//获取html内容，如果为空，要填充空白
+		var ajhtml = $("#ajAuth").html();
+		var wjhtml = $("#wjAuth").html();
+		if (ajhtml == '') {
+			intoTbody("ajAuth",4);
+		}
+		
+		if (wjhtml == '') {
+			intoTbody("wjAuth",4);
+		}
 	}
 	
 	//创建数据访问权限页面显示
@@ -369,18 +404,17 @@
 <title>为组赋权</title>
 </head>
 <body>
-	<div style="float: left;">
-	<table id="testTable" cellpadding="0" cellspacing="0">
+	<div style="float: left;overflow-x: auto; overflow-y: auto; height: 480px; width:400px;">
+	<table width="350" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
 		<tbody>
 			<tr >
-                <td class="biaoti" colspan="2">为组 [${org.orgname }] 赋予档案使用权</td>
-                <td>&nbsp;</td>
+                <td colspan="2" align="center">为组 [${org.orgname }] 赋予档案使用权</td>
             </tr>
-			<tr class="tr1">
-				<td class="txt1" colspan="2"><ul id="treeDemo" class="ztree"></ul></td>
+			<tr>
+				<td colspan="2"><ul id="treeDemo" class="ztree"></ul></td>
 			</tr>
 			<tr >
-				<td class="caozuo" colspan="2">
+				<td colspan="2" align="center">
 					<button type="button" onclick="setchecknodes()">授权</button>
 					<button type="button" onclick="closepage()">关闭</button>
 				</td>
@@ -388,85 +422,104 @@
 		</tbody>
 	</table>
 	</div>
-	<div style="float:right;">
+	<div style="float:right;margin-right: 20px;overflow:auto;width: 340px;">
 		<div id="ajDataAuth">
-			<h5>设置帐户组对档案节点数据［案卷］记录的访问权限</h5>
-			<hr>
-			<div>
-				<div>
-					<div>
-						<div>
-							<p style="margin: 6px 12px;">
-								<button class="btn" type="button" disabled onclick="showSetDataAuthWindow('01')">添加</button>
-							</p>
-						</div>
-						<div>
-				            <div id="dataAuth">
-				            	<table border="1" cellpadding="1" cellspacing="0" width="90%">
-									<thead>
-									<tr>
-										<th>字段</th>
-										<th>关系符</th>
-										<th>值</th>
-										<th>操作</th>
-									</tr>
-									</thead>
-									<tbody id="ajAuth">
-									
-									</tbody>
-								</table>
-				            </div>
-						</div>
-					</div>
-				</div>
-			</div>
+			<table width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+				<thead>
+					<tr >
+		                <td colspan="4" align="center">设置帐户组对档案节点数据［案卷］记录的访问权限</td>
+		            </tr>
+					<tr>
+						<th>字段</th>
+						<th>关系符</th>
+						<th>值</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="ajAuth">
+						<tr>
+							<td colspan="4" align="center">
+							</td>
+						</tr>
+				</tbody>
+				<tfoot>
+					<tr >
+						<td colspan="4" align="center">
+							<button class="btn" type="button" disabled onclick="showSetDataAuthWindow('01')">添加</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
 		</div>
-		<div id="wjDataAuth">
-			<h5>设置帐户组对档案节点数据［文件］记录的访问权限</h5>
-			<hr>
-			<div>
-				<div>
-					<div>
-						<div>
-							<p style="margin: 6px 12px;">
-								<button class="btn" disabled type="button" onclick="showSetDataAuthWindow('02')">添加</button>
-							</p>
-						</div>
-						<div>
-				            <div id="">
-				            	<table border="1" cellpadding="1" cellspacing="0" width="90%">
-									<thead>
-									<tr>
-										<th>字段</th>
-										<th>关系符</th>
-										<th>值</th>
-										<th>操作</th>
-									</tr>
-									</thead>
-									<tbody id="wjAuth">
-									</tbody>
-								</table>
-				            </div>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div id="wjDataAuth" style="margin-top: 20px;">
+			<table width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+				<thead>
+					<tr >
+		                <td colspan="4" align="center">设置帐户组对档案节点数据［文件］记录的访问权限</td>
+		            </tr>
+					<tr>
+						<th>字段</th>
+						<th>关系符</th>
+						<th>值</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="wjAuth">
+						<tr>
+							<td colspan="4" align="center">
+							</td>
+						</tr>
+				</tbody>
+				<tfoot>
+					<tr >
+						<td colspan="4" align="center">
+							<button class="btn" disabled type="button" onclick="showSetDataAuthWindow('02')">添加</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
 		</div>
-		<div style="border:1px solid #990000">
-			<div>
-				<input type="checkbox" id="filescan" value="1">查看电子全文
-				<input type="checkbox" id="filedown" value="1">下载电子全文
-				<input type="checkbox" id="fileprint" value="1">打印电子全文
-			</div>
-			<div><button class="btn" type="button" onclick="saveTreeAuth()">保存</button></div>
+		<div style="margin-top: 20px;">
+			<table width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+				<thead>
+					<tr >
+						<td>
+		                <input type="checkbox" id="filescan" value="1">查看电子全文
+						<input type="checkbox" id="filedown" value="1">下载电子全文
+						<input type="checkbox" id="fileprint" value="1">打印电子全文
+						</td>
+		            </tr>
+				</thead>
+				<tfoot>
+					<tr >
+						<td colspan="4" align="center">
+							<button class="btn" type="button" onclick="saveTreeAuth()">保存</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
 		</div>
-		<div style="border:1px solid #990000">
-			<select id="docauth">
-				<c:forEach  items="${codes}" var="item">
-					<option value="${item.id }">${item.columndata }</option>
-			    </c:forEach>
-			</select>
-			<div><button class="btn" type="button" onclick="saveDocAuth()">保存</button></div>
+		<div style="margin-top: 20px;">
+			<table width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
+				<thead>
+					<tr >
+						<td>
+		                <select id="docauth">
+							<c:forEach  items="${codes}" var="item">
+								<option value="${item.id }">${item.columndata }</option>
+						    </c:forEach>
+						</select>
+						</td>
+		            </tr>
+				</thead>
+				<tfoot>
+					<tr >
+						<td colspan="4" align="center">
+							<button class="btn" type="button" onclick="saveDocAuth()">保存</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
 		</div>
 	</div>
 </body>

@@ -126,7 +126,7 @@ public class ConfigService implements IConfigService {
 		
 		if (null == configs || configs.size() == 0) {
 			//创建帐户自己的配置文件
-			Sys_config config1 = new Sys_config();
+//			Sys_config config1 = new Sys_config();
 			config.setConfigkey("PAGE");
 			config.setAccountid("SYSTEM");
 			config = selectByWhere(config);
@@ -143,7 +143,12 @@ public class ConfigService implements IConfigService {
 			config2.setConfigname("截取文字显示");
 			config2.setConfigvalue("8");
 			insert(config2);
-			configs = configDao.search(config);
+			
+			
+			Sys_config config1 = new Sys_config();
+			config1.setAccountid(accountid);
+			
+			configs = configDao.search(config1);
 		}
 		return configs;
 		

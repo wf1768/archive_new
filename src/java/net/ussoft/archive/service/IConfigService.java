@@ -2,7 +2,6 @@ package net.ussoft.archive.service;
 
 import java.util.List;
 
-import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
 
 public interface IConfigService {

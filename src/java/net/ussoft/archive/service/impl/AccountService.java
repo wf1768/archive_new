@@ -143,7 +143,7 @@ public class AccountService implements IAccountService {
 		sql = "delete from sys_config where accountid=?";
 		configDao.del(sql, values);
 		
-		//删除帐户私有字段
+		
 		//首先获取字段list，删除字段代码
 		sql = "select * from sys_templetfield where iscode=1 and accountid=?";
 		List<Sys_templetfield> fields = templetfieldDao.search(sql, values);
@@ -156,7 +156,7 @@ public class AccountService implements IAccountService {
 				codeDao.del(sql, values);
 			}
 		}
-		
+		//删除帐户私有字段
 		sql = "delete from sys_templetfield where accountid=?";
 		values.clear();
 		values.add(id);
@@ -422,6 +422,25 @@ public class AccountService implements IAccountService {
 	@Transactional("txManager")
 	@Override
 	public Boolean saveTreeAuth(Sys_account_tree tmp) {
+		
+		//0说明是树的根节点，要处理当前帐户所有有权限的树节点同样的全文访问权
+		if ("0".equals(tmp.getTreeid())) {
+			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where treetype =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getAccountid());
+			values.add("W");
+			
+			List<Sys_account_tree> childList = accounttreeDao.search(sql, values);
+			
+			for (Sys_account_tree sys_account_tree : childList) {
+				sys_account_tree.setFilescan(tmp.getFilescan());
+				sys_account_tree.setFiledown(tmp.getFiledown());
+				sys_account_tree.setFileprint(tmp.getFileprint());
+				
+				accounttreeDao.update(sys_account_tree);
+			}
+			return true;
+		}
 		//获取对象
 		Sys_account_tree aTree = new Sys_account_tree();
 		aTree.setAccountid(tmp.getAccountid());
@@ -439,11 +458,11 @@ public class AccountService implements IAccountService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
-			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where parentid =?)";
+		if (!tree.getTreetype().equals("W")) {
+			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(tmp.getAccountid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_account_tree> childList = accounttreeDao.search(sql, values);
 			
@@ -522,12 +541,12 @@ public class AccountService implements IAccountService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
+		if (tree.getTreetype().equals("F") || tree.getTreetype().equals("FT")) {
 			//如果是夹，则获取夹下面的子节点
-			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where parentid =?)";
+			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(account_tree.getAccountid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_account_tree> childList = accounttreeDao.search(sql, values);
 			
@@ -588,6 +607,23 @@ public class AccountService implements IAccountService {
 	@Transactional("txManager")
 	@Override
 	public Boolean saveDocAuth(Sys_account_tree tmp) {
+		
+		//0说明是树的根节点，要处理当前帐户所有有权限的树节点同样的全文访问权
+		if ("0".equals(tmp.getTreeid())) {
+			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where treetype =?)";
+			List<Object> values = new ArrayList<Object>();
+			values.add(tmp.getAccountid());
+			values.add("W");
+			
+			List<Sys_account_tree> childList = accounttreeDao.search(sql, values);
+			
+			for (Sys_account_tree sys_account_tree : childList) {
+				sys_account_tree.setDocauth(tmp.getDocauth());
+				accounttreeDao.update(sys_account_tree);
+			}
+			return true;
+		}
+				
 		//获取对象
 		Sys_account_tree aTree = new Sys_account_tree();
 		aTree.setAccountid(tmp.getAccountid());
@@ -605,11 +641,11 @@ public class AccountService implements IAccountService {
 			return false;
 		}
 		
-		if (tree.getTreetype().equals("F")) {
-			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where parentid =?)";
+		if (!tree.getTreetype().equals("W")) {
+			String sql = "select * from sys_account_tree where accountid=? and treeid in (select id from sys_tree where treenode like '"+tree.getTreenode()+"%' and treetype = ?)";
 			List<Object> values = new ArrayList<Object>();
 			values.add(tmp.getAccountid());
-			values.add(tree.getId());
+			values.add("W");
 			
 			List<Sys_account_tree> childList = accounttreeDao.search(sql, values);
 			

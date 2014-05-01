@@ -86,7 +86,7 @@
 		/**************************************************
 	     * Context-Menu with Sub-Menu
 	     **************************************************/
-	    $.contextMenu({
+	    /* $.contextMenu({
 	        selector: '.scrollTable', 
 	        callback: function(key, options) {
 	            var m = "clicked: " + key;
@@ -140,7 +140,7 @@
 	        		}
 	        	}
 	        }
-	    });
+	    }); */
 	});
 
 	function callback() {
@@ -369,7 +369,7 @@
 		}
 		
 		var whObj = {
-			width : 650,
+			width : 750,
 			height : 500
 		};
 		
@@ -431,14 +431,18 @@
 		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 			<div class="dqwz_l">当前位置：档案管理-${treename }-案卷下全部文件级</div>
 			<div class="caozuoan">
-				<div style="float: left;">
+				<div style="float: right;margin-top: 3px;margin-left: 5px">
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
+					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+				</div>
+				<div style="float: right;">
 				<ul id="cssdropdown">
 					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;">导出Excel</a></li>
-							<li><a href="javascript:;">数据移动</a></li>
+							<!-- <li><a href="javascript:;">导出Excel</a></li>
+							<li><a href="javascript:;">数据移动</a></li> -->
 						</ul>
 					</li>
 					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','02')">设置</a></li>
@@ -446,11 +450,7 @@
 					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
 				</ul>
 				</div>
-				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<!-- <input type="button" value="查询" class="btn" onClick="searchData()" /> -->
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
-				</div>
+				
 			</div>
 			<div style="clear: both"></div>
 		</div>

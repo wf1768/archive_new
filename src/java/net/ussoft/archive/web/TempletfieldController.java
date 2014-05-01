@@ -3,6 +3,7 @@ package net.ussoft.archive.web;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -177,6 +178,23 @@ public class TempletfieldController extends BaseConstroller {
 					}
 					
 					if (childList.size() >0) {
+						//纠正。案卷表在上，文件在下
+						if (childList.size() == 2) {
+							HashMap<String, Object> mapAj = new HashMap<String, Object>();
+							HashMap<String, Object> mapWj = new HashMap<String, Object>();
+							for (HashMap<String, Object> hashMap : childList) {
+								if (hashMap.get("name").toString().indexOf("案卷") >0) {
+									mapAj = hashMap;
+								}
+								if (hashMap.get("name").toString().indexOf("文件") >0) {
+									mapWj = hashMap;
+								}
+							}
+							childList.clear();
+							childList.add(mapAj);
+							childList.add(mapWj);
+						}
+						
 						map.put("children", childList);
 					}
 					
@@ -307,7 +325,7 @@ public class TempletfieldController extends BaseConstroller {
 	 * @throws IOException
 	 */
 	@RequestMapping(value="/sort",method=RequestMethod.POST)
-	public void sort(String id,String type,HttpServletResponse response) throws IOException {
+	public void sort(String id,String type,HttpServletRequest request,HttpServletResponse response) throws IOException {
 		
 		response.setContentType("text/xml;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -404,6 +422,7 @@ public class TempletfieldController extends BaseConstroller {
 			out.print(result);
 			return;
 		}
+		
 		Boolean b = templetfieldService.fieldpaste(fieldid, tableid);
 		
 		if (b) {
