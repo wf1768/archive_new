@@ -63,6 +63,8 @@ img {
 	}
 	
 	function editField(id){
+		var jscroll = $('html,body').scrollTop();
+		setCookie('jscroll',jscroll);
 		var url = "${pageContext.request.contextPath}/archive/fieldedit.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
@@ -72,14 +74,17 @@ img {
 	/* function reload() {
 		var reload = document.getElementById("reload");
 		reload.click();
-	}
+	}*/
 	
 	$(function(){
-		var url = window.location.href;
-		$("#reload").attr("href",url);
-	}) */
+		var jscroll = getCookie('jscroll');
+		$('html,body').scrollTop(jscroll);
+		delCookie('jscroll');//删除cookie
+	})
 	
 	function sort(id,type) {
+		var jscroll = $('html,body').scrollTop();
+		setCookie('jscroll',jscroll);
 		$.ajax({
 	        async : false,
 	        url : "${pageContext.request.contextPath}/templetfield/sort.do",
@@ -99,6 +104,8 @@ img {
 	
 	//更新字段的一些属性。例如：检索字段、列表显示等的0和1修改。
 	function updateOtherInfo(id,type,value) {
+		var jscroll = $('html,body').scrollTop();
+		setCookie('jscroll',jscroll);
 		$.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/templetfield/updateOtherInfo.do",
@@ -117,6 +124,8 @@ img {
 	}
 	
 	function fieldcode(id) {
+		var jscroll = $('html,body').scrollTop();
+		setCookie('jscroll',jscroll);
 		var url = "${pageContext.request.contextPath}/templetfield/fieldcode.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 640, height: 400 };
 		var result = openShowModalDialog(url,window,whObj);

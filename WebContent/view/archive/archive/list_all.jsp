@@ -172,6 +172,10 @@
 		});
 		
 		$('.shiftCheckbox').shiftcheckbox();
+		
+		var jscroll = getCookie('jscroll');
+		$('.body-wrapper').scrollTop(jscroll);
+		delCookie('jscroll');//删除cookie
 	}
 	function pageselectCallback(page_index, jq){
 		var searchTxt = "${searchTxt }";
@@ -182,10 +186,12 @@
 	}; 
 
 	function refresh() {
+		jscroll('body-wrapper');
 		window.location.reload(true);
 	}
 	
 	function setshow(templetid,tabletype) {
+		jscroll('body-wrapper');
 		if (templetid == "") {
 			alert("请选择左侧父档案树节点，再设置显示设置。");
 			return;
@@ -200,6 +206,7 @@
 	}
 	
 	function add() {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 	
 		if (treeid == '' || treeid == '0') {
@@ -223,7 +230,7 @@
 	}
 	
 	function edit(id) {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧档案节点，再编辑档案。');
@@ -240,7 +247,7 @@
 	}
 	
 	function show(id) {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧档案节点，再查看档案。');
@@ -257,7 +264,7 @@
 	}
 	
 	function del() {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧父档案节点，再删除档案。');
@@ -307,6 +314,7 @@
 	}
 	
 	function doc(id) {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧档案节点，再查看档案电子文件。');
@@ -379,7 +387,7 @@
 	}
 	
 	function update_multiple() {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		if (treeid == '') {
 			alert('请选择左侧档案节点，再编辑档案。');

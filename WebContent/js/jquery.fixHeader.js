@@ -33,8 +33,6 @@ $.fn.fixHeader = function(options){
     fixTable.css({
         'position': 'relative',
         'top': '33px',
-	
-       
         'border-bottom': $('tr:eq(0)', thead).find('th:eq(0), td:eq(0)').css('border-bottom-width')
     });
 

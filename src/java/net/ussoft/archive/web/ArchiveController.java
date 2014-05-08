@@ -36,6 +36,8 @@ import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.service.ITreeService;
+import net.ussoft.archive.util.CommonUtils;
+import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.Excel;
 import net.ussoft.archive.util.resule.ResultInfo;
 
@@ -431,7 +433,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
 		archiveList.add(map);
-		ResultInfo info = dynamicService.updaetArchive(tabletype, archiveList);
+		ResultInfo info = dynamicService.updateArchive(tabletype, archiveList);
 		
 		out.print(info.getMsg());
 	}
@@ -472,7 +474,7 @@ public class ArchiveController extends BaseConstroller {
 				map.put(tc_th_field, tc);
 				archiveList.add(map);
 			}
-			info = dynamicService.updaetArchive(tabletype, archiveList);
+			info = dynamicService.updateArchive(tabletype, archiveList);
 		}
 		else if (tc_radio.equals("th")) {
 			//如果是替换
@@ -521,7 +523,7 @@ public class ArchiveController extends BaseConstroller {
 					archiveList.add(map);
 					num += xl_size;
 				}
-				info = dynamicService.updaetArchive(tabletype, archiveList);
+				info = dynamicService.updateArchive(tabletype, archiveList);
 			}
 			else {
 				//如果序列更新里，包含了序列字段、序列值
@@ -550,7 +552,7 @@ public class ArchiveController extends BaseConstroller {
 					updateMaps.add(map);
 					num += xl_size;
 				}
-				info = dynamicService.updaetArchive(tabletype, updateMaps);
+				info = dynamicService.updateArchive(tabletype, updateMaps);
 			}
 			
 		}
@@ -1032,5 +1034,162 @@ public class ArchiveController extends BaseConstroller {
 		}
 		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
     }
+	
+	/**
+	 * 
+	 * @param id
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/datacopy",method=RequestMethod.POST)
+	public void datacopy(String treeid,String tabletype,String ids,HttpServletRequest request,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "档案数据复制成功，任意档案树节点下，点击［粘贴］。";
+		
+		if (null == ids || ids.equals("")) {
+			result = "档案数据复制失败，请重新尝试，或与管理员联系。";
+			out.print(result);
+			return;
+		}
+		
+		//将copy的id存入session
+		CommonUtils.setSessionAttribute(request, Constants.data_copy_session, ids);
+		CommonUtils.setSessionAttribute(request, Constants.data_copy_treeid_session, treeid);
+		CommonUtils.setSessionAttribute(request, Constants.data_copy_tabletype_session, tabletype);
+		out.print(result);
+	}
+	
+	/**
+	 * 保存粘贴数据
+	 * @param dy					目标档案类型与源档案类型，字段对应关系
+	 * @param isdoc					是否copy电子文件
+	 * @param targetTreeid			目标档案类型treeid
+	 * @param targetTabletype		目标档案类型的表类型
+	 * @param parentid				如果是文件级，会用到的案卷级id
+	 * @param status				档案的状态
+	 * @param response		
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/datapaster",method=RequestMethod.POST)
+	public void datapaster(String dy,Boolean isdoc,String targetTreeid,String targetTabletype,String parentid,Integer status,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "没有获得足够参数，请重新登录，再尝试操作。";
+		if (null == targetTreeid || "".equals(targetTreeid) || null == targetTabletype || "".equals(targetTabletype)) {
+			out.print(result);
+			return;
+		}
+		
+		if (null == dy || "".equals(dy)) {
+			out.print(result);
+			return;
+		}
+		
+		if (null == status || status < 0) {
+			status = 0;
+		}
+		
+		//获取session里的复制codeid
+		String ids = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_session);
+		String treeid = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_treeid_session);
+		String tabletype = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_tabletype_session);
+		
+		if (null == ids || ids.equals("")) {
+			out.print(result);
+			return;
+		}
+		
+		HashMap<String, Object> param = new HashMap<String, Object>();
+		param.put("ids", ids);
+		param.put("treeid", treeid);
+		param.put("tabletype", tabletype);
+		param.put("dy", dy);
+		param.put("targetTreeid", targetTreeid);
+		param.put("targetTabletype", targetTabletype);
+		param.put("parentid", parentid);
+		param.put("isdoc", isdoc);
+		param.put("status", status);
+		
+		ResultInfo info = dynamicService.dataPaster(param);
+		
+		out.print(info.getMsg());
+	}
+	
+	@RequestMapping(value="/opendatapaster",method=RequestMethod.GET)
+	public ModelAndView opendatapaster(String targetTreeid,String targetTabletype,String parentid,HttpServletResponse response,ModelMap modelMap) throws IOException {
+		
+		if (null == targetTreeid || "".equals(targetTreeid) || null == targetTabletype || "".equals(targetTabletype)) {
+			return null;
+		}
+		
+		modelMap.put("targetTreeid", targetTreeid);
+		modelMap.put("targetTabletype", targetTabletype);
+		modelMap.put("parentid", parentid);
+		
+		//获取session里的复制codeid
+		String ids = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_session);
+		String treeid = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_treeid_session);
+		String tabletype = (String) CommonUtils.getSessionAttribute(request, Constants.data_copy_tabletype_session);
+		
+		if (null == ids || ids.equals("")) {
+			return null;
+		}
+		
+		//获取档案类型、树节点名称等基本信息
+		Sys_templet templet = treeService.getTemplet(treeid);
+		modelMap.put("templet",templet);
+		Sys_templet targetTemplet = treeService.getTemplet(targetTreeid);
+		modelMap.put("targetTemplet", targetTemplet);
+		
+		Sys_tree tree = treeService.getById(treeid);
+		modelMap.put("tree", tree);
+		Sys_tree targetTree = treeService.getById(targetTreeid);
+		modelMap.put("targetTree", targetTree);
+		
+		String[] idArr = ids.split(",");
+		
+		//获取原档案类型的字段
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
+		modelMap.put("fields", fields);
+		//获取目标档案类型的字段
+		List<Sys_templetfield> fieldsTarget = getTempletfields(targetTreeid, targetTabletype);
+		modelMap.put("fieldsTarget", fieldsTarget);
+		modelMap.put("fieldsTarget_json", JSON.toJSON(fieldsTarget));
+		
+		String orderbyString = getOrderby(fields);
+		
+		//获取档案信息
+		List<String> idList = Arrays.asList(idArr);
+		List<Map<String, Object>> maps = dynamicService.get(treeid, "",tabletype, idList,orderbyString,null,null);
+		modelMap.put("maps", maps);
+		
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
+		HashMap<String, Object> configMap = getConfig(account.getId());
+		//字段截取标准。（列表里字段长度超过标准，被截取)
+		Integer subString = 10;
+		if (null == configMap || configMap.size() == 0) {
+		}
+		else {
+			subString = Integer.parseInt(configMap.get("SUBSTRING").toString());
+		}
+		//防止数字错误
+		if (subString < 0) {
+			subString = 10;
+		}
+		//用来前台判断文字截取多少个
+		modelMap.put("subString", subString);
+		
+		return new ModelAndView("/view/archive/archive/datapaster",modelMap);
+	}
 	
 }

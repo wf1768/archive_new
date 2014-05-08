@@ -26,6 +26,12 @@ function openShowModalDialog(url,param,whparam){
 	  return showModalDialog(url,paramObj,p);  
 }
 
+//获取滚动条位置，存入cookie
+function jscroll(classname) {
+	var jscroll = $('.'+classname).scrollTop();
+	setCookie('jscroll',jscroll);
+}
+
 
 //设置cookie
 function setCookie(name,value){

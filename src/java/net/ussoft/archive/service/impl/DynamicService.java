@@ -5,6 +5,10 @@ import java.io.Serializable;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +43,8 @@ import net.ussoft.archive.util.resule.ResultInfo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
 
 @Service
 public class DynamicService implements IDynamicService {
@@ -315,6 +321,7 @@ public class DynamicService implements IDynamicService {
 		
 		Sys_table table = getTable(treeid, tabletype);
 		
+		List<String> ids = new ArrayList<String>();
 		for (int i=0;i<archiveList.size();i++) {
 			StringBuilder sb=new StringBuilder("insert into ");
 			sb.append(table.getTablename());
@@ -350,18 +357,18 @@ public class DynamicService implements IDynamicService {
 			sb.append(")");
 			
 			dynamicDao.add(sb.toString(), par);
-			
+			ids.add(id);
 		}
 		
 		info.setSuccess(true);
 		info.setMsg("处理数据成功。");
-		
+		info.put("idsList", ids);
 		return info;
 	}
 	
 	@Transactional("txManager")
 	@Override
-	public ResultInfo updaetArchive(String tabletype, List<Map<String, String>> archiveList) {
+	public ResultInfo updateArchive(String tabletype, List<Map<String, String>> archiveList) {
 		
 		ResultInfo info = new ResultInfo();
 		
@@ -744,12 +751,222 @@ public class DynamicService implements IDynamicService {
 		dynamicDao.execute(sql);
 	}
 
+	@Transactional("txManager")
 	@Override
-	public ResultInfo updateSequence(String treeid, String tabletype,
-			List<String> ids, String tc_th_field, Integer xl_begin,
-			Integer xl_size) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResultInfo dataPaster(Map<String, Object> param) {
+		
+		ResultInfo info = new ResultInfo();
+		
+		//复制的档案记录id
+		String ids = param.get("ids").toString();
+		String treeid = param.get("treeid").toString();
+		String tabletype = param.get("tabletype").toString();
+		
+		//获取档案信息
+		String[] idArr = ids.split(",");
+		List<String> idList = Arrays.asList(idArr);
+		List<Map<String, Object>> maps = get(treeid, "",tabletype, idList,null,null,null);
+		
+		if (null == maps || maps.size() == 0) {
+			info.setSuccess(false);
+			return info;
+		}
+		
+		//获取目标粘贴档案类型信息
+		String targetTreeid = param.get("targetTreeid").toString();
+		String targetTabletype = param.get("targetTabletype").toString();
+		//如果粘贴到文件级，会赋予案卷级的id为parentid
+		String parentid = param.get("parentid").toString();
+		//如果选择了同时复制电子文件，
+		Boolean isdoc = (Boolean) param.get("isdoc");
+		String status = param.get("status").toString();
+		String dy = param.get("dy").toString();
+		Map<String, String> dyMap = (Map<String, String>) JSON.parse(dy);
+		
+		if (null == status || status.equals("")) {
+			status = "0";
+		}
+		
+		
+		Map<String, String> sysFieldMap = new HashMap<String, String>();
+		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
+		//生成粘贴的档案系统参数
+		sysFieldMap.put("treeid", targetTreeid);
+		sysFieldMap.put("tabletype", targetTabletype);
+		sysFieldMap.put("status", status);
+		sysFieldMap.put("parentid", parentid);
+		
+		Sys_tree tree = treeDao.get(treeid);
+		//获取源templet
+		Sys_templet templet = templetDao.get(tree.getTempletid());
+		//目标templet
+		Sys_tree targetTree = treeDao.get(targetTreeid);
+		Sys_templet targeTemplet = templetDao.get(targetTree.getTempletid());
+		Sys_table targetTable = getTable(targetTreeid,targetTabletype);
+		
+		//如果源数据和目标数据属于一个档案类型，就直接copy，不对应字段
+		Boolean common = false;
+		//如果源数据和目标数据属于一个档案类型，并且是案卷粘贴到案卷，把文件级也带过去
+		Boolean wjBoolean = false;
+		if (templet.getId().equals(targeTemplet.getId())) {
+			if (tabletype.equals(targetTabletype)) {
+				common = true;
+			}
+			if (!templet.getTemplettype().equals("F") && tabletype.equals("01")) {
+				if (!targeTemplet.getTemplettype().equals("F") && targetTabletype.equals("01")) {
+					wjBoolean = true;
+				}
+			}
+		}
+		
+		for (Map<String, Object> map : maps) {
+			Map<String, String> tmpMap = new HashMap<String, String>();
+			//源数据id
+			String idString = map.get("ID").toString();
+			Integer isdocInteger = (Integer) map.get("ISDOC");
+			if (common) {
+				map.remove("ID");
+				map.remove("ISDOC");
+				map.remove("TREEID");
+				map.remove("STATUS");
+				map.remove("PARENTID");
+				String json = JSON.toJSONString(map);
+				tmpMap = (Map<String, String>) JSON.parse(json);
+			}
+			else {
+				for (String key : dyMap.keySet()) {
+				    String value = dyMap.get(key);
+				    if (null == map.get(value)) {
+				    	tmpMap.put(key, "");
+				    }
+				    else {
+				    	tmpMap.put(key, map.get(value).toString());
+				    }
+				}
+			}
+			archiveList.clear();
+			archiveList.add(tmpMap);
+			//插入一条记录
+			ResultInfo tmpInfo = insertArchive(sysFieldMap, archiveList);
+			
+			//新的目标粘贴数据id
+			String targetFileid = ((List<String>)tmpInfo.getData().get("idsList")).get(0).toString();
+			Sys_table table = getTable(treeid,tabletype);
+			//如果选择了同时copy电子文件
+			if (isdoc) {
+				if (isdocInteger == 1) {
+					Sys_doc doc = new Sys_doc();
+					doc.setFileid(idString);
+					doc.setTableid(table.getId());
+					List<Sys_doc> docs = docDao.search(doc);
+					for (Sys_doc sys_doc : docs) {
+						sys_doc.setId(UUID.randomUUID().toString());
+						
+						if (null == targetFileid || targetFileid.equals("")) {
+							continue;
+						}
+						sys_doc.setFileid(targetFileid);
+						sys_doc.setTreeid(targetTreeid);
+						sys_doc.setTableid(targetTable.getId());
+						docDao.save(sys_doc);
+					}
+					if (docs.size() > 0) {
+						HashMap<String, String> updateMap = new HashMap<String, String>();
+						updateMap.put("id", targetFileid);
+						updateMap.put("isdoc", "1");
+						updateMap.put("treeid", targetTreeid);
+						List<Map<String, String>> updateList = new ArrayList<Map<String,String>>();
+						updateList.add(updateMap);
+						updateArchive(targetTabletype, updateList);
+					}
+				}
+			}
+			if (wjBoolean) {
+//				insert into 表1(字段1,字段2,字段3) select 字段1,字段2,字段3 from 表1 where id=1
+//				List<Sys_templetfield> childField = getTempletfields(treeid, "02");
+//				
+//				List<String> fList = new ArrayList<String>();
+//				for (Sys_templetfield field : childField) {
+//					if (!field.getEnglishname().toLowerCase().equals("id") && !field.getEnglishname().toLowerCase().equals("treeid")) {
+//						fList.add(field.getEnglishname());
+//					}
+//				}
+//				String fString = CommonUtils.ListToString(fList, ",");
+//				Sys_table childTable = getTable(treeid, "02");
+//				StringBuffer sb = new StringBuffer();
+//				sb.append("insert into ");
+//				sb.append(childTable.getTablename());
+//				sb.append("(").append("id,treeid,").append(fString).append(")");
+//				sb.append("select '").append(UUID.randomUUID().toString()).append("','").append(targetTreeid).append("',");
+//				sb.append(fString).append(" from ").append(childTable.getTablename());
+//				sb.append(" where parentid='").append(map.get("ID").toString()).append("'");
+//				
+//				List<Object> values = new ArrayList<Object>();
+//				dynamicDao.add(sb.toString(), values);
+				
+				//获取文件级数据
+				List<Map<String, Object>> childMaps = get(treeid,idString ,"02", null,null,null,null);
+				
+				//生成粘贴的档案系统参数
+				Map<String, String> sysChildFieldMap = new HashMap<String, String>();
+				List<Map<String, String>> archiveChildList = new ArrayList<Map<String,String>>();
+				sysChildFieldMap.put("treeid", targetTreeid);
+				sysChildFieldMap.put("tabletype", "02");
+				sysChildFieldMap.put("parentid", targetFileid);
+				
+				if (null != childMaps && childMaps.size() > 0) {
+					for (Map<String, Object> childMap : childMaps) {
+						String childId = childMap.get("ID").toString();
+						Integer childIsdoc = (Integer) childMap.get("ISDOC");
+						childMap.remove("ID");
+						childMap.remove("ISDOC");
+						childMap.remove("TREEID");
+						sysChildFieldMap.put("status", childMap.get("STATUS").toString());
+						childMap.remove("STATUS");
+						childMap.remove("PARENTID");
+						String json = JSON.toJSONString(childMap);
+						Map<String, String> aaMap = (Map<String, String>) JSON.parse(json);
+						archiveChildList.clear();
+						archiveChildList.add(aaMap);
+						ResultInfo childInfo = insertArchive(sysChildFieldMap, archiveChildList);
+						
+						//如果选择了同时copy电子文件
+						if (isdoc && childIsdoc == 1) {
+							Sys_table childTable = getTable(treeid,"02");
+							String targetChildFileid = ((List<String>)childInfo.getData().get("idsList")).get(0).toString();
+							Sys_doc doc = new Sys_doc();
+							doc.setFileid(childId);
+							doc.setTableid(childTable.getId());
+							List<Sys_doc> docs = docDao.search(doc);
+							for (Sys_doc sys_doc : docs) {
+								sys_doc.setId(UUID.randomUUID().toString());
+								
+								if (null == targetFileid || targetFileid.equals("")) {
+									continue;
+								}
+								sys_doc.setFileid(targetChildFileid);
+								sys_doc.setTreeid(targetTreeid);
+								sys_doc.setTableid(childTable.getId());
+								docDao.save(sys_doc);
+							}
+							if (docs.size() > 0) {
+								HashMap<String, String> updateMap = new HashMap<String, String>();
+								updateMap.put("id", targetChildFileid);
+								updateMap.put("isdoc", "1");
+								updateMap.put("treeid", targetTreeid);
+								List<Map<String, String>> updateList = new ArrayList<Map<String,String>>();
+								updateList.add(updateMap);
+								updateArchive("02", updateList);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		info.setSuccess(true);
+		info.setMsg("粘贴数据完毕。");
+		return info;
 	}
 
 }

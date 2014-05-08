@@ -183,6 +183,10 @@
             }
 		});
 		$('.shiftCheckbox').shiftcheckbox();
+		
+		var jscroll = getCookie('jscroll');
+		$('.body-wrapper').scrollTop(jscroll);
+		delCookie('jscroll');//删除cookie
 	}
 	
 	function pageselectCallback(page_index, jq){
@@ -194,10 +198,12 @@
 	}; 
 
 	function refresh() {
+		jscroll('body-wrapper');
 		window.location.reload(true);
 	}
 	
 	function setshow(templetid,tabletype) {
+		jscroll('body-wrapper');
 		if (templetid == "") {
 			alert("请选择左侧父档案树节点，再设置显示设置。");
 			return;
@@ -216,6 +222,7 @@
 	}
 	
 	function add() {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 	
 		if (treeid == '' || treeid == '0') {
@@ -245,6 +252,7 @@
 	}
 	
 	function edit(id) {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -262,6 +270,7 @@
 	}
 	
 	function show(id) {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -279,6 +288,7 @@
 	}
 	
 	function del() {
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -329,7 +339,7 @@
 	}
 	
 	function doc(id) {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -430,7 +440,7 @@
 	}
 	
 	function update_multiple() {
-		
+		jscroll('body-wrapper');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -453,6 +463,68 @@
 		}
 		
 		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=01&id=" + str + "&multiple=true&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
+	function datacopy() {
+		
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再复制档案数据。');
+			return;
+		}
+		
+		var str = "";
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要复制的档案数据。");
+			return;
+		}
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
+		$.ajax({
+			async : false,
+			url : "${pageContext.request.contextPath}/archive/datacopy.do",
+			type : 'post',
+			data : {
+				'treeid':treeid,
+				'tabletype':'01',
+				'ids' : str
+			},
+			dataType : 'text',
+			success : function(data) {
+				alert(data);
+				refresh();
+			}
+		});
+	}
+	
+	function datapaster() {
+		var ids = '${sessionScope.CURRENT_DATA_COPY_SESSION }';
+		if (ids == "") {
+			alert("请先选择要粘贴的档案数据。");
+			return;
+		}
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再粘贴档案数据。');
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/opendatapaster.do?targetTreeid="+treeid+"&targetTabletype=01&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 850,
 			height : 600
@@ -508,9 +580,11 @@
 							<li><a href="javascript:;" onclick="allwj()">只文件级</a></li>
 							</c:if>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<!-- <li><a href="javascript:;">Excel导入</a></li>
+							<li><a href="javascript:;">Excel导入</a></li>
 							<li><a href="javascript:;">导出Excel</a></li>
-							<li><a href="javascript:;">数据移动</a></li> -->
+							<!-- <li><a href="javascript:;">数据移动</a></li> -->
+							<li><a href="javascript:;" onclick="datacopy()">复制</a></li>
+							<li><a href="javascript:;" onclick="datapaster()">粘贴</a></li>
 						</ul>
 					</li>
 					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','01')">设置</a></li>

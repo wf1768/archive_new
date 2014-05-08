@@ -128,13 +128,16 @@ public class DocController extends BaseConstroller {
       	String docContentType = getContentType(doc.getDocext());
         response.setContentType(docContentType);
         
-        String userAgent = request.getHeader("User-Agent"); 
+        String userAgent = request.getHeader("User-Agent");
+        response.reset();
         if(userAgent != null && userAgent.indexOf("MSIE") == -1) {
-            // FF   
+            // FF
+        	String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName); 
 //            String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
 //            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);
-        	response.setHeader("Content-disposition", "attachment; filename="  
-                    + new String(filename.getBytes("utf-8"), "ISO8859-1"));  
+//        	response.setHeader("Content-disposition", "attachment; filename="
+//                    + new String(filename.getBytes("utf-8"), "ISO8859-1"));  
         }else{
             // IE   
             String enableFileName = new String(filename.getBytes("GBK"), "ISO-8859-1");   
@@ -701,7 +704,7 @@ public class DocController extends BaseConstroller {
 		PrintWriter out = response.getWriter();
 		
 		if (null == data || data.equals("")) {
-			out.print("未获得要删除的数据，请重新操作或与管理员联系。");
+			out.print("未获得数据，请重新操作或与管理员联系。");
 			return;
 		}
 		

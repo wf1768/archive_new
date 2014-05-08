@@ -51,7 +51,7 @@ public interface IDynamicService {
 	 * @param archiveList
 	 * @return
 	 */
-	public ResultInfo updaetArchive(String tabletype,List<Map<String,String>> archiveList);
+	public ResultInfo updateArchive(String tabletype,List<Map<String,String>> archiveList);
 	
 	/**
 	 * 替换
@@ -79,18 +79,6 @@ public interface IDynamicService {
 	public ResultInfo updateHigh(String treeid,String tabletype,List<String> ids,String tc_th_field,String firstField,String txt,String secondField );
 	
 	/**
-	 * 序列流水更改   1、2、3、4  递增
-	 * @param treeid
-	 * @param tabletype
-	 * @param ids				要修改的档案记录id list
-	 * @param tc_th_field		要修改的字段
-	 * @param xl_begin			起始值
-	 * @param xl_size			步长
-	 * @return
-	 */
-	public ResultInfo updateSequence(String treeid,String tabletype,List<String> ids,String tc_th_field,Integer xl_begin,Integer xl_size);
-	
-	/**
 	 * 删除档案
 	 * @param treeid
 	 * @param tabletype
@@ -109,6 +97,21 @@ public interface IDynamicService {
 	 * @throws SocketException 
 	 */
 	public ResultInfo deleteDoc(List<Sys_doc> docs) throws SocketException, IOException;
+	
+	/**
+	 * 粘贴档案数据
+	 * @param param						参数集合。
+	 * 应包括：
+	 * 1：ids				String[] 	源数据id集合
+	 * 2:treeid				String		源数据treeid
+	 * 3:tabletype			String		源数据的表类型  01 or 02
+	 * 4:targetTreeid		String		目标库treeid
+	 * 5:targetTabletype	String		目标库表类型	01 or 02
+	 * 6:dy					jsonString	目标库与源库的字段对应关系
+	 * 7:isdoc				Boolean		是否包含电子文件
+	 * @return
+	 */
+	public ResultInfo dataPaster(Map<String, Object> param);
 	
 	/**
 	 * 查询表数据

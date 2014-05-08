@@ -15,6 +15,11 @@
 <script type="text/javascript">
 function callback() {
 }
+
+function setcookie() {
+	var jscroll = $('.body-wrapper').scrollTop();
+	setCookie('jscroll',jscroll);
+}
 </script>
 
 <title>${sysname }</title>

@@ -43,9 +43,6 @@
 		var treeid = "${selectid}";
 		selectTreeid = treeid;
 		selectNode(treeid);
-		//$("#data_table").animate({scrollTop: $("#0dfcc112-21e6-4c03-bb13-a30989346a2c").offset().top}, 1000);
-		//$(".scrollTable").animate({scrollTop: -1200}, 1000);
-		
 	});
 	
 	function callback() {
@@ -68,6 +65,7 @@
 	}
 	
 	function addField(){
+		jscroll('body-wrapper');
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var nodes = treeObj.getSelectedNodes();
 		if (typeof(nodes[0]) == "undefined") {
@@ -86,6 +84,7 @@
 	}
 	
 	function delField(id) {
+		jscroll('body-wrapper');
 		if (id == "") {
 			alert("没有获得要删除的字段，请重新尝试，或与管理员联系。");
 			return;
@@ -112,6 +111,7 @@
 	}
 	
 	function editField(id){
+		jscroll('body-wrapper');
 		var url = "${pageContext.request.contextPath}/templetfield/edit.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
@@ -119,8 +119,7 @@
 	}
 	
 	function sort(id,type) {
-		var jscroll = $('.body-wrapper').scrollTop();
-		setCookie('jscroll',jscroll);
+		jscroll('body-wrapper');
 		
 		$.ajax({
 	        async : true,
@@ -140,28 +139,14 @@
 	}
 	
 	function refresh() {
+		jscroll('body-wrapper');
 		window.location.reload(true);
 	}
 	
 	
-	function addT() {
-		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		var nodes = treeObj.getSelectedNodes();
-		if (typeof(nodes[0]) == "undefined") {
-			alert("请选择左侧父档案夹，再创建档案类型夹。");
-			return;
-		}
-		if (nodes[0].templettype != 'T') {
-			alert("请选择左侧父档案夹，再创建档案类型夹。");
-			return;
-		}
-		var url = "${pageContext.request.contextPath}/templet/addT.do?parentid="+nodes[0].id+"&time="+Date.parse(new Date());
-		var whObj = { width: 600, height: 500 };
-		var result = openShowModalDialog(url,window,whObj);
-	}
-	
 	//更新字段的一些属性。例如：检索字段、列表显示等的0和1修改。
 	function updateOtherInfo(id,type,value) {
+		jscroll('body-wrapper');
 		$.ajax({
 	        async : true,
 	        url : "${pageContext.request.contextPath}/templetfield/updateOtherInfo.do",
@@ -180,6 +165,7 @@
 	}
 	
 	function fieldcode(id) {
+		jscroll('body-wrapper');
 		var url = "${pageContext.request.contextPath}/templetfield/fieldcode.do?id="+id + "&time="+Date.parse(new Date());
 		var whObj = { width: 640, height: 400 };
 		var result = openShowModalDialog(url,window,whObj);
@@ -315,7 +301,7 @@
 						<td>长度</td>
 						<td>默认值</td>
 						<!-- <td>必著</td>
-					<td>唯一</td> -->
+						<td>唯一</td> -->
 						<td title="字段将作为智能检索、高级检索的检索项">检索</td>
 						<td title="字段将在档案数据列表里出现">列表</td>
 						<td title="增加档案时，作为档案著录项">编辑</td>

@@ -20,6 +20,21 @@ public class Constants{
 	public static final String field_copy_session = "CURRENT_FIELD_COPY_SESSION";
 	
 	/**
+	 * 档案数据copy时，记录copy的字段id
+	 */
+	public static final String data_copy_session = "CURRENT_DATA_COPY_SESSION";
+	
+	/**
+	 * 档案数据copy时，记录copy的字段id所属treeid
+	 */
+	public static final String data_copy_treeid_session = "CURRENT_DATA_COPY_TREEID_SESSION";
+	
+	/**
+	 * 档案数据copy时，记录copy的字段id所属tabletype
+	 */
+	public static final String data_copy_tabletype_session = "CURRENT_DATA_COPY_TABLETYPE_SESSION";
+	
+	/**
 	 * 总行数
 	 */
 	public static final String total_row = "TOTAL_ROW_IN_SESSION";

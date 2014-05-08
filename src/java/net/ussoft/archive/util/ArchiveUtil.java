@@ -54,9 +54,9 @@ public class ArchiveUtil {
 		String fieldString = "";
 		if (null != fields && fields.size() > 0) {
 			for (Sys_templetfield field : fields) {
-				if (field.getSort() < 0 || field.getIsedit() == 1 ) {
+//				if (field.getSort() < 0 || field.getIsedit() == 1 ) {
 					fieldString += field.getEnglishname() + ",";
-				}
+//				}
 			}
 			if (!"".equals(fieldString)) {
 				fieldString = fieldString.substring(0, fieldString.length()-1);

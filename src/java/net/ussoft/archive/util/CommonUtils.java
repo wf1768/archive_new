@@ -12,6 +12,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -373,5 +375,35 @@ public class CommonUtils {
 			sb.delete(index, index+str.length());
 		}
 	}
+    
+    /**
+     * List转换String
+     * 
+     * @param list :需要转换的List
+     * @param sep1 :分隔符
+     * @return String转换后的字符串
+     */ 
+    public static String ListToString(List<?> list,String SEP1) { 
+        StringBuffer sb = new StringBuffer(); 
+        if (list != null && list.size() > 0) { 
+            for (int i = 0; i < list.size(); i++) { 
+                if (list.get(i) == null || list.get(i) == "") { 
+                    continue; 
+                } 
+                // 如果值是list类型则调用自己 
+                if (list.get(i) instanceof List) { 
+                    sb.append(ListToString((List<?>) list.get(i), SEP1)); 
+                    sb.append(SEP1); 
+                } else { 
+                    sb.append(list.get(i)); 
+                    sb.append(SEP1); 
+                } 
+            } 
+        }
+        String result = sb.toString();
+        result = result.substring(0, result.length()-1);
+        return result; 
+    }
+    
     
 }

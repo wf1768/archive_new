@@ -166,6 +166,9 @@ public class TempletfieldService implements ITempletfieldService {
 		
 		String result = "success";
 		
+		//将字段英文名称转成大写
+		templetfield.setEnglishname(templetfield.getEnglishname().toUpperCase());
+		
 		//判断字段英文名是否存在
 		String sql = "select * from  sys_templetfield where englishname=? and tableid=? and accountid=?";
 		List<Object> values = new ArrayList<Object>();
