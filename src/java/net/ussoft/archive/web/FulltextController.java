@@ -2,7 +2,9 @@ package net.ussoft.archive.web;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +16,7 @@ import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IDocserverService;
 import net.ussoft.archive.service.ISearchService;
 import net.ussoft.archive.service.ITreeService;
+import net.ussoft.archive.util.CommonUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -72,19 +75,31 @@ public class FulltextController extends BaseConstroller{
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked" })
-	@RequestMapping(value="/search",method=RequestMethod.POST)
+	@RequestMapping(value="/search",method=RequestMethod.GET)
 	public ModelAndView search(ModelMap modelMap,String schTreeid,String searchText,HttpServletRequest request,int currentPage){
 		modelMap = super.getModelMap("SEARCHMANAGE","SEARCHFILE");
 		HashMap bb = new HashMap();
+		if(currentPage == 0)
+			currentPage = 1;
 		List<Sys_tree> tmpList = new ArrayList<Sys_tree>();
+		StringBuffer sbTreeid = new StringBuffer();
 		
 		List<Sys_docserver> docserverList = docserverService.list();
 		Sys_docserver docserver = docserverList.get(1);
 		
 		System.out.println("treeid="+schTreeid);
-
+		//要查询的树节点
+		String schTreeids = "";
+		//查询树节点结果集中的单个节点
+		String schTreeidByTreeid = CommonUtils.replaceNull2Space(request.getParameter("treeid"));
+		if("".equals(schTreeidByTreeid)){
+			schTreeids = schTreeid;
+		}else{
+			schTreeids = schTreeidByTreeid;
+		}
+		
 		// 根据treeid来执行不同的查询
-		if ("all".equals(schTreeid.toLowerCase())) {
+		if ("all".equals(schTreeids.toLowerCase())) {
 			//获得当前帐户的树节点范围
 			List<Sys_tree> treeList = new ArrayList<Sys_tree>();
 			treeList = getTreeNode();
@@ -92,6 +107,7 @@ public class FulltextController extends BaseConstroller{
 				if (!"0".equals(tree.getParentid())) {
 					if ("W".equals(tree.getTreetype())) {
 						tmpList.add(tree);
+						sbTreeid.append(tree.getId()+",");
 					}
 				}
 			}
@@ -99,10 +115,11 @@ public class FulltextController extends BaseConstroller{
 			bb = searchService.search(searchText, docserver.getId(), tmpList, currentPage, pageSize);
 			
 		}else {
-			String[] treeIds = schTreeid.split(",");
+			String[] treeIds = schTreeids.split(",");
 			for(int i=0;i<treeIds.length;i++){
 				Sys_tree tree = treeService.getById(treeIds[i]);
 				tmpList.add(tree);
+				sbTreeid.append(tree.getId()+",");
 			}
 			bb = searchService.search(searchText, docserver.getId(), tmpList, currentPage, pageSize);
 		}
@@ -121,21 +138,38 @@ public class FulltextController extends BaseConstroller{
 		String jsonTree = jsonTree(request, jsonTreeList);
 		modelMap.put("treeList", jsonTree);
 		
+		String treeids = CommonUtils.replaceNull2Space(request.getParameter("treeids"));
+		if("".equals(treeids)){
+			treeids = sbTreeid.toString();
+		}
 		//查询结果树节点
 		List<Sys_tree> searchTreeList = new ArrayList<Sys_tree>();
 		List searchNumList = new ArrayList();
-		for(Sys_tree tree:tmpList){
-			HashMap<String, Integer> resultMap = searchService.searchNumber(searchText, docserver.getId(), tree.getId());
+		String[] treeidArr = treeids.split(",");
+		for(int i=0;i<treeidArr.length;i++){
+			HashMap<String, Integer> resultMap = searchService.searchNumber(searchText, docserver.getId(), treeidArr[i]);
 			searchNumList.add(resultMap);
-			getParentTree(tree.getId(), searchTreeList);
+			getParentTree(treeidArr[i], searchTreeList);
 		}
+		//统计档案类型节点F下W的数量和
+		List countNum = getParentTreeFNum(searchTreeList, searchNumList);
+		for(int i=0;i<countNum.size();i++){
+			HashMap<String, Integer> resultMap = (HashMap<String, Integer>) countNum.get(i);
+			searchNumList.add(resultMap);
+		}
+		modelMap.put("treeid", schTreeidByTreeid);
+		modelMap.put("treeids", treeids);
 		String searchTree = JSON.toJSONString(searchTreeList);
+		//要显示的树节点
 		String searchJsonTree = jsonTree(request,searchTree);
 		modelMap.put("searchTrees", searchJsonTree);
-		
+		//节点结果数量
 		String searchNum = JSON.toJSONString(searchNumList);
 		modelMap.put("searchNum", searchNum);
-		
+		//查询类型选择的树节点
+		modelMap.put("schTreeid", schTreeid); 
+		//检索的关键字
+		modelMap.put("searchText", searchText);
 		return new ModelAndView("/view/search/fulltext/search",modelMap);
 	}
 
@@ -160,6 +194,45 @@ public class FulltextController extends BaseConstroller{
 				getParentTree(tree.getParentid(), treeList);
 			}
 		}
+	}
+	/**
+	 * /统计档案类型节点F下W的数量和
+	 * @param treeList
+	 * @param searchNumList 节点W的数量
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked" })
+	private List getParentTreeFNum(List<Sys_tree> treeList,List searchNumList) {
+		List countList = new ArrayList();
+		for(Sys_tree tree:treeList){
+			if("F".equals(tree.getTreetype())){
+				HashMap<String, Integer> countMap = new HashMap<String, Integer>();
+				int count = 0;
+				for(int i=0;i<searchNumList.size();i++){
+					Map.Entry map = getOneMap((Map)searchNumList.get(i));
+					Sys_tree obj = treeService.getById(map.getKey().toString());
+					if(obj.getTreenode().indexOf(tree.getTreenode()) > -1){
+						count = count + Integer.parseInt(map.getValue().toString());
+					}
+				}
+				countMap.put(tree.getId(), count);
+				countList.add(countMap);
+			}
+		}
+		return countList;
+	}
+	
+	/**
+	 * 此Map中只有一个值
+	 * 为了直接获取map的key和value
+	 * */
+	@SuppressWarnings("unchecked")
+	public Map.Entry getOneMap(Map m){
+		Iterator i=m.entrySet().iterator();
+		while(i.hasNext()){//只遍历一次,速度快
+			return (Map.Entry)i.next();
+		}
+		return null;
 	}
 	
 	/*

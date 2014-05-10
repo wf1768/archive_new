@@ -94,7 +94,7 @@
    		<div id="bodyer_left" style="width: auto;"></div>
     	<div id="bodyer_right">
     		<div class="xtgl">
-	        	<form action="search.do" id="searchform" method="post">
+	        	<form action="search.do" id="searchform" method="get">
 	        		<input type="hidden" id="schTreeid" name="schTreeid" value="all" />
 	       			<input type="hidden" name="currentPage" value="0" />
 			        <fieldset>
