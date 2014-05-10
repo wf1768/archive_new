@@ -148,9 +148,7 @@
 			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 			treeObj.expandNode(nodes);
 		} else {
-			//window.location.href = "${pageContext.request.contextPath}/archive/list.do?treeid=" + nodes.id;
-			$('#form1').action="${pageContext.request.contextPath}/archive/list.do?treeid=" + nodes.id;
-			$('#form1').submait();
+			window.location.href = "${pageContext.request.contextPath }/fulltext/search.do?schTreeid=${schTreeid}&currentPage=0&searchText=${searchText }&treeids=${treeids}&treeid=" + nodes.id;
 		}
 	};
 	
@@ -160,7 +158,7 @@
 	function updateNode(treeid,searchNum) {
 		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
 		var node = treeObj.getNodeByParam("id", treeid, null);
-		if (node.treetype == 'W') {
+		if (node.treetype == 'F' || node.treetype == 'W') {
 			node.treename = node.treename.replace(/_[\d]*$/g, "") + "[<span style='color:red;margin-right:0px;'>" + searchNum + "</span>]";
 		}
 		treeObj.updateNode(node);
@@ -170,6 +168,8 @@
 		$.fn.zTree.init($("#treeDemo"), setting_s, nodes_s);
 		
 		showResultList();
+		var treeid = "${treeid}";
+		selectNode(treeid);
 		//树节点检索条数
 		for(var j=0;j<searchNum.length;j++){
 			for(var key in searchNum[j]){  
@@ -236,84 +236,11 @@ function getSearchData() {
 	return list;
 }
 
-function showSearchInfo(list) {
-	
-	searchCommon.rowCount = list[0].ROWCOUNT;
-	searchCommon.pages = list[0].PAGES;
-	searchCommon.currentPage = list[0].CURRENTPAGE;
-	searchCommon.data = list[0]["DATA"];
-	
-	var doc = showResultList(list);
-	$("#searchList").html("");
-	$("#searchList").append(doc);
-	
-	$("#currentPage").val(searchCommon.currentPage);
-	$("#pageinfo").html("第  "+searchCommon.currentPage +" 页 / 共 "+searchCommon.pages+" 页");
-	$('.pagination').css('display','block');
-	pageState();
-}
-
-//翻页
-function selectPage(page) {
-	//把搜索框复位
-	$("#searchTxt").val(searchCommon.searchTxt);
-	//得到当前点击翻页按钮  的css类
-	var cssClass = $("#" + page).attr("class");
-	if (cssClass == "disabled") {
-		return ;
-	}
-	if (page == "next") {
-		searchCommon.currentPage = searchCommon.currentPage + 1;
-	}
-	else if (page == "first") {
-		searchCommon.currentPage = 1;
-	}
-	else if (page == "previous") {
-		searchCommon.currentPage = searchCommon.currentPage - 1;
-	}
-	else if (page == "over") {
-		searchCommon.currentPage = searchCommon.pages;
-	}
-	else {
-		if (page > searchCommon.pages) {
-			searchCommon.currentPage = searchCommon.pages;
-		}
-		else if (page < 0) {
-			searchCommon.currentPage = 1;
-		}
-		else {
-			searchCommon.currentPage = page;
-		}
-		
-	}
-	
-	var list = getSearchData();
-	showSearchInfo(list);
-	
-}
-
-//处理翻页按钮状态
-function pageState() {
-	$("#first").removeClass("disabled");
-	$("#previous").removeClass("disabled");
-	$("#next").removeClass("disabled");
-	$("#over").removeClass("disabled");
-	//如果是第一页
-	if (searchCommon.currentPage == 1) {
-		$("#first").addClass("disabled");
-		$("#previous").addClass("disabled");
-	}
-	if (searchCommon.currentPage == searchCommon.pages){
-		$("#next").addClass("disabled");
-		$("#over").addClass("disabled");
-	}
-	
-}
 function pageselectCallback(page_index, jq){
-	var searchTxt = ""//"${searchTxt }";
-	var pageno = 0;//${pagebean.pageNo };
+	var searchTxt = "${searchText }";
+	var pageno = ${pageBean["CURRENTPAGE"]};//${pagebean.pageNo };
 	if (page_index != pageno) {
-		window.location.href="${pageContext.request.contextPath }/archive/list.do?treeid=${selectid}&page="+page_index+"&searchTxt="+searchTxt;
+		window.location.href="${pageContext.request.contextPath }/fulltext/search.do?schTreeid=${schTreeid}&treeids=${treeids}&treeid=${treeid}&currentPage="+page_index+"&searchText="+searchTxt;
 	}
 }; 
 //预览
@@ -376,7 +303,7 @@ function fileDown(docId,treeid){
   			<!-- 搜索 -->
   			<div align="center"><div style="width: 43%">
 	        	<div id="nav-bar-middle">
-	            	<form class="nav-searchbar-inner" method="post" action="search.do" id="nav-searchbar">
+	            	<form class="nav-searchbar-inner" method="get" action="search.do" id="nav-searchbar">
 	            		<input type="hidden" id="schTreeid" name="schTreeid" value="all" />
 	       				<input type="hidden" name="currentPage" value="0" />
 			            <div class="nav-submit-button nav-sprite">
@@ -390,7 +317,7 @@ function fileDown(docId,treeid){
 			            </span>
 			            <div class="nav-searchfield-width">
 			              <div id="nav-iss-attach">
-			                <input type="text" name="searchText" value="" title="输入要搜索的内容..." id="twotabsearchtextbox">
+			                <input type="text" name="searchText" value="${searchText }" title="输入要搜索的内容..." id="twotabsearchtextbox">
 			              </div>
 			            </div>
 		        	</form>
@@ -404,13 +331,14 @@ function fileDown(docId,treeid){
 				<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >
 					<tr id="fanye" >
 						<c:choose>
-							<c:when test='${pageBean["PAGES"]} > 0 '>
+							<c:when test="${pageBean[\"PAGES\"] > 1}">
 								<td><p style="color: #3366CC;font-weight: bold;">当前第 ${pageBean["CURRENTPAGE"]} 页，共 ${pageBean["PAGES"]} 页，每页${pageBean["PAGESIZE"]} 行，共${pageBean["ROWCOUNT"]} 行</p></td>
 								<td id="pagination" class="fenye pagination" ></td>
 							</c:when>
 							<c:otherwise>
-								<td><p>当前第 1 页，共 1 页，每页 1 行，共1 行</p></td>
-								<td  ></td>
+								<c:if test="${pageBean[\"ROWCOUNT\"] != 0}">
+									<td><p>当前第 1 页，共 1 页，每页${pageBean["PAGESIZE"]} 行，共${pageBean["ROWCOUNT"]}  行</p></td>
+								</c:if>
 							</c:otherwise>
 						</c:choose>
 					</tr>
