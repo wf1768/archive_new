@@ -42,7 +42,7 @@ function openwindow(id){
 					<li><a href="${pageContext.request.contextPath}/config/docauthlist.do" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_10.png"
 							width="18" height="13" class="tubiao1" /><span>电子文件权限</span></a></li>
-					<li><a href="#" class="txt2"><img
+					<li><a href="${pageContext.request.contextPath}/index/index.do" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_14.png"
 							width="18" height="13" class="tubiao1" /><span>索引维护</span></a></li>
 				</ul>

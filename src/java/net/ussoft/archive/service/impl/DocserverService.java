@@ -6,11 +6,13 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import net.ussoft.archive.dao.DocserverDao;
+import net.ussoft.archive.model.SysDocserverExample;
 import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.service.IDocserverService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class DocserverService implements IDocserverService {
 	
