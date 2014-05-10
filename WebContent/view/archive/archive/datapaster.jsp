@@ -147,7 +147,7 @@
 		            		<select id="${itemTarget.englishname }">
 		            			<option value="" >空白</option>
 								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+									<c:if test="${(item.sort > 0)}">
 										<option value="${item.englishname }" ${itemTarget.englishname == item.englishname?'selected':'' }>${item.chinesename }</option>
 									</c:if>
 								</c:forEach>

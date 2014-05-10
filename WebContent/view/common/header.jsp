@@ -6,6 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
 <link type="text/css" href="${pageContext.request.contextPath}/css/template.css" rel="stylesheet" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/public.js"></script>
