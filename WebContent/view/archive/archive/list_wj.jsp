@@ -155,7 +155,7 @@
 	});
 
 	function callback() {
-		$(".scrollTable").height($(".scrollTable").height() - $("#aj").height());
+		$(".scrollTable").height($(".scrollTable").height() - $("#aj").height()) ;
 		
 		var n = $(".scrollTable").height()-$(".aa").height();
 		$('.data_table').fixHeader({
@@ -187,6 +187,7 @@
 		var jscroll = getCookie('jscroll');
 		$('.body-wrapper').scrollTop(jscroll);
 		delCookie('jscroll');//删除cookie
+		
 	}
 	function pageselectCallback(page_index, jq){
 		var searchTxt = "${searchTxt }";
@@ -576,42 +577,28 @@
 					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
-				<div style="float: right;z-index:999">
-				<ul id="cssdropdown">
-					<li class="headlink"><a href="javascript:;" onclick="add()">添加</a></li>
-					<li class="headlink"><a href="javascript:;" onclick="del()">删除</a></li>
-					<li class="headlink"><a href="javascript:;">数据操作</a>
-						<ul>
-							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;" onclick="archiveImport()">Excel导入</a></li>
-							<li><a href="javascript:;" onclick="archiveExport()">导出Excel</a></li>
-							<!-- <li><a href="javascript:;">数据移动</a></li> -->
-							<li><a href="javascript:;" onclick="datacopy()">复制</a></li>
-							<li><a href="javascript:;" onclick="datapaster()">粘贴</a></li>
-						</ul>
-					</li>
-					<li class="headlink"><a href="javascript:;" onclick="setshow('${templet.id}','02')">设置</a></li>
-					<li class="headlink"><a href="javascript:;" onclick="doc('')">挂接</a></li>
-					<li class="headlink"><a href="javascript:;" onclick="openprint()">打印</a></li>
-				</ul>
+				<div style="float: right;z-index:999;margin-top: 8px;">
+					<ul id="sddm">
+						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
+						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
+						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
+							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+								<a href="javascript:;" onclick="update_multiple()">批量修改</a>
+								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
+								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
+								<a href="javascript:;" onclick="datacopy()">复制</a>
+								<a href="javascript:;" onclick="datapaster()">粘贴</a>
+							</div>
+						</li>
+						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
+						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
+						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+					</ul>
 				</div>
-				<%-- <input type="button" value="添加" class="btn" onClick="add()" />
-				<input type="button" value="删除" class="btn" onClick="del()" />
-				<input type="button" value="设置" class="btn" onClick="setshow('${templet.id}','02')" />
-				<input type="button" value="挂接" class="btn" onClick="doc('')" />
-				<select name="pageselect" onchange="print_(options[selectedIndex].value)" >
-					<option value="ajml">打印案卷目录</option>
-				</select>
-				<select name="pageselect" onchange="test(options[selectedIndex].value)" >
-					<option value="import">数据导入</option>
-					<option value="export">数据导出</option>
-				</select>
-				<input type="button" value="刷新" class="btn" onClick="refresh()" />
-				<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-				<input type="button" value="查询" class="btn" onClick="search()" /> --%>
 			</div>
 			<div style="clear: both"></div>
 		</div>
+		<div style="margin-bottom: 10px;">
 		<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:998;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
 			<thead>
 				<tr class="tableTopTitle-bg">
@@ -661,11 +648,12 @@
 				</tr>
 			</tbody>
 		</table>
+		</div>
 		<div class="scrollTable" align="left" style="padding-left:5px; ">
 			<table id="data_table" class="data_table table-Kang" aline="left" width="98%"
 				border=0 cellspacing="1" cellpadding="4">
 				<thead>
-					<tr class="tableTopTitle-bg">
+					<tr id="table_head" class="tableTopTitle-bg">
 						<td width="30px"><input type="checkbox" id="checkall"></td>
 						<td width="40px">行号</td>
 						<td width="40px">全文</td>

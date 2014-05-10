@@ -46,7 +46,7 @@ $(function() {
 		//$(".data_table").height(200);
 		// $("#cssz_table").width(rw);
 		// $("#tb2").height($("#bodyer_right").height() - 55);
-		$(".scrollTable").height($("#bodyer_right").height() - 70);
+		$(".scrollTable").height($("#bodyer_right").height() - 79);
 		$(".xiangce").height($(".scrollTable").height() - 10);
 		// $("#not").height($("#table_main").height()-60);
 		// $("#ddiv").width(w*0.98-2);
