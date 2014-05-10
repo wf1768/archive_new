@@ -9,21 +9,12 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/lhgcalendar/lhgcalendar.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.easytabs/jquery.easytabs.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <base target="_self">
 
 <style type="text/css">
-	.etabs { margin: 0; padding: 0; }
-    .tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; -moz-border-radius: 4px 4px 0 0; -webkit-border-radius: 4px 4px 0 0; }
-    .tab a { font-size: 14px; line-height: 2em; display: block; padding: 0 10px; outline: none; text-decoration: none;}
-    .tab a:hover { text-decoration: underline; }
-    .tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
-    .tab a.active { font-weight: bold; }
-    .tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; -moz-border-radius: 0 4px 4px 4px; -webkit-border-radius: 0 4px 4px 4px; }
     .panel-container { margin-bottom: 10px; }
     
     .notcss {border: 0}
@@ -36,6 +27,10 @@
 <script>
 	
 	$(function() {
+		var info = '${failure}';
+		if (info != "") {
+			alert(info);
+		}
 		$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
 		    if (this.checked) {
@@ -49,9 +44,6 @@
 		$('input[type="checkbox"]').removeAttr("checked");
 		
 		$('.shiftCheckbox').shiftcheckbox();
-		$('#tab-container').easytabs();
-		
-		$('#tc_date').calendar({ id:'#tc' });
 		
 		$('input[name="checkbox"]').click(function(){
 		    if (this.checked) {
@@ -219,112 +211,30 @@
 		update(d);
 	}
 </script>
-<title>批量修改档案</title>
+<title>Excel导入数据</title>
 </head>
 <body>
 	<a id="reload" href="" style="display:none">reload...</a>
-	<div id="tab-container" class="tab-container">
-		<ul class='etabs'>
-			<li class='tab'><a href="#tabs-tc">填充</a></li>
-			<li class='tab'><a href="#tabs-xl">序列</a></li>
-		</ul>
-		<div class='panel-container'>
-			<div id="tabs-tc">
-				<h4>为选择的字段属性，填充内容。(可以选择部分档案进行批量修改，不选择等于全部修改)</h4>
-				<table class="notcss" border="0" cellpadding="4" cellspacing="1">
-					<tr>
-						<td class="notcss">选择字段:</td>
-						<td class="notcss">
-							<select id="tc_th_field">
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-										<option value="${item.englishname }">${item.chinesename }</option>
-									</c:if>
-								</c:forEach>
-							</select>
-						</td>
-						<td class="notcss">
-							<input type="radio" name="tc_radio" value="tc" checked>填充 <input type="text" id="tc">
-							<img id="tc_date" align="absmiddle" src="${pageContext.request.contextPath}/images/icons/iconDate.gif">
-						</td>
-						<td class="notcss">
-							<button type="button" onclick="update_tc()">更改</button>
-							<button type="button" onclick="closepage()">关闭</button>
-						</td>
-					</tr>
-					<tr>
-						<td class="notcss"></td>
-						<td class="notcss"></td>
-						<td class="notcss">
-							<input type="radio" name="tc_radio" value="th">替换
-							<input type="text" id="th_key" > 为 <input type="text" id="th_value" >
-						</td>
-						<td class="notcss"></td>
-					</tr>
-					<tr>
-						<td class="notcss"></td>
-						<td class="notcss"></td>
-						<td class="notcss">
-							<input type="radio" name="tc_radio" value="zk">置空
-						</td>
-						<td class="notcss"></td>
-					</tr>
-					<tr>
-						<td class="notcss"></td>
-						<td class="notcss"></td>
-						<td class="notcss">
-							<input type="radio" name="tc_radio" value="gj">高级
-							<select id="gj_first">
-								<option value="" >请选择</option>
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-										<option value="${item.englishname }">${item.chinesename }</option>
-									</c:if>
-								</c:forEach>
-							</select> + 
-							<input type="text" id="gj_txt"> + 
-							<select id="gj_second">
-								<option value="" >请选择</option>
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-										<option value="${item.englishname }">${item.chinesename }</option>
-									</c:if>
-								</c:forEach>
-							</select>
-						</td>
-						<td class="notcss"></td>
-					</tr>
-				</table>
-			</div>
-			<div id="tabs-xl">
-				<h4>为选择的字段属性，生成序列流水编号。(可以选择部分档案进行批量修改，不选择等于全部修改。起始值和步长只能为数字)</h4>
-				<table class="notcss" border="0" cellpadding="4" cellspacing="1">
-					<tr>
-						<td class="notcss">选择字段:</td>
-						<td class="notcss">
-							<select id="xl_th_field">
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
-										<option value="${item.englishname }">${item.chinesename }</option>
-									</c:if>
-								</c:forEach>
-							</select>
-						</td>
-						<td class="notcss">
-							起始值 
-							<input type="text" value="1" id="xl_begin">
-							 步长
-							<input type="text" value="1" id="xl_size">
-							
-						</td>
-						<td class="notcss">
-							<button type="button" onclick="update_xl()">更改</button>
-							<button type="button" onclick="closepage()">关闭</button>
-						</td>
-					</tr>
-				</table>
-			</div>
-		</div>
+	<div>
+		<h4>请上传Excel数据文件(注意：仅支持Excel2003格式，即扩展名为xls文件，如果是xlsx格式，请先另存为xls格式。)</h4>
+		<form method="post" action="upload.do" enctype="multipart/form-data">
+		<table class="notcss" border="0" cellpadding="4" cellspacing="1">
+			<tr>
+				<td class="notcss">选择Excel文件:</td>
+				<td class="notcss">
+					<input type="file" name="file" />
+					<input type="hidden" value="${treeid }" id="treeid" name="treeid" />	
+					<input type="hidden" value="${tabletype }" id="tabletype" name="tabletype" />	
+					<input type="hidden" value="${status }" id="status" name="status" />	
+					<input type="hidden" value="${parentid }" id="parentid" name="parentid" />	
+				</td>
+				<td class="notcss">
+					<button type="submit">上传</button>
+					<button type="button" onclick="closepage()">关闭</button>
+				</td>
+			</tr>
+		</table>
+		</form>
 	</div>
 	<div style="width: 98%;height: 300px;min-width:600px;overflow: auto;">
 		<table id="data_table" class="data_table table-Kang" aline="left" width="98%"

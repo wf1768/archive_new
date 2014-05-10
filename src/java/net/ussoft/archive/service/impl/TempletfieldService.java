@@ -106,7 +106,7 @@ public class TempletfieldService implements ITempletfieldService {
 		}
 		
 		if (templetfield.getFieldtype().equals("VARCHAR") ) {
-			if (templetfield.getFieldsize() >= 30 && templetfield.getFieldsize() < 2000) {
+			if (templetfield.getFieldsize() >= 30 && templetfield.getFieldsize() <= 2000) {
 				sb.append("(").append(templetfield.getFieldsize()).append(")");
 			}
 			else {

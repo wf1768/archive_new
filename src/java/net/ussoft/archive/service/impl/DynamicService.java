@@ -206,11 +206,17 @@ public class DynamicService implements IDynamicService {
 		}
 		values.add(treeid);
 		
-		if (null != status) {
-//			sql += " and status = " + status;
-			sql += " and status = ?";
-			values.add(status);
+		if (null == status || status<0) {
+			status = 0;
 		}
+		
+		sql += " and status = ?";
+		values.add(status);
+		
+//		if (null != status) {
+//			sql += " and status = ?";
+//			values.add(status);
+//		}
 		
 		
 		

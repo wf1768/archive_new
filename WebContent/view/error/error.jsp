@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
+<title>系统出现错误操作。</title>
 </head>
 <body>
 <h1>出错了</h1>  

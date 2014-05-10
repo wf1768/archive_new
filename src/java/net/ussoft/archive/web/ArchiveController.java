@@ -1,11 +1,17 @@
 package net.ussoft.archive.web;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -44,6 +50,7 @@ import net.ussoft.archive.util.resule.ResultInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -973,15 +980,23 @@ public class ArchiveController extends BaseConstroller {
 		out.print(result);
 	}
 	
-	public ModelAndView importArchive(String data,ModelMap modelMap) {
-		@SuppressWarnings("unchecked")
-		Map<String, String> parMap = (Map<String, String>) JSON.parse(data);
-		
-		String treeid = parMap.get("treeid");
-		String tabletype = parMap.get("tabletype");
+	/**
+	 * 打开导入excel数据页面
+	 * @param data
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/importArchive.do",method=RequestMethod.GET)
+	public ModelAndView importArchive(String treeid,String tabletype,String status,String parentid,ModelMap modelMap) {
 		
 		modelMap.put("treeid", treeid);
 		modelMap.put("tabletype", tabletype);
+		if (null == status || "".equals(status)) {
+			status = "0";
+		}
+		modelMap.put("status", status);
+		
+		modelMap.put("parentid", parentid);
 		
 		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
 	}
@@ -992,29 +1007,30 @@ public class ArchiveController extends BaseConstroller {
 	 * @param treeid		树节点id
 	 * @param tabletype		01 or 02
 	 * @param status		状态值，案卷级-状态：0为正常，1为组卷  。文件级-状态：0为正常，1为组卷，2为零散文件
+	 * @param parentid		如果是文件级，tabletype＝02  的 需要插入parentid
 	 * @param request
 	 * @return
 	 * @throws IOException
 	 */
 	@RequestMapping(value="/upload.do",method=RequestMethod.POST)
-    public ModelAndView upload(@RequestParam("file") MultipartFile file,String treeid,String tabletype,Integer status,HttpServletRequest request,ModelMap modelMap) throws IOException {
+    public ModelAndView upload(@RequestParam("file") MultipartFile file,String treeid,String tabletype,String status,String parentid,HttpServletRequest request,ModelMap modelMap) throws IOException {
 		
-//        String path = request.getRealPath("/upload");
 		//获取临时文件的绝对路径
 		String path = getProjectRealPath() + "file" +File.separator + "upload" + File.separator;
 		File excFile = new File(path+"/"+file.getOriginalFilename());
-        //FileCopyUtils.copy(file.getBytes(),excFile);
+        FileCopyUtils.copy(file.getBytes(),excFile);
         
 		//得到excel表内容
 		Excel e = new Excel();
         Vector v = null;
         
+        //读取excel文件，jxl只支持xls格式
         try {
             v = e.readFromExcel(excFile);
         }
         catch (Exception e1) {
-//            out.write("<script>parent.showCallback('failure','Excel文件读取错误，请检查Excel文件中是否包含上传数据。')</script>");
-            return null;
+            modelMap.put("failure", "Excel文件读取错误，请检查Excel文件中是否包含上传数据。");
+            return new ModelAndView("/view/archive/archive/excel_import",modelMap);
         }
         
       //得到excel表第一行列头，作为字段名称
@@ -1023,17 +1039,214 @@ public class ArchiveController extends BaseConstroller {
 			excelFieldName = (String) v.get(0);
 		}
 		else {
-	//      			out.write("<script>parent.showCallback('failure','Excel文件读取错误，请检查Excel文件中是否包含上传数据。')</script>");
-			return null;
+	      	modelMap.put("failure", "Excel文件读取错误，请检查Excel文件中是否包含上传数据。");
+	      	return new ModelAndView("/view/archive/archive/excel_import",modelMap);
 		}
-		
+		//字段名是以&分隔的，将字段名转成list
 		List<String> excelField = Arrays.asList(v.get(0).toString().split("&&"));
         
-		for (String string : excelField) {
-			System.out.println(string + "  ====================");
+		//获取表字段
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
+		modelMap.put("fields", fields);
+		
+		//存储导入字段
+		List<String> tmpFieldList = new ArrayList<String>();
+		HashMap<Integer,String> tmpFieldMap = new HashMap<Integer,String>();
+		//数据库字段名称与excel列头对比，找出需要导入哪些字段
+		for (int i=0;i<fields.size();i++) {
+			String a = fields.get(i).getChinesename();
+			int num = excelField.indexOf(a);
+			if (num >= 0) {
+                tmpFieldList.add(fields.get(i).getEnglishname());
+                tmpFieldMap.put(num,fields.get(i).getEnglishname());
+			}
 		}
+		
+		if (tmpFieldList.size() == 0) {
+			modelMap.put("failure", "Excel文件里没有获取与当前档案匹配的字段，请确认Excel文件的第一行为字段中文名称。");
+	      	return new ModelAndView("/view/archive/archive/excel_import",modelMap);
+		}
+		
+		
+		//档案系统字段数据
+		Map<String, String> sysFieldMap = new HashMap<String, String>();
+		//生成粘贴的档案系统参数
+		sysFieldMap.put("treeid", treeid);
+		sysFieldMap.put("tabletype", tabletype);
+		sysFieldMap.put("status", status);
+		sysFieldMap.put("parentid", parentid);
+		
+		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
+		
+		//创建json数据
+		for (int i=1;i<v.size();i++) {
+            HashMap<String,String> archiveMap = new HashMap<String,String>();
+			List<String> row = Arrays.asList(v.get(i).toString().split("&&",-1));
+
+			//生成excel导入字段数据
+            Iterator it = tmpFieldMap.keySet().iterator();
+            while (it.hasNext()) {
+                Object key = it.next();
+                archiveMap.put(tmpFieldMap.get(key).toString(),row.get((Integer)key));
+            }
+            archiveList.add(archiveMap);
+		}
+		
+		ResultInfo info = dynamicService.insertArchive(sysFieldMap, archiveList);
+		
+		List<String> idList = (List<String>) info.getData().get("idsList");
+		
+		String orderbyString = getOrderby(fields);
+		//获取导入的数据，前台显示
+		List<Map<String, Object>> maps = dynamicService.get(treeid, "",tabletype, idList,orderbyString,null,null);
+		modelMap.put("maps", maps);
+		
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
+		HashMap<String, Object> configMap = getConfig(account.getId());
+		//字段截取标准。（列表里字段长度超过标准，被截取)
+		Integer subString = 10;
+		if (null == configMap || configMap.size() == 0) {
+		}
+		else {
+			subString = Integer.parseInt(configMap.get("SUBSTRING").toString());
+		}
+		//防止数字错误
+		if (subString < 0) {
+			subString = 10;
+		}
+		//用来前台判断文字截取多少个
+		modelMap.put("subString", subString);
+		
 		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
     }
+	
+	/**
+	 * 导出excel数据
+	 * @param treeid		 	档案树节点id
+	 * @param tabletype			档案表类型
+	 * @param ids				选择的档案数据id，如果为空，就获取全部导出
+	 * @param parentid			如果tabletype为02，则获取数据需要parentid
+	 * @param request		
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/exportArchive")
+	public void exportArchive(String treeid,String tabletype,String ids,String parentid,HttpServletRequest request,HttpServletResponse response) throws Exception {
+		
+		//获取字段
+		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
+		//获取排序规则
+		String orderby = getOrderby(fields);
+		List<Map<String, Object>> maps = new ArrayList<Map<String,Object>>();
+		//获取导出数据
+		//判断id是否存在
+		if (ids != null && !ids.equals("")) {
+			String[] idArr = ids.split(",");
+			List<String> idList = Arrays.asList(idArr);
+			maps = dynamicService.get(treeid,"", tabletype, idList,orderby,0,null);
+		}
+		else {
+			//如果没有传入导出数据id，获取全部数据导出
+			maps = dynamicService.get(treeid,parentid, tabletype, null,orderby,0,null);
+		}
+		
+		
+		//得到excel表内容
+		//获取临时文件的绝对路径
+		String path = getProjectRealPath() + "file" +File.separator;
+		File tmpFile = new File(path+"/export.xls");
+		
+		Date date = new Date();
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	    String dateString = sdf.format(date);
+	    
+	    Sys_tree tree = treeService.getById(treeid);
+	    
+	    String filename = tree.getTreename()+"-导出数据-"+dateString + ".xls";
+	     
+		File file = new File(path+"/"+filename);
+        FileCopyUtils.copy(tmpFile,file);
+        
+		Excel e = new Excel(file);
+		Vector v = new Vector();
+        
+        e.addSheet("导出数据");
+        
+        //弄字段名
+        String fString = "";
+        for (Sys_templetfield field : fields) {
+			if (field.getSort() > 0) {
+				fString += field.getChinesename() + "&&";
+			}
+		}
+        
+        if (!fString.equals("")) {
+        	fString = fString.substring(0, fString.length()-2);
+        }
+        v.addElement(fString);
+        
+        
+        for (Map<String, Object> map : maps) {
+        	String dString = "";
+        	for (Sys_templetfield field : fields) {
+    			if (field.getSort() > 0) {
+    				Object str = map.get(field.getEnglishname());
+    				if (null == str) {
+    					str = "";
+    				}
+    				
+    				dString += str.toString() + "&&";
+    			}
+    		}
+        	if (!dString.equals("")) {
+        		dString = dString.substring(0, dString.length()-2);
+            }
+        	v.addElement(dString);
+		}
+        e.addContent(v);
+        e.createExcel();
+        
+        //创建后，下载文件
+      //获取doc类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        
+        String userAgent = request.getHeader("User-Agent");
+        response.reset();
+        if(userAgent != null && userAgent.indexOf("MSIE") == -1) {
+            // FF
+        	String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName); 
+        }else{
+            // IE   
+            String enableFileName = new String(filename.getBytes("GBK"), "ISO-8859-1");   
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);
+        }
+        
+        request.setCharacterEncoding("UTF-8");  
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;  
+  
+  
+        long fileLength = new File(path+"/"+filename).length();  
+        response.setHeader("Content-Length", String.valueOf(fileLength));
+        
+    	bis = new BufferedInputStream(new FileInputStream(path+"/"+filename));  
+        bos = new BufferedOutputStream(response.getOutputStream());  
+        byte[] buff = new byte[2048];  
+        int bytesRead;  
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {  
+            bos.write(buff, 0, bytesRead);  
+        }  
+        bis.close();  
+        bos.close();
+        
+        
+        //下载完，删除临时文件
+        file.delete();
+	}
+		
 	
 	/**
 	 * 

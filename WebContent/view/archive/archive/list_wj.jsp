@@ -505,6 +505,46 @@
 		window.location.reload(true);
 	}
 	
+	function archiveImport() {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再导入档案数据。');
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/importArchive.do?treeid="+treeid+"&tabletype=02&parentid=${parentid}&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
+	function archiveExport() {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再导入档案数据。');
+			return;
+		}
+		
+		var str = "";
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str != "") {
+			str = str.substring(0,str.length-1);
+		}
+		
+		var link = "${pageContext.request.contextPath}/archive/exportArchive.do?treeid="+treeid+"&tabletype=02&ids="+str+"&parentid=${parentid}&time=" + Date.parse(new Date());
+        window.location.href=link;
+        return false;
+		
+	}
+	
 	
 </script>
 
@@ -543,8 +583,8 @@
 					<li class="headlink"><a href="javascript:;">数据操作</a>
 						<ul>
 							<li><a href="javascript:;" onclick="update_multiple()">批量修改</a></li>
-							<li><a href="javascript:;">Excel导入</a></li>
-							<li><a href="javascript:;">导出Excel</a></li>
+							<li><a href="javascript:;" onclick="archiveImport()">Excel导入</a></li>
+							<li><a href="javascript:;" onclick="archiveExport()">导出Excel</a></li>
 							<!-- <li><a href="javascript:;">数据移动</a></li> -->
 							<li><a href="javascript:;" onclick="datacopy()">复制</a></li>
 							<li><a href="javascript:;" onclick="datapaster()">粘贴</a></li>
