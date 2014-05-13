@@ -129,8 +129,8 @@ function yjdjb_html(field,otherPar) {
 				html += "<td style=\"border:1px #000 solid;\">"+ (field.ajh == 'NOTHING' ? '': data_json[j][field.ajh]) +"</td>";
 				html += "<td align=\"left\" style=\"border:1px #000 solid;\">"+ (field.tm == 'NOTHING' ? '' : data_json[j][field.tm]) +"</td>";
 				html += "<td style=\"border:1px #000 solid;\">"+ (field.bgqx == 'NOTHING' ? '' : data_json[j][field.bgqx]) +"</td>";
-				html += "<td style=\"border:1px #000 solid;\"></td>";
-				html += "<td style=\"border:1px #000 solid;\"></td>";
+				html += "<td style=\"border:1px #000 solid;\">"+ (field.js == 'NOTHING' ? '' : data_json[j][field.js]) +"</td>";
+				html += "<td style=\"border:1px #000 solid;\">是</td>";
 				html += "</tr>";
 			}
 			else {

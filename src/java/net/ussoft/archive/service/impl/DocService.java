@@ -93,39 +93,47 @@ public class DocService implements IDocService {
 		
 		for (String id : ids) {
 			Sys_doc doc = docDao.get(id);
+			
+			//因档案复制粘贴功能，将造成电子文件共用的情况，所以在删除时，判断是否表中有存在多个
+			String sql = "select * from sys_doc where docnewname=?";
+			List<Object> values = new ArrayList<Object>();
+			values.add(doc.getDocnewname());
+			
+			List<Sys_doc> tmpList = docDao.search(sql, values);
+			
+			if (null != tmpList && tmpList.size() == 1) {
+				//获取doc的server
+				Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
+				//删除物理文件
+				if ("LOCAL".equals(docserver.getServertype())) {
+					//得到服务器路径
+					String serverPath = docserver.getServerpath();
+					if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
+						serverPath += "/";
+		            }
+					serverPath += doc.getDocpath();
+					String filename = doc.getDocnewname();
+					FileOperate fo = new FileOperate();
+					boolean b = fo.delFile(serverPath + filename);
+				}
+				else {
+					//处理ftp删除
+		            FtpUtil util = new FtpUtil();
+		            util.connect(docserver.getServerip(),
+		                    docserver.getServerport(),
+		                    docserver.getFtpuser(),
+		                    docserver.getFtppassword(),
+		                    docserver.getServerpath());
+//		                FileInputStream s = new FileInputStream(newFile);
+//		                util.uploadFile(s, newName);
+		            util.changeDirectory(doc.getDocpath());
+		            boolean isDel = util.deleteFile(doc.getDocnewname());
+		            util.closeServer();
+				}
+			}
 
-			//获取doc的server
-			Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
-			//删除物理文件
-			if ("LOCAL".equals(docserver.getServertype())) {
-				//得到服务器路径
-				String serverPath = docserver.getServerpath();
-				if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
-					serverPath += "/";
-	            }
-				serverPath += doc.getDocpath();
-				String filename = doc.getDocnewname();
-				FileOperate fo = new FileOperate();
-				boolean b = fo.delFile(serverPath + filename);
-	            //删除文件记录
-				num = docDao.del(doc.getId());
-			}
-			else {
-				//处理ftp删除
-	            FtpUtil util = new FtpUtil();
-	            util.connect(docserver.getServerip(),
-	                    docserver.getServerport(),
-	                    docserver.getFtpuser(),
-	                    docserver.getFtppassword(),
-	                    docserver.getServerpath());
-//	                FileInputStream s = new FileInputStream(newFile);
-//	                util.uploadFile(s, newName);
-	            util.changeDirectory(doc.getDocpath());
-	            boolean isDel = util.deleteFile(doc.getDocnewname());
-	            util.closeServer();
-	            //删除文件记录
-	            num = docDao.del(doc.getId());
-			}
+			 //删除文件记录
+            num = docDao.del(doc.getId());
 			
 			if (num > 0) {
 				//判断删除电子文件后，档案如果没有挂接文件了，将档案的isdoc设置为0
@@ -139,8 +147,8 @@ public class DocService implements IDocService {
 					List<Sys_doc> docs = docDao.search(tmpDoc);
 					if (null == docs || docs.size() == 0) {
 						Sys_table table = tableDao.get(tableid);
-						String sql = "update " + table.getTablename() + " set isdoc=0 where id=?";
-						List<Object> values = new ArrayList<Object>();
+						sql = "update " + table.getTablename() + " set isdoc=0 where id=?";
+						values.clear();
 						values.add(archiveid);
 						dynamicDao.update(sql, values);
 					}

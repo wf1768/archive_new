@@ -41,9 +41,9 @@
 		//系统字段对象
 		var s = {};
 		s.treeid = '${maps[0].treeid}';
-		s.status = '${maps[0].status}';
+		s.status = '${maps[0].status}';	
 		s.tabletype = $("#tabletype").val();
-		
+		alert(s.treeid);
 		var templettype = '${templet.templettype}';
 		if (templettype != 'F' && s.tabletype == '02') {
 			s.parentid = '${maps[0].parentid}';

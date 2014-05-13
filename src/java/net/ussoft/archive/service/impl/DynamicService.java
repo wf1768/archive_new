@@ -1,5 +1,6 @@
 package net.ussoft.archive.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.SocketException;
@@ -293,7 +294,7 @@ public class DynamicService implements IDynamicService {
 		String tabletype = sysFieldMap.get("tabletype");
 		Integer status = 0;
 		
-		if (null != sysFieldMap.get("status") || !sysFieldMap.get("status").equals("")) {
+		if (null != sysFieldMap.get("status") && !sysFieldMap.get("status").equals("")) {
 			Integer.valueOf(sysFieldMap.get("status"));
 		}
 		
@@ -568,38 +569,47 @@ public class DynamicService implements IDynamicService {
 		
 		if (null != docs && docs.size() > 0) {
 			for (Sys_doc doc : docs) {
-				//获取doc的server
-				Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
-				//删除物理文件
-				if ("LOCAL".equals(docserver.getServertype())) {
-					//得到服务器路径
-					String serverPath = docserver.getServerpath();
-					if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
-						serverPath += "/";
-		            }
-					serverPath += doc.getDocpath();
-					String filename = doc.getDocnewname();
-					FileOperate fo = new FileOperate();
-					boolean b = fo.delFile(serverPath + filename);
-		            //删除文件记录
-					docDao.del(doc.getId());
+				
+				//因档案复制粘贴功能，将造成电子文件共用的情况，所以在删除时，判断是否表中有存在多个
+				String sql = "select * from sys_doc where docnewname=?";
+				List<Object> values = new ArrayList<Object>();
+				values.add(doc.getDocnewname());
+				
+				List<Sys_doc> tmpList = docDao.search(sql, values);
+				
+				if (null != tmpList && tmpList.size() == 1) {
+					//获取doc的server
+					Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
+					//删除物理文件
+					if ("LOCAL".equals(docserver.getServertype())) {
+						//得到服务器路径
+						String serverPath = docserver.getServerpath();
+						if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
+							serverPath += "/";
+			            }
+						serverPath += doc.getDocpath();
+						String filename = doc.getDocnewname();
+						FileOperate fo = new FileOperate();
+						boolean b = fo.delFile(serverPath + filename);
+					}
+					else {
+						//处理ftp删除
+			            FtpUtil util = new FtpUtil();
+			            util.connect(docserver.getServerip(),
+			                    docserver.getServerport(),
+			                    docserver.getFtpuser(),
+			                    docserver.getFtppassword(),
+			                    docserver.getServerpath());
+//			                FileInputStream s = new FileInputStream(newFile);
+//			                util.uploadFile(s, newName);
+			            util.changeDirectory(doc.getDocpath());
+			            boolean isDel = util.deleteFile(doc.getDocnewname());
+			            util.closeServer();
+					}
+					
 				}
-				else {
-					//处理ftp删除
-		            FtpUtil util = new FtpUtil();
-		            util.connect(docserver.getServerip(),
-		                    docserver.getServerport(),
-		                    docserver.getFtpuser(),
-		                    docserver.getFtppassword(),
-		                    docserver.getServerpath());
-//		                FileInputStream s = new FileInputStream(newFile);
-//		                util.uploadFile(s, newName);
-		            util.changeDirectory(doc.getDocpath());
-		            boolean isDel = util.deleteFile(doc.getDocnewname());
-		            util.closeServer();
-		            //删除文件记录
-		            docDao.del(doc.getId());
-				}
+				 //删除文件记录
+				docDao.del(doc.getId());
 			}
 		}
 		
@@ -621,6 +631,8 @@ public class DynamicService implements IDynamicService {
 		List<Object> values=new ArrayList<Object>();
 		
 		for (int i=0;i<ids.size();i++) {
+			//判断是不是多媒体
+			
 			StringBuilder sb=new StringBuilder("delete from ");
 			sb.append(tablename);
 			
@@ -679,30 +691,46 @@ public class DynamicService implements IDynamicService {
 		//首先判断是不是案卷级，如果是案卷，要先删除文件级电子全文、文件级
 		Sys_templet templet = templetDao.get(tree.getTempletid());
 		if (!templet.getTemplettype().equals("F") && tabletype.equals("01")) {
-//			values.clear();
-//			values.add(tree.getTempletid());
-//			values.add("02");
-//			//根据templetid获取tableid
-//			List<Sys_table> wjTable = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
 			Sys_table wjTable = getTable(treeid, "02");
 			String wjTableNameString = wjTable.getTablename();
 			//获取文件级，并删除
 			for (int i=0;i<ids.size();i++) {
-				//删除文件级有电子全文的
-				sql = "select id from " + wjTableNameString + " where treeid=? and parentid=? and isdoc=?";
-				values.clear();
-				values.add(treeid);
-				values.add(ids.get(i));
-				values.add(1);
-				List<Map<String, Object>> wjList =dynamicDao.searchForMap(sql, values);
 				
-				if (null != wjList && wjList.size() > 0) {
-					List<String> wjids = new ArrayList<String>();
-					for (Map<String, Object> map : wjList) {
-						wjids.add(map.get("id").toString());
+				//如果是多媒体，不删除挂接的电子文件,要删除slt的文件
+				if (templet.getTemplettype().equals("P")) {
+					//删除文件级有电子全文的
+					sql = "select * from " + wjTableNameString + " where treeid=? and parentid=?";
+					values.clear();
+					values.add(treeid);
+					values.add(ids.get(i));
+					List<Map<String, Object>> wjList =dynamicDao.searchForMap(sql, values);
+					if (null != wjList && wjList.size() > 0) {
+						for (Map<String, Object> map : wjList) {
+							if (null != map.get("slt") && !map.get("slt").toString().equals("")) {
+								String pathString = request.getSession().getServletContext().getRealPath("/");
+								File file = new File(pathString + "file/pic/" + map.get("slt").toString());
+								file.delete();
+							}
+						}
 					}
-					execDelete(wjTable.getId(), wjTableNameString, wjids);
 				}
+				else {
+					//删除文件级有电子全文的
+					sql = "select id from " + wjTableNameString + " where treeid=? and parentid=? and isdoc=?";
+					values.clear();
+					values.add(treeid);
+					values.add(ids.get(i));
+					values.add(1);
+					List<Map<String, Object>> wjList =dynamicDao.searchForMap(sql, values);
+					if (null != wjList && wjList.size() > 0) {
+						List<String> wjids = new ArrayList<String>();
+						for (Map<String, Object> map : wjList) {
+							wjids.add(map.get("id").toString());
+						}
+						execDelete(wjTable.getId(), wjTableNameString, wjids);
+					}
+				}
+				
 				//删除所有文件级
 				sql = "delete from " + wjTableNameString + " where treeid=? and parentid=?";
 				values.clear();
@@ -718,6 +746,21 @@ public class DynamicService implements IDynamicService {
 		//根据templetid获取tableid
 		List<Sys_table> tableList = tableDao.search("select * from sys_table where templetid=? and tabletype=?", values);
 		
+		
+		//如果是多媒体，不删除挂接的电子文件,要删除slt的文件
+		if (templet.getTemplettype().equals("P")) {
+			List<Map<String, Object>> pmaps = get(treeid, null, tabletype, ids, null, null, null);
+			if (null != pmaps && pmaps.size() > 0) {
+				for (Map<String, Object> map : pmaps) {
+					if (null != map.get("slt") && !map.get("slt").toString().equals("")) {
+						String pathString = request.getSession().getServletContext().getRealPath("/");
+						File file = new File(pathString + "file/pic/" + map.get("slt").toString());
+						file.delete();
+					}
+				}
+			}
+		}
+				
 		execDelete(tableList.get(0).getId(), tableList.get(0).getTablename(), ids);
 		
 		info.setSuccess(true);

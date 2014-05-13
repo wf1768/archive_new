@@ -12,6 +12,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
+
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
@@ -82,7 +84,7 @@ public class SystemFilter implements Filter {
             boolean isAjaxRequest = isAjaxRequest(httpRequest);
             if (isAjaxRequest) {
                 httpResponse.setCharacterEncoding("UTF-8");
-                //httpResponse.sendError(HttpStatus.UNAUTHORIZED.value(),"您已经太长时间没有操作,请刷新页面");  
+                httpResponse.sendError(HttpStatus.UNAUTHORIZED.value(),"您已经太长时间没有操作,请刷新页面");  
             }
             httpResponse.sendRedirect(path + "/login.do");
             return;  

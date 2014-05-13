@@ -13,27 +13,12 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.layout/layout-default-latest.css" type="text/css" />
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.layout/jQueryui_1.9.2.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.layout/jquery.layout-latest.js"></script>
+
 <base target="_self">
 <style type="text/css">
-	.div1 {
-		width:100%;
-		height:250px;
-		clear:both;
-		overflow:auto;
-	}
-	.div2 {
-		float:left;
-		width:375px;
-		height:220px;
-		overflow:auto;
-	}
-	.div3 {
-		width:275px;
-		height:220px;
-		float:left;
-		overflow:auto;
-	}
-	
 	.table-SbgList:hover {
 		background:#b8e4f9;
 	}
@@ -330,9 +315,9 @@
 	}
 	
 	$(function(){
-		var winW = $(window).width();
+		/* var winW = $(window).width();
 		var div2_w = $(".div2").width();
-		$(".div3").width(winW - div2_w - 20);
+		$(".div3").width(winW - div2_w - 20); */
 		
 		setDocNotTr();
 		
@@ -378,6 +363,17 @@
 		});
 		
 		$('.shiftCheckbox').shiftcheckbox();
+		
+		$('body').layout({
+			applyDemoStyles: false,
+			resizable:true,
+			north__size:250,//pane的大小
+			north__closable:false,//可以被关闭  
+			//north__resizable:true,
+			spacing_open:3,//边框的间隙
+			west__size:600
+			//north__spacing_open:0,
+		});
 		
 	})
 	
@@ -470,7 +466,7 @@
 </head>
 <body>
 	<a id="reload" href="" style="display:none">reload...</a>
-	<div class="div1"  style ="border:solid 1px #345674;">
+	<div class="ui-layout-north" onmouseover="myLayout.allowOverflow('north')" onmouseout="myLayout.resetOverflow(this)">
 		<table id="table_archive" aline="left" width="100%" cellspacing="0" cellpadding="6" align="center">
 			<thead>
 				<tr>
@@ -538,7 +534,7 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="div2"  style ="border:solid 1px #556677;">
+	<div class="ui-layout-west">
 		<table id="table_yes" width="600px" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
 			<thead>
 				<tr>
@@ -564,7 +560,7 @@
 			</tbody>
 	  	</table>
 	</div>
-	<div class="div3"  style ="border:solid 1px #09aadd;">
+	<div class="ui-layout-center">
 		<table id="table_not" width="100%" cellspacing="0" cellpadding="8" align="center" style="margin-top:0px">
 			<thead>
 				<tr>

@@ -7,12 +7,19 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css" type="text/css" />
+<link href="${pageContext.request.contextPath}/js/umeditor1_2_2/themes/default/css/umeditor.css" type="text/css" rel="stylesheet">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.jqprint-0.3.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/print.util.js"></script>
-<script src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/print.util_zf.js"></script>
+<%-- <script src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script> --%>
+<!-- 配置文件 -->
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/umeditor1_2_2/umeditor.config.js"></script>
+<!-- 编辑器源码文件 -->
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/umeditor1_2_2/umeditor.min.js"></script>
+<!-- 语言包文件(建议手动加载语言包，避免在ie下，因为加载语言失败导致编辑器加载失败) -->
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/umeditor1_2_2/lang/zh-cn/zh-cn.js"></script>
 <base target="_self">
 
 <script>
@@ -43,6 +50,9 @@
 		else if (tabletype=='02') {
 			$('#JNML').removeAttr("style");
 		}
+		
+		//实例化编辑器
+	    var um = UM.getEditor('myEditor');
 	})
 	
 	function onPrint() {
@@ -85,6 +95,7 @@
 			field.ajh = $("#YJDJB_AJH").val();
 			field.tm = $("#YJDJB_TM").val();
 			field.bgqx = $("#YJDJB_BGQX").val();
+			field.js = $("#YJDJB_JS").val();
 		}
 		//======
 		
@@ -96,7 +107,8 @@
 		
 		var printcode = $("#printcode").val();
 		if (printcode == 'JNBKB') {
-			var data = CKEDITOR.instances.JNBKB_SM.getData();
+			//var data = CKEDITOR.instances.JNBKB_SM.getData();
+			var data = UM.getEditor('myEditor').getContent();
 			create_print_data(printcode,data);
 			onPrint();
 			return;
@@ -107,7 +119,7 @@
 			css: {
                 padding: '15px',
                 width:"300px"
-            } 
+            }
         });
 		
 		var d = {};
@@ -303,6 +315,19 @@
 					</select>
             	</td>
             </tr>
+            <tr>
+            	<td>件数</td>
+            	<td>
+            		<select id="YJDJB_JS">
+            			<option value="NOTHING" >空白</option>
+						<c:forEach items="${fields}" varStatus="i" var="item">
+							<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+								<option value="${item.englishname }" ${item.englishname == 'JS'?'selected':'' }>${item.chinesename }</option>
+							</c:if>
+						</c:forEach>
+					</select>
+            	</td>
+            </tr>
 		</tbody>
 	</table>
 	<table class="t" id="JNML" width="80%" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
@@ -389,7 +414,11 @@
             <tr >
             	<td>本卷情况说明</td>
             	<td>
-            		<textarea id="JNBKB_SM" class="ckeditor" style="height: 20px" cols="30" rows="10"></textarea>
+            		<!--style给定宽度可以影响编辑器的最终宽度-->
+				<script type="text/plain" id="myEditor" style="width:500px;height:240px;">
+    				<p>请输入备考表内容</p>
+				</script>
+            		<!-- <textarea id="JNBKB_SM" class="ckeditor" style="height: 20px" cols="30" rows="10"></textarea> -->
             	</td>
             </tr>
 		</tbody>

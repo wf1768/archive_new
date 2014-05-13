@@ -1,0 +1,19 @@
+@charset "UTF-8";
+/* CSS Document */
+
+.xiangce{ overflow:;}
+.xiangce ul li{ width:220px; height:210px; background:#FFF; float:left; margin-left:25px; border:#D8D8D8 1px solid; margin-top:30px;}
+.xiangce ul li:hover{box-shadow: 0 0 3px 0 #CCC;}
+.photo{ width:200px; height:150px; background:#CCC; margin:10px;}
+.miaoshu{ float:left; width:130px;}
+.miaoshu span{ font-size:12px; color:#666; padding-left:10px; line-height:25px;}
+.xuanze_btn{ float:left; margin-left:20px;}
+.xuanze_btn a{ border:none; cursor:pointer;}
+.miaoshu22{ width:200px; margin:0 auto; text-align:center; color:#666; line-height:35px; }
+.photo22{ width:220px; height:170px; background:#CCC; }
+#xlan .img{position:absolute; z-index:1;}
+.xlan{ position:relative; top:-170px; left:165px; z-index:2; ilter:alpha(opacity=80); -moz-opacity:0.8; opacity:0.8; display:none;}
+.xuanxiang{ position:relative; z-index:3000; width:70px; height:107px; background:#fff; top:-168px; left:136px; ilter:alpha(opacity=70);
+-moz-opacity:0.7; opacity:0.7; display:none;}
+.xuanxiang a:hover{ color:#06F;}
+.xx11{ width:70px; height:25px; border-bottom:#CCC solid 1px; border-top:#FFF solid 1px; text-align:center; line-height:25px; color:#666;} 

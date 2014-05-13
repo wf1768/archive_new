@@ -225,14 +225,24 @@ public class ArchiveController extends BaseConstroller {
 		
 		//返回的url。返回案卷页，或是文件级页
 		String url = "/view/archive/archive/list";
-		if (null != templet && templet.getTemplettype().equals("F")) {
-			url = "/view/archive/archive/list";
-		}
+		
 		if (tabletype.equals("02") && allwj==false) {
 			url = "/view/archive/archive/list_wj";
 		}
+		
 		if (allwj) {
 			url = "/view/archive/archive/list_all";
+		}
+		
+		if (null != templet && templet.getTemplettype().equals("F")) {
+			url = "/view/archive/archive/list";
+		}
+		
+		if (null != templet && templet.getTemplettype().equals("P")) {
+			url = "/view/archive/archive/listpic";
+			if (tabletype.equals("02")) {
+				url = "/view/archive/archive/listpic_wj";
+			}
 		}
 		
 		return new ModelAndView(url,modelMap);
@@ -1002,7 +1012,7 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	/**
-	 * 
+	 * 上传excel文件，执行导入，返回导入数据
 	 * @param file
 	 * @param treeid		树节点id
 	 * @param tabletype		01 or 02
@@ -1100,6 +1110,7 @@ public class ArchiveController extends BaseConstroller {
 		//获取导入的数据，前台显示
 		List<Map<String, Object>> maps = dynamicService.get(treeid, "",tabletype, idList,orderbyString,null,null);
 		modelMap.put("maps", maps);
+		modelMap.put("treeid", treeid);
 		
 		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
@@ -1121,7 +1132,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		return new ModelAndView("/view/archive/archive/excel_import",modelMap);
     }
-	
+
 	/**
 	 * 导出excel数据
 	 * @param treeid		 	档案树节点id

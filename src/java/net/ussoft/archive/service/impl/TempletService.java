@@ -516,38 +516,47 @@ public class TempletService implements ITempletService {
 				List<Sys_doc> docs = docDao.search(sql, values);
 				if (null != docs && docs.size() > 0) {
 					for (Sys_doc doc : docs) {
-						//获取doc的server
-						Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
-						//删除物理文件
-						if ("LOCAL".equals(docserver.getServertype())) {
-							//得到服务器路径
-							String serverPath = docserver.getServerpath();
-							if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
-								serverPath += "/";
-				            }
-							serverPath += doc.getDocpath();
-							String filename = doc.getDocnewname();
-							FileOperate fo = new FileOperate();
-							boolean b = fo.delFile(serverPath + filename);
-				            //删除文件记录
-							docDao.del(doc.getId());
+						
+						//因档案复制粘贴功能，将造成电子文件共用的情况，所以在删除时，判断是否表中有存在多个
+						sql = "select * from sys_doc where docnewname=?";
+						values.clear();
+						values.add(doc.getDocnewname());
+						
+						List<Sys_doc> tmpList = docDao.search(sql, values);
+						
+						if (null != tmpList && tmpList.size() == 1) {
+							//获取doc的server
+							Sys_docserver docserver = docserverDao.get(doc.getDocserverid());
+							//删除物理文件
+							if ("LOCAL".equals(docserver.getServertype())) {
+								//得到服务器路径
+								String serverPath = docserver.getServerpath();
+								if (!serverPath.substring(serverPath.length()-1,serverPath.length()).equals("/")) {
+									serverPath += "/";
+					            }
+								serverPath += doc.getDocpath();
+								String filename = doc.getDocnewname();
+								FileOperate fo = new FileOperate();
+								boolean b = fo.delFile(serverPath + filename);
+							}
+							else {
+								//处理ftp删除
+					            FtpUtil util = new FtpUtil();
+					            util.connect(docserver.getServerip(),
+					                    docserver.getServerport(),
+					                    docserver.getFtpuser(),
+					                    docserver.getFtppassword(),
+					                    docserver.getServerpath());
+//					                FileInputStream s = new FileInputStream(newFile);
+//					                util.uploadFile(s, newName);
+					            util.changeDirectory(doc.getDocpath());
+					            boolean isDel = util.deleteFile(doc.getDocnewname());
+					            util.closeServer();
+							}
 						}
-						else {
-							//处理ftp删除
-				            FtpUtil util = new FtpUtil();
-				            util.connect(docserver.getServerip(),
-				                    docserver.getServerport(),
-				                    docserver.getFtpuser(),
-				                    docserver.getFtppassword(),
-				                    docserver.getServerpath());
-//				                FileInputStream s = new FileInputStream(newFile);
-//				                util.uploadFile(s, newName);
-				            util.changeDirectory(doc.getDocpath());
-				            boolean isDel = util.deleteFile(doc.getDocnewname());
-				            util.closeServer();
-				            //删除文件记录
-				            docDao.del(doc.getId());
-						}
+						//删除文件记录
+						docDao.del(doc.getId());
+						
 					}
 				}
 				
