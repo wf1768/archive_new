@@ -614,24 +614,15 @@
 					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
-					<ul id="sddm">
+					<ul id="sddm" style="width: 250px">
 						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
-						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-								<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-									<a href="javascript:;" onclick="allwj()">只文件级</a>
-								</c:if>
-								<a href="javascript:;" onclick="update_multiple()">批量修改</a>
 								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
 								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
-								<a href="javascript:;" onclick="datacopy()">复制</a>
-								<a href="javascript:;" onclick="datapaster()">粘贴</a>
 							</div>
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
 					</ul>
 				</div>
 			</div>
@@ -650,7 +641,7 @@
 									<img src="${pageContext.request.contextPath}/images/no_photo_135.png" height="150" width="200"/>
 								</c:when>
 								<c:otherwise>
-									<img src="${pageContext.request.contextPath}/${archiveitem.slt}" height="150" width="200"/>
+									<img src="${pageContext.request.contextPath}/file/pic/${archiveitem.slt}" height="150" width="200"/>
 								</c:otherwise>
 							</c:choose>
 							</a>

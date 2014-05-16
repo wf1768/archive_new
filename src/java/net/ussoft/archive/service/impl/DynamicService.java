@@ -94,6 +94,8 @@ public class DynamicService implements IDynamicService {
 			sql += " WHERE treeid=? and status = " + status;
 		}
 		
+		//TODO 这里要加上记录访问权限
+		
 		values.clear();
 		values.add(treeid);
 		//如果是文件级，并且不显示全文件，赋予parentid
@@ -879,6 +881,7 @@ public class DynamicService implements IDynamicService {
 				map.remove("TREEID");
 				map.remove("STATUS");
 				map.remove("PARENTID");
+				map.remove("CREATETIME");
 				String json = JSON.toJSONString(map);
 				tmpMap = (Map<String, String>) JSON.parse(json);
 			}
@@ -973,6 +976,7 @@ public class DynamicService implements IDynamicService {
 						sysChildFieldMap.put("status", childMap.get("STATUS").toString());
 						childMap.remove("STATUS");
 						childMap.remove("PARENTID");
+						childMap.remove("CREATETIME");
 						String json = JSON.toJSONString(childMap);
 						Map<String, String> aaMap = (Map<String, String>) JSON.parse(json);
 						archiveChildList.clear();
