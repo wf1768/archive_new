@@ -17,6 +17,10 @@
 <script>
 
 	$(function(){
+		var result = '${result}';
+		if (result != "") {
+			alert(result);
+		}
 		var parentWin=window.dialogArguments;
 		//var buttonValue=parentWin.document.getElementByIdx("mybutton2").value;   //获取父窗口中的对象
 		//var parentValue=parentWin.nodes;       //获取父窗口中的变量
@@ -86,6 +90,28 @@
 		});
 	}
 	
+	function showvideo(id) {
+		var treeid = '${treeid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点。');
+			return;
+		}
+		
+		if (id == "") {
+			alert("请先选择要播放的多媒体文件。");
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/showvideo.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
 </script>
 <title>查看多媒体</title>
 </head>
@@ -111,7 +137,7 @@
 			</c:forEach>
 			<tr>
 				<td>多媒体文件名 :</td>
-				<td>${maps[0].sltname}</td>
+				<td>${maps[0].imgoldname}</td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center">
@@ -128,6 +154,9 @@
 					<c:if test="${tabletype=='02' }">
 						<button type="button" onclick="upload_pic_single('${maps[0]['id']}')">上传</button>
 						<button type="button" onclick="setCover('${maps[0]['id']}')">设为相册封面</button>
+						<c:if test="${maps[0].slttype=='VIDEO' }">
+							<button type="button" onclick="showvideo('${maps[0]['id']}')">播放多媒体</button>
+						</c:if>
 					</c:if>
 				</td>
 			</tr>
@@ -146,7 +175,7 @@
 							<img class="tip" title="${maps[0].sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" />
 						</c:when>
 						<c:otherwise>
-							<img class="tip" title="${maps[0].sltname }" style="z-index:1;width: 80%;" src="${pageContext.request.contextPath}/file/pic/${slt}" />
+							<img class="tip" title="${maps[0].sltname }" style="z-index:1;width: 80%;" src="${pageContext.request.contextPath}/${slt}" />
 						</c:otherwise>
 					</c:choose>
                 </td>

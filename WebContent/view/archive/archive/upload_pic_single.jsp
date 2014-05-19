@@ -54,7 +54,7 @@
 			<tr>
 				<td>
 					<input type="radio" value="IMAGE" name="slttype" checked />图片格式
-            		<input type="radio" value="VIDEO" name="slttype"/>视频格式
+            		<input type="radio" value="VIDEO" name="slttype"/>音频视频格式
             		<input type="radio" value="OTHER" name="slttype"/>其他类型
 				</td>
 			</tr>

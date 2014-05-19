@@ -710,7 +710,12 @@ public class DynamicService implements IDynamicService {
 						for (Map<String, Object> map : wjList) {
 							if (null != map.get("slt") && !map.get("slt").toString().equals("")) {
 								String pathString = request.getSession().getServletContext().getRealPath("/");
-								File file = new File(pathString + "file/pic/" + map.get("slt").toString());
+								File file = new File(pathString + map.get("slt").toString());
+								file.delete();
+							}
+							if (null != map.get("imgnewname") && !map.get("imgnewname").toString().equals("")) {
+								String pathString = request.getSession().getServletContext().getRealPath("/");
+								File file = new File(pathString + map.get("imgnewname").toString());
 								file.delete();
 							}
 						}
@@ -756,7 +761,12 @@ public class DynamicService implements IDynamicService {
 				for (Map<String, Object> map : pmaps) {
 					if (null != map.get("slt") && !map.get("slt").toString().equals("")) {
 						String pathString = request.getSession().getServletContext().getRealPath("/");
-						File file = new File(pathString + "file/pic/" + map.get("slt").toString());
+						File file = new File(pathString + map.get("slt").toString());
+						file.delete();
+					}
+					if (null != map.get("imgnewname") && !map.get("imgnewname").toString().equals("")) {
+						String pathString = request.getSession().getServletContext().getRealPath("/");
+						File file = new File(pathString + map.get("imgnewname").toString());
 						file.delete();
 					}
 				}

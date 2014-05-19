@@ -742,7 +742,7 @@
 									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="30" width="35"/></td>
 								</c:when>
 								<c:otherwise>
-									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/${archiveitem.slt}" height="30" width="35"/></td>
+									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/${archiveitem.slt}" height="30" width="35"/></td>
 								</c:otherwise>
 							</c:choose>
 							

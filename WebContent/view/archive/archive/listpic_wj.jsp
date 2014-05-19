@@ -589,7 +589,7 @@
 										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="170" width="220"/>
 									</c:when>
 									<c:otherwise>
-										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/${archiveitem.slt}" height="170" width="220"/>
+										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/${archiveitem.slt}" height="170" width="220"/>
 									</c:otherwise>
 								</c:choose>
 		                   		<div id="${archiveitem.id }_xlan" class="xlan" onclick="showElement('xuanxiang')" >

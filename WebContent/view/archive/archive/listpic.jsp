@@ -641,14 +641,24 @@
 									<img src="${pageContext.request.contextPath}/images/no_photo_135.png" height="150" width="200"/>
 								</c:when>
 								<c:otherwise>
-									<img src="${pageContext.request.contextPath}/file/pic/${archiveitem.slt}" height="150" width="200"/>
+									<img src="${pageContext.request.contextPath}/${archiveitem.slt}" height="150" width="200"/>
 								</c:otherwise>
 							</c:choose>
 							</a>
 						</div>
 						<div>
-							<div class="miaoshu">
-								<span>${archiveitem.tm}</span>
+							<div class="miaoshu" title="${archiveitem.tm}">
+								<span>
+									<c:set var="subStr" value="${archiveitem.tm}"></c:set>
+									<c:choose>
+										<c:when test="${fn:length(subStr) > 12 }">
+											${fn:substring(archiveitem.tm, 0, 12)}..
+										</c:when>
+										<c:otherwise>
+									      	${archiveitem.tm }
+									    </c:otherwise>
+									</c:choose>
+								</span>
 							</div>
 							<div class="xuanze_btn">
 								<a href="javascript:;" onclick="edit('${archiveitem.id }')"><img src="${pageContext.request.contextPath}/images/xiangce_03.gif" width="29" height="28" /></a>

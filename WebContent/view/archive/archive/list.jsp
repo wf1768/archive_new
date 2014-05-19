@@ -650,7 +650,7 @@
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+ 						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
 					</ul>
 				</div>
 			</div>

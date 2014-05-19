@@ -53,6 +53,7 @@ import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.Excel;
 import net.ussoft.archive.util.FileOperate;
 import net.ussoft.archive.util.FtpUtil;
+import net.ussoft.archive.util.ResizeImage;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1521,7 +1522,7 @@ public class ArchiveController extends BaseConstroller {
 			updateMap.put("slt",map.get("slt").toString() );
 		}
 		else if (map.get("slttype").equals("VIDEO")) {
-			updateMap.put("slt","video.jpg");
+			updateMap.put("slt","file/pic/video.jpg");
 		}
 		
 		updateList.add(updateMap);
@@ -1546,12 +1547,18 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	@RequestMapping(value="/upload_pic_single.do",method=RequestMethod.POST)
-    public ModelAndView upload_pic_single(@RequestParam("file") MultipartFile file,String treeid,String tabletype,String id,String slttype,HttpServletRequest request,ModelMap modelMap) throws IOException {
+    public ModelAndView upload_pic_single(@RequestParam("file") MultipartFile file,String treeid,String tabletype,String id,String slttype,HttpServletRequest request,ModelMap modelMap) throws Exception {
 		
 		String newName = "";
 		String oldName = "";
+		String thumbName = "";
+		
+		String filepath = "file" +File.separator + "pic" + File.separator + treeid + File.separator;
 		//获取临时文件的绝对路径
-		String path = getProjectRealPath() + "file" +File.separator + "pic" + File.separator;
+		String projectpath = getProjectRealPath();
+		String path = projectpath + filepath;
+		
+		FileOperate.isExist(path);
 		
 		String ext = "";//扩展名
         oldName = file.getOriginalFilename();
@@ -1560,11 +1567,11 @@ public class ArchiveController extends BaseConstroller {
             ext = oldName.substring(oldName.lastIndexOf("."));
         }
         
-		newName = UUID.randomUUID().toString() + ext;
-		File excFile = new File(path + "/" + newName);
-        FileCopyUtils.copy(file.getBytes(),excFile);
-        
-        String result = "";
+        String uuidString = UUID.randomUUID().toString();
+		newName = uuidString + ext;
+		thumbName = uuidString + "_thumb.jpg";
+		
+		String result = "";
         //获取数据对象
   		List<String> idList = new ArrayList<String>();
   		idList.add(id);
@@ -1583,11 +1590,26 @@ public class ArchiveController extends BaseConstroller {
 		
 		Map<String, Object> map = maps.get(0);
 		
+		File excFile = new File(path + "/" + newName);
+        FileCopyUtils.copy(file.getBytes(),excFile);
+        
+        //创建缩略图
+        if (slttype.equals("IMAGE")) {
+        	ResizeImage riImage = new ResizeImage(path + "/" + newName);
+        	riImage.setDestFile(path + "/" + thumbName);
+        	riImage.resizeFix(500, 300);
+        }
+        
 		//如果slt不是空，先删除
 		if (null != map.get("slt") && !map.get("slt").equals("")) {
-			File oldFile = new File(path+"/"+map.get("slt").toString());
+			File oldFile = new File(projectpath+"/"+map.get("slt").toString());
 			if (null != oldFile) {
 				oldFile.delete();
+			}
+			//删除原始图
+			File imgnewname = new File(projectpath+"/"+map.get("imgnewname").toString());
+			if (null != imgnewname) {
+				imgnewname.delete();
 			}
 		}
 		
@@ -1596,8 +1618,9 @@ public class ArchiveController extends BaseConstroller {
 		updateMap.put("id", map.get("id").toString());
 		updateMap.put("treeid",map.get("treeid").toString());
 		updateMap.put("slttype", slttype);
-		updateMap.put("sltname", oldName);
-		updateMap.put("slt", newName);
+		updateMap.put("imgoldname", oldName);
+		updateMap.put("imgnewname", filepath + newName);
+		updateMap.put("slt", filepath + thumbName);
 		
 		updateList.add(updateMap);
 		
@@ -1622,17 +1645,18 @@ public class ArchiveController extends BaseConstroller {
 			maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
 		}
 		
-		if (null == maps || maps.size() != 1 || null == maps.get(0).get("slt") || "".equals(maps.get(0).get("slt")) ) {
+		if (null == maps || maps.size() != 1 || null == maps.get(0).get("imgnewname") || "".equals(maps.get(0).get("imgnewname")) ) {
 			response.setCharacterEncoding("UTF-8");
             response.sendError(HttpStatus.UNAUTHORIZED.value(),"没有找到下载文件.");  
 			return;
 		}
 		
 		//获取临时文件的绝对路径
-		String path = getProjectRealPath() + "file" + File.separator + "pic" + File.separator;
-		File tmpFile = new File(path + maps.get(0).get("slt"));
+//		String path = getProjectRealPath() + "file" + File.separator + "pic" + File.separator  + treeid + File.separator;
+		String path = getProjectRealPath();
+		File tmpFile = new File(path + maps.get(0).get("imgnewname"));
 		
-	    String filename = maps.get(0).get("sltname").toString();
+	    String filename = maps.get(0).get("imgoldname").toString();
 	     
         //下载文件
         //获取doc类型
@@ -1658,7 +1682,7 @@ public class ArchiveController extends BaseConstroller {
         long fileLength = tmpFile.length();  
         response.setHeader("Content-Length", String.valueOf(fileLength));
         
-    	bis = new BufferedInputStream(new FileInputStream(path+"/"+maps.get(0).get("slt")));  
+    	bis = new BufferedInputStream(new FileInputStream(path+"/"+maps.get(0).get("imgnewname")));  
         bos = new BufferedOutputStream(response.getOutputStream());  
         byte[] buff = new byte[2048];  
         int bytesRead;  
@@ -1692,11 +1716,10 @@ public class ArchiveController extends BaseConstroller {
 	 * 执行上传多媒体文件
 	 * @param request
 	 * @param response
-	 * @throws IllegalStateException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	@RequestMapping("/upload_pic_multiple")
-	public void upload_pic_multiple(HttpServletRequest request,HttpServletResponse response) throws IllegalStateException, IOException{
+	public void upload_pic_multiple(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		
     	CommonsMultipartResolver multipartResolver  = new CommonsMultipartResolver(request.getSession().getServletContext());
 		if(multipartResolver.isMultipart(request)){
@@ -1789,15 +1812,18 @@ public class ArchiveController extends BaseConstroller {
      * @param treeid
      * @param tmpFile
      * @return
-     * @throws IOException
+     * @throws Exception 
      */
     private String uploadSaveData(String parentid,String slttype,String status,String tabletype,
-    		String treeid,File tmpFile) throws IOException {
+    		String treeid,File tmpFile) throws Exception {
     	
     	String newName = "";
 		String oldName = "";
+		String thumbName = "";
+		
+		String filepath = "file" +File.separator + "pic" + File.separator + treeid + File.separator;
 		//获取临时文件的绝对路径
-		String path = getProjectRealPath() + "file" +File.separator + "pic" + File.separator;
+		String path = getProjectRealPath();
 		
 		String ext = "";//扩展名
         oldName = tmpFile.getName();
@@ -1806,9 +1832,19 @@ public class ArchiveController extends BaseConstroller {
             ext = oldName.substring(oldName.lastIndexOf("."));
         }
         
-		newName = UUID.randomUUID().toString() + ext;
+		String uuidString = UUID.randomUUID().toString();
+		newName = uuidString + ext;
+		thumbName = uuidString + "_thumb.jpg";
 		
-    	tmpFile.renameTo(new File(path + newName));
+    	tmpFile.renameTo(new File(path + filepath + newName));
+    	
+    	//创建缩略图
+        if (slttype.equals("IMAGE")) {
+        	ResizeImage riImage = new ResizeImage(path + filepath + newName);
+        	riImage.setDestFile(path + filepath + thumbName);
+        	riImage.resizeFix(500, 300);
+        }
+        
     	//档案系统字段数据
 		Map<String, String> sysFieldMap = new HashMap<String, String>();
 		//生成粘贴的档案系统参数
@@ -1822,9 +1858,11 @@ public class ArchiveController extends BaseConstroller {
 		//创建json数据
         HashMap<String,String> archiveMap = new HashMap<String,String>();
 
-        archiveMap.put("slt", newName);
+        archiveMap.put("slt", filepath + thumbName);
         archiveMap.put("slttype", slttype);
-        archiveMap.put("sltname", oldName);
+        archiveMap.put("imgoldname", oldName);
+        archiveMap.put("imgnewname", filepath + newName);
+        
         
         archiveList.add(archiveMap);
 		
@@ -1832,4 +1870,83 @@ public class ArchiveController extends BaseConstroller {
 		
         return info.getMsg();
     }
+    
+    /**
+     * 播放多媒体（视频或音频）
+     * @param treeid
+     * @param tabletype
+     * @param id
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping(value="/showvideo.do",method=RequestMethod.GET)
+	public ModelAndView showvideo(String treeid,String tabletype,String id,ModelMap modelMap) {
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("id", id);
+		
+		//获取档案信息
+		List<String> idList = new ArrayList<String>();
+		idList.add(id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
+		
+		
+		if (null == maps || maps.size() == 0 || !maps.get(0).get("slttype").equals("VIDEO")) {
+			modelMap.put("result","未找到多媒体文件，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		if (null == maps.get(0).get("slt") || maps.size() == 0 || !maps.get(0).get("slttype").equals("VIDEO")) {
+			modelMap.put("result","未找到多媒体文件，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		
+		String ext = "";//扩展名
+		String oldName = maps.get(0).get("imgoldname").toString();
+        //获取扩展名
+        if (oldName.lastIndexOf(".") >= 0) {
+            ext = oldName.substring(oldName.lastIndexOf("."));
+        }
+        modelMap.put("title", oldName);
+		if (ext.toLowerCase().equals(".mp4")) {
+			modelMap.put("videotype", "m4v");
+			modelMap.put("supplied", "m4v");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "html,flash");
+		}
+		else if (ext.toLowerCase().equals(".webm")) {
+			modelMap.put("supplied", "webmv");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "html,flash");
+		}
+		else if (ext.toLowerCase().equals(".ogg")) {
+			modelMap.put("supplied", "oga");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".flv")) {
+			modelMap.put("supplied", "flv");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".mp3")) {
+			modelMap.put("supplied", "mp3");
+			modelMap.put("mediatype", "audio");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".wav")) {
+			modelMap.put("supplied", "wav");
+			modelMap.put("mediatype", "audio");
+			modelMap.put("solution", "flash,html");
+		}
+		else {
+			modelMap.put("result","未知多媒体文件格式，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		
+		modelMap.put("maps", maps);
+		
+		return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+	}
+    
 }
