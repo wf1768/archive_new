@@ -20,20 +20,25 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
+import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_tree;
+import net.ussoft.archive.service.IAccountService;
 import net.ussoft.archive.service.IDocService;
 import net.ussoft.archive.service.IDocserverService;
 import net.ussoft.archive.service.IDynamicService;
+import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletService;
 import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.FileOperate;
 import net.ussoft.archive.util.FtpUtil;
+import net.ussoft.archive.util.openoffice.DocConverter;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,9 +77,13 @@ public class DocController extends BaseConstroller {
 	private ITreeService treeService;
 	@Resource
 	private ITempletService templetService;
+	@Resource
+	private IAccountService accountService;
+	@Resource
+	private IOrgService orgService;
 	
 	private static final int BUFFER_SIZE = 2 * 1024;
-	
+    
 	@Autowired
     CommonsMultipartResolver multipartResolver;
 	
@@ -525,4 +534,137 @@ public class DocController extends BaseConstroller {
 		out.print(info.getMsg());
 	}
 	
+	
+	////////////////////////////////////////////////////guodh-up////////////////////////////////////////////////////////////////////////////
+	
+	/**
+     * 全文检索，文件预览
+     * @throws IOException 
+     * */
+	@RequestMapping(value="/preview",method=RequestMethod.POST)
+    public void filePreview(HttpServletRequest request,HttpServletResponse response,String docid,String treeid) throws IOException{
+    	PrintWriter out = response.getWriter();
+    	int isAuth = isAuthority("fileview", treeid);
+    	if(isAuth != 0){
+    		out.write("1"); //有权限
+    	}else{
+    		out.write("0"); //没权限
+    	}
+    }
+    /**
+     * 在线预览电子全文
+     * @param request
+     * @param response
+     * @param docid
+     * @param treeid
+     * */
+    @RequestMapping(value="/showSwfFile",method=RequestMethod.POST)
+    public void showSwfFile(HttpServletRequest request,HttpServletResponse response,String docid,String treeid) throws Exception{
+    	PrintWriter out = response.getWriter();
+    	int isAuth = isAuthority("fileview", treeid);
+    	if(isAuth != 0){
+    		DocConverter docConverter = new DocConverter();
+        	Sys_doc doc = docService.selectById(docid);
+        	//判断文件所属服务器
+        	String serverid = doc.getDocserverid();
+        	//得到所属服务器的信息
+        	Sys_docserver docServer = docserverService.selectById(serverid);
+        	//判断服务器类型。根据不同类型，执行不同的操作
+        	String serverType = docServer.getServertype();
+        	String savePath = "";
+        	if ("LOCAL".equals(serverType)) {
+        		savePath = docServer.getServerpath();
+        	}else if ("FTP".equals(serverType)) {
+        		savePath = docServer.getServerpath();
+        	}
+        	String pdf2swfPath = request.getSession().getServletContext().getRealPath("/WEB-INF/tools/swftools/pdf2swf.exe ");
+        	docConverter.setPdf2swfPath(pdf2swfPath);
+        	String fileName = savePath + "/" + doc.getDocpath() + doc.getDocnewname();
+        	docConverter.setFile(fileName);
+        	String temp = "/SWFFILE/" + doc.getDocpath();
+			String tableIndexDir = request.getSession().getServletContext().getRealPath(temp)+ File.separator;
+			File file =new File(tableIndexDir);    
+			//如果文件夹不存在则创建    
+			if(!file .exists()  && !file .isDirectory()){       
+			    file .mkdir();    
+			}
+        	docConverter.setOutputPath(tableIndexDir + doc.getId());
+        	boolean flag = docConverter.conver();
+        	if(flag){
+	        	String path = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
+	        	path = path+temp+"/"+doc.getId()+".swf";
+	        	out.write(path);
+        	}else{
+        		out.write("1");
+        	}
+    	}else{
+    		out.write("0");
+    	}
+    }
+    
+    /**
+     * 全文检索-打印
+     * @throws IOException 
+     * */
+    @RequestMapping(value="/filePrint",method=RequestMethod.POST)
+    public void filePrint(HttpServletResponse response,String treeid) throws IOException{
+    	PrintWriter out = response.getWriter();
+    	int isAuth = isAuthority("fileprint", treeid);
+    	if(isAuth != 0){
+    		out.write("1"); //有权限
+    	}else{
+    		out.write("0"); //没权限
+    	}
+    }
+    
+    /**
+     * 全文检索-下载
+     * @throws IOException 
+     * */
+    @RequestMapping(value="/fileDown",method=RequestMethod.POST)
+    public void fileDown(HttpServletResponse response,String treeid) throws IOException{
+    	PrintWriter out = response.getWriter();
+    	int isAuth = isAuthority("filedown", treeid);
+    	if(isAuth != 0){
+    		out.write("1"); //有权限
+    	}else{
+    		out.write("0"); //没权限
+    	}
+    }
+    
+    /**
+     * 是否有（查看、下载、打印）权限
+     * @param fileType :fileview(查看) filedown(下载) fileprint(打印)
+     * @return
+     * */
+    public int isAuthority(String fileType,String treeid){
+    	int filescan = 0;
+    	int filedown = 0;
+    	int fileprint = 0;
+    	
+		//先查看账户本身是否有权限
+    	Sys_account account = getSessionAccount();
+		Sys_account_tree accountTree =  accountService.getTreeAuth(account.getId(), treeid);
+		if(accountTree != null){
+			filescan = accountTree.getFilescan();
+			filedown = accountTree.getFiledown();
+			fileprint = accountTree.getFileprint();
+		}else{
+			//否则查看该账户所在组的权限
+		 	Sys_org_tree orgTree = orgService.getTreeAuth(account.getOrgid(), treeid);
+		 	if(orgTree != null){
+		 		filescan = orgTree.getFilescan();
+				filedown = orgTree.getFiledown();
+				fileprint = orgTree.getFileprint();
+		 	}
+		}
+		if(fileType.equals("fileview")){
+			return filescan;
+		}else if(fileType.equals("filedown")){
+			return filedown;
+		}else{
+			return fileprint;
+		}
+    }
+    
 }

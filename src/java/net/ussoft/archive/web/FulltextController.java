@@ -60,9 +60,7 @@ public class FulltextController extends BaseConstroller{
 		treeList = getTreeNode();
 		String jsonTreeList = JSON.toJSONString(treeList);
 		String jsonTree = jsonTree(request, jsonTreeList);
-
-		
-		modelMap.put("pageName", "全文检索");
+//		modelMap.put("pageName", "全文检索");
 		modelMap.put("treeList", jsonTree);
 		return new ModelAndView("/view/search/fulltext/index",modelMap);
 	}
@@ -87,7 +85,6 @@ public class FulltextController extends BaseConstroller{
 		List<Sys_docserver> docserverList = docserverService.list();
 		Sys_docserver docserver = docserverList.get(1);
 		
-		System.out.println("treeid="+schTreeid);
 		//要查询的树节点
 		String schTreeids = "";
 		//查询树节点结果集中的单个节点
@@ -113,7 +110,6 @@ public class FulltextController extends BaseConstroller{
 			}
 			//权限字段
 			bb = searchService.search(searchText, docserver.getId(), tmpList, currentPage, pageSize);
-			
 		}else {
 			String[] treeIds = schTreeids.split(",");
 			for(int i=0;i<treeIds.length;i++){
@@ -234,59 +230,6 @@ public class FulltextController extends BaseConstroller{
 		}
 		return null;
 	}
-	
-	/*
-	*//**
-	 * 获取数据访问的权限字段
-	 * @param treeid
-	 * @param object
-	 * *//*
-	@SuppressWarnings("unchecked")
-	public HashMap<String, String> getDataAuthField(String treeid,Object object){
-		//获取数据访问权限
-		String filter = getDataAuth(treeid);
-	    Gson gson = new Gson();
-	    List list = gson.fromJson(filter, new TypeToken<List>(){}.getType());
-	    //权限字段+值
-	    HashMap<String, String> fMap = new HashMap<String, String>();
-	    if(list !=null && list.size() >0){
-	    	for (int i = 0; i < list.size(); i++) {
-				HashMap<String, String> map = gson.fromJson(list.get(i).toString(), new TypeToken<HashMap<String, String>>(){}.getType());
-				if (map.get("tableType").toString().equals(object)) {
-					String selF = map.get("selectField");
-					String selFv = map.get("dataAuthValue");
-					fMap.put(selF, selFv);
-//					System.out.println(treeid+":"+selF+"="+selFv);
-				}
-			}
-	    }
-	    return fMap;
-	}
-	*//**
-     * 获取数据访问权限
-     * @param 
-     * @return
-     * *//*
-    public String getDataAuth(String treeid){
-    	
-    	SysAccount account = super.getAccount();
-		//先查看账户本身是否有权限
-		List<SysAccountTree> accountTreeList =  accountService.getAccountOfTree(account.getAccountid(), treeid);
-		if(accountTreeList.size() >0 && accountTreeList != null){
-			SysAccountTree accountTree = accountTreeList.get(0);
-			return accountTree.getFilter();
-		}else{
-			//否则查看该账户的所在组
-			SysOrg sysOrg = accountService.getAccountOfOrg(account);
-			if(sysOrg!=null){
-			 	List<SysOrgTree> orgTreeList = orgService.getOrgOfTree(sysOrg.getOrgid(), treeid);
-			 	if(orgTreeList.size() >0 && orgTreeList != null){
-			 		return orgTreeList.get(0).getFilter();
-			 	}
-			}
-		}
-		return "";
-    }*/
 
 	/**
 	 * 获取当前帐户所能管理的树节点

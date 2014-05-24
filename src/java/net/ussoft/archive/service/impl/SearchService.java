@@ -212,7 +212,7 @@ public class SearchService implements ISearchService {
 				
 				HashMap map = new HashMap();
 				
-				map.put("docid", doc.get("docid"));
+				map.put("docid", doc.get("id"));
 				map.put("treeid", doc.get("treeid"));
 				map.put("fileid", doc.get("fileid"));
 				map.put("tableid", doc.get("tableid"));

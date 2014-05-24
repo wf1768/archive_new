@@ -197,44 +197,6 @@ $(function(){
         'callback'            : pageselectCallback
     });
 });
-//检索电子全文
-function submitSearch() {
-	if ( $("#searchTxt").val() == "") {
-		return;
-	};
-	searchCommon.searchTxt = $("#searchTxt").val();
-	searchCommon.treeid = $("#searchDropdownBox").val();
-	searchCommon.currentPage = 1;
-	var list = getSearchData();
-	showSearchInfo(list);
-	$('.pagination').css('display','block');
-	$(".widget-header").css('display','block');	//结果列表
-	$(".widget-content").css('display','block');
-}
-
-function getSearchData() {
-	var list;
-	//得到查询值
-	$.ajax({
-		async : false,
-		url : "searchFile.action",
-		type : 'post',
-		dataType : 'script',
-		data:"keyword=" + searchCommon.searchTxt + "&treeid=" + searchCommon.treeid + "&currentPage=" + searchCommon.currentPage,
-		success : function(data) {
-			if (data != "error") {
-				list = eval(data);
-			} else {
-				us.openalert('<span style="color:red">读取数据时出错.</span></br>请关闭浏览器，重新登录尝试或与管理员联系!',
-						'系统提示',
-						'alertbody alert_Information'
-				);
-			}
-		}
-	});
-	
-	return list;
-}
 
 function pageselectCallback(page_index, jq){
 	var searchTxt = "${searchText }";
@@ -243,21 +205,22 @@ function pageselectCallback(page_index, jq){
 		window.location.href="${pageContext.request.contextPath }/fulltext/search.do?schTreeid=${schTreeid}&treeids=${treeids}&treeid=${treeid}&currentPage="+page_index+"&searchText="+searchTxt;
 	}
 }; 
+
 //预览
 function openContentDialog(selectid,treeid) {
 	$.ajax({
 		async : false,
-		url : "filePreview.action",
+		url : "../doc/preview.do",
 		type : 'post',
 		dataType : 'text',
-		data:"treeid="+treeid+"&docId="+selectid,
+		data:"treeid="+treeid+"&docid="+selectid,
 		success : function(data) {
 			if (data == "0") {
-				openalert("对不起，您没有权限预览此文件！");
+				alert("对不起，您没有权限预览此文件！");
 			} else {
 				var a=document.createElement("a");  
 				a.target="_blank"; 
-				a.href="../../../readFile.html?selectid="+selectid+"&treeid="+treeid;
+				a.href="../readFile.html?selectid="+selectid+"&treeid="+treeid;
 				document.body.appendChild(a);  
 				a.click()
 			}
@@ -269,15 +232,15 @@ function openContentDialog(selectid,treeid) {
 function fileDown(docId,treeid){
 	$.ajax({
 		async : false,
-		url : "isDownDoc.action",
+		url : "../doc/fileDown.do",
 		type : 'post',
 		dataType : 'text',
 		data:"treeid="+treeid,
 		success : function(data) {
 			if (data == "1") {
-				window.location.href="downDoc.action?docId="+docId+"&treeid="+treeid;
+				window.location.href="../doc/download.do?id="+docId+"&treeid="+treeid;
 			} else {
-				openalert("对不起，您没有权限下载此文件！");
+				alert("对不起，您没有权限下载此文件！");
 			}
 		}
 	});
