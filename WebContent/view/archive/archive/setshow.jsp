@@ -28,22 +28,23 @@ img {
 	}
 	
 	function save(id,ob) {
-		var ob = $("#"+ob).val();
+		var obvalue = $("#"+ob).val();
 		
-		if (id == "" || ob == "") {
+		if (id == "" || obvalue == "") {
 			alert("没有获取足够数据，请退出后，重新尝试，或与管理员联系。");
 			return;
 		}
-		
-		if(isNaN(ob)){
-			alert("只能为是数字,请输入数字。");
-			$("#ob").focus();
-			return;
+		if (ob!="imageshow") {
+			if(isNaN(obvalue)){
+				alert("只能为是数字,请输入数字。");
+				$("#ob").focus();
+				return;
+			}
 		}
 		
 		var d = {};
 		d.id = id;
-		d.configvalue = ob;
+		d.configvalue = obvalue;
 		
 	    $.ajax({
 	        async : true,
@@ -169,6 +170,23 @@ img {
 							<button type="button" onclick="save('${config.id}','substring')">保存</button>
 						</td>
 					</tr>
+            	</c:if>
+            	<c:if test="${templet.templettype=='P' }">
+            	<c:if test="${config.configkey=='IMAGESHOW'}">
+            		<tr>
+						<td>${config.configname }</td>
+						<td>
+							<select id="imageshow">
+								<option value="IMAGE" ${config.configvalue == 'IMAGE'?"selected":""}>显示图片</option>
+								<option value="LIST" ${config.configvalue == 'LIST'?"selected":""}>显示列表</option>
+							</select>
+						</td>
+						<td>${config.configmemo }</td>
+						<td>
+							<button type="button" onclick="save('${config.id}','imageshow')">保存</button>
+						</td>
+					</tr>
+            	</c:if>
             	</c:if>
             </c:forEach>
             <tr>

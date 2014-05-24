@@ -4,7 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
 
 import javax.annotation.Resource;
@@ -27,6 +31,7 @@ import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
 import net.ussoft.archive.model.Sys_doc;
+import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
@@ -40,14 +45,19 @@ import net.ussoft.archive.service.IDynamicService;
 import net.ussoft.archive.service.IEncryService;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.ITableService;
+import net.ussoft.archive.service.ITempletService;
 import net.ussoft.archive.service.ITempletfieldService;
 import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.Excel;
+import net.ussoft.archive.util.FileOperate;
+import net.ussoft.archive.util.FtpUtil;
+import net.ussoft.archive.util.ResizeImage;
 import net.ussoft.archive.util.resule.ResultInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
@@ -55,6 +65,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
@@ -78,6 +90,8 @@ public class ArchiveController extends BaseConstroller {
 	@Resource
 	private IConfigService configService;
 	@Resource
+	private ITempletService templetService;
+	@Resource
 	private ITempletfieldService templetfieldService;
     @Autowired  
     private  HttpServletRequest request;  
@@ -92,6 +106,8 @@ public class ArchiveController extends BaseConstroller {
     private IEncryService encryService;
     @Resource
     private ITableService tableService;
+    
+    private static final int BUFFER_SIZE = 2 * 1024;
 	
 	
 	@RequestMapping(value="/index",method=RequestMethod.GET)
@@ -144,26 +160,29 @@ public class ArchiveController extends BaseConstroller {
 		modelMap.put("result", treeJson);
 		modelMap.put("searchTxt", searchTxt);
 		
+		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
+		HashMap<String, Object> configMap = getConfig(account.getId());
+		//每页行数
+		Integer pageSize = 30;
+		//字段截取标准。（列表里字段长度超过标准，被截取)
+		Integer subString = 10;
+		String imageshow = "IMAGE";
+		if (null == configMap || configMap.size() == 0) {
+			configMap = getConfig("SYSTEM");
+			pageSize = Integer.parseInt(configMap.get("PAGE").toString());
+		}
+		else {
+			pageSize = Integer.parseInt(configMap.get("PAGE").toString());
+			subString = Integer.parseInt(configMap.get("SUBSTRING").toString());
+			imageshow = configMap.get("IMAGESHOW").toString();
+		}
+		
 		//获取点击后页面右侧档案类型列表
 		PageBean<Map<String, Object>> pageBean = new PageBean<Map<String,Object>>();
 		if (null == treeid || treeid.equals("")) {
 			treeid = "0";
 		}
 		else {
-			//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
-			HashMap<String, Object> configMap = getConfig(account.getId());
-			//每页行数
-			Integer pageSize = 30;
-			//字段截取标准。（列表里字段长度超过标准，被截取)
-			Integer subString = 10;
-			if (null == configMap || configMap.size() == 0) {
-				configMap = getConfig("SYSTEM");
-				pageSize = Integer.parseInt(configMap.get("PAGE").toString());
-			}
-			else {
-				pageSize = Integer.parseInt(configMap.get("PAGE").toString());
-				subString = Integer.parseInt(configMap.get("SUBSTRING").toString());
-			}
 			//防止数字错误
 			if (pageSize < 0) {
 				pageSize = 30;
@@ -239,9 +258,22 @@ public class ArchiveController extends BaseConstroller {
 		}
 		
 		if (null != templet && templet.getTemplettype().equals("P")) {
-			url = "/view/archive/archive/listpic";
-			if (tabletype.equals("02")) {
-				url = "/view/archive/archive/listpic_wj";
+			if ("IMAGE".equals(imageshow)) {
+				url = "/view/archive/archive/listpic";
+				if (tabletype.equals("02")) {
+					url = "/view/archive/archive/listpic_wj";
+				}
+			}
+			else {
+				url = "/view/archive/archive/listpic_list";
+				if (tabletype.equals("02")) {
+					if (allwj == false) {
+						url = "/view/archive/archive/listpic_wj_list";
+					}
+					else {
+						url = "/view/archive/archive/listpic_wj_list_all";
+					}
+				}
 			}
 		}
 		
@@ -672,8 +704,15 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("docs", docs);
 		
+		Sys_templet templet = treeService.getTemplet(treeid);
+		
+		String url = "/view/archive/archive/show";
+		if (templet.getTemplettype().equals("P")) {
+			url = "/view/archive/archive/show_pic";
+		}
+		
 		//获取对象
-		return new ModelAndView("/view/archive/archive/show",modelMap);
+		return new ModelAndView(url,modelMap);
 	}
 	
 	@RequestMapping(value="/doc",method=RequestMethod.GET)
@@ -879,10 +918,13 @@ public class ArchiveController extends BaseConstroller {
 		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
 //		modelMap.put("account", account);
-		//帐户页面显示设置有二类。1、帐户config，包括每页显示条数，字符截取数。2、字段设置，字段显示、字段排序
+		//帐户页面显示设置有二类。1、帐户config，包括每页显示条数，字符截取数、多媒体档案显示样式（图片显示、列表显示）。2、字段设置，字段显示、字段排序
 		//获取帐户的配置，如果没有，以系统为标准️添加
 		List<Sys_config> configs = configService.getAccountConfig(account.getId());
 		modelMap.put("configs", configs);
+		
+		Sys_templet templet = templetService.getByid(templetid);
+		modelMap.put("templet", templet);
 		
 		List<Sys_templetfield> templetfields = templetfieldService.getAccountTempletfields(templetid, tabletype, account.getId());
 		modelMap.put("templetfields", templetfields);
@@ -1416,4 +1458,495 @@ public class ArchiveController extends BaseConstroller {
 		return new ModelAndView("/view/archive/archive/datapaster",modelMap);
 	}
 	
+	/**
+	 * 设置多媒体文件级图片为相册封面
+	 * @param id
+	 * @param treeid
+	 * @param tabletype
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value="/setCover",method=RequestMethod.POST)
+	public void setCover(String id,String treeid,String tabletype,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "没有获得足够参数，请重新登录，再尝试操作。";
+		if (null == treeid || "".equals(treeid) || null == tabletype || "".equals(tabletype)) {
+			out.print(result);
+			return;
+		}
+		
+		if (null == id || "".equals(id)) {
+			out.print(result);
+			return;
+		}
+		
+		//获取对象
+		List<String> idList = new ArrayList<String>();
+		idList.add(id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
+				
+		if (null == maps || maps.size() == 0 || maps.size() > 1) {
+			result = "错误代码：Ar_setCover_1。获取的照片文件有问题，请与管理员联系。";
+			out.print(result);
+			return;
+		}
+		
+		Map<String, Object> map = maps.get(0);
+		
+		if (null == map.get("slt") || map.get("slt").equals("")) {
+			result = "没有设置缩略图，请先上传多媒体文件，再设置封面。";
+			out.print(result);
+			return;
+		}
+		
+		//获取aj级信息
+		idList.clear();
+		idList.add(map.get("parentid").toString());
+		List<Map<String, Object>> ajList = dynamicService.get(treeid,"", "01", idList,null,null,null);
+		
+		if (null == ajList || ajList.size()==0) {
+			result = "错误代码：Ar_setCover_2。获取的照片文件有问题，请与管理员联系。";
+			out.print(result);
+			return;
+		}
+		
+		List<Map<String, String>> updateList = new ArrayList<Map<String,String>>();
+		Map<String, String> updateMap = new HashMap<String, String>();
+		updateMap.put("id", ajList.get(0).get("id").toString());
+		updateMap.put("treeid",ajList.get(0).get("treeid").toString());
+		if (map.get("slttype").equals("IMAGE")) {
+			updateMap.put("slt",map.get("slt").toString() );
+		}
+		else if (map.get("slttype").equals("VIDEO")) {
+			updateMap.put("slt","file/pic/video.jpg");
+		}
+		
+		updateList.add(updateMap);
+		ResultInfo info = dynamicService.updateArchive("01", updateList);
+		out.print(info.getMsg());
+	}
+	
+	/**
+	 * 打开单个上传多媒体文件页面
+	 * @param data
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value="/open_upload_pic_single.do",method=RequestMethod.GET)
+	public ModelAndView upload_pic_single(String treeid,String tabletype,String id,ModelMap modelMap) {
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("id", id);
+		
+		return new ModelAndView("/view/archive/archive/upload_pic_single",modelMap);
+	}
+	
+	@RequestMapping(value="/upload_pic_single.do",method=RequestMethod.POST)
+    public ModelAndView upload_pic_single(@RequestParam("file") MultipartFile file,String treeid,String tabletype,String id,String slttype,HttpServletRequest request,ModelMap modelMap) throws Exception {
+		
+		String newName = "";
+		String oldName = "";
+		String thumbName = "";
+		
+		String filepath = "file" +File.separator + "pic" + File.separator + treeid + File.separator;
+		//获取临时文件的绝对路径
+		String projectpath = getProjectRealPath();
+		String path = projectpath + filepath;
+		
+		FileOperate.isExist(path);
+		
+		String ext = "";//扩展名
+        oldName = file.getOriginalFilename();
+        //获取扩展名
+        if (oldName.lastIndexOf(".") >= 0) {
+            ext = oldName.substring(oldName.lastIndexOf("."));
+        }
+        
+        String uuidString = UUID.randomUUID().toString();
+		newName = uuidString + ext;
+		thumbName = uuidString + "_thumb.jpg";
+		
+		String result = "";
+        //获取数据对象
+  		List<String> idList = new ArrayList<String>();
+  		idList.add(id);
+  		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
+  		
+  		if (null == maps || maps.size() == 0 || maps.size() > 1) {
+			result = "错误代码：Ar_upload_pic_single_1。获取多媒体文件错误，请与管理员联系。";
+			modelMap.put("result", result);
+			
+			modelMap.put("treeid", treeid);
+			modelMap.put("tabletype", tabletype);
+			modelMap.put("id", id);
+			
+			return new ModelAndView("/view/archive/archive/upload_pic_single",modelMap);
+		}
+		
+		Map<String, Object> map = maps.get(0);
+		
+		File excFile = new File(path + "/" + newName);
+        FileCopyUtils.copy(file.getBytes(),excFile);
+        
+        //创建缩略图
+        if (slttype.equals("IMAGE")) {
+        	ResizeImage riImage = new ResizeImage(path + "/" + newName);
+        	riImage.setDestFile(path + "/" + thumbName);
+        	riImage.resizeFix(500, 300);
+        }
+        
+		//如果slt不是空，先删除
+		if (null != map.get("slt") && !map.get("slt").equals("")) {
+			File oldFile = new File(projectpath+"/"+map.get("slt").toString());
+			if (null != oldFile) {
+				oldFile.delete();
+			}
+			//删除原始图
+			File imgnewname = new File(projectpath+"/"+map.get("imgnewname").toString());
+			if (null != imgnewname) {
+				imgnewname.delete();
+			}
+		}
+		
+		List<Map<String, String>> updateList = new ArrayList<Map<String,String>>();
+		Map<String, String> updateMap = new HashMap<String, String>();
+		updateMap.put("id", map.get("id").toString());
+		updateMap.put("treeid",map.get("treeid").toString());
+		updateMap.put("slttype", slttype);
+		updateMap.put("imgoldname", oldName);
+		updateMap.put("imgnewname", filepath + newName);
+		updateMap.put("slt", filepath + thumbName);
+		
+		updateList.add(updateMap);
+		
+		ResultInfo info = dynamicService.updateArchive(tabletype, updateList);
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("id", id);
+		
+		modelMap.put("result", info.getMsg());
+		
+		return new ModelAndView("/view/archive/archive/upload_pic_single",modelMap);
+    }
+	
+	@RequestMapping(value="/down_pic")
+	public void down_pic(String treeid,String tabletype,String id,HttpServletRequest request,HttpServletResponse response) throws Exception {
+		
+		List<Map<String, Object>> maps = new ArrayList<Map<String,Object>>();
+		//判断id是否存在
+		if (id != null && !id.equals("")) {
+			List<String> idList = Arrays.asList(id);
+			maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
+		}
+		
+		if (null == maps || maps.size() != 1 || null == maps.get(0).get("imgnewname") || "".equals(maps.get(0).get("imgnewname")) ) {
+			response.setCharacterEncoding("UTF-8");
+            response.sendError(HttpStatus.UNAUTHORIZED.value(),"没有找到下载文件.");  
+			return;
+		}
+		
+		//获取临时文件的绝对路径
+//		String path = getProjectRealPath() + "file" + File.separator + "pic" + File.separator  + treeid + File.separator;
+		String path = getProjectRealPath();
+		File tmpFile = new File(path + maps.get(0).get("imgnewname"));
+		
+	    String filename = maps.get(0).get("imgoldname").toString();
+	     
+        //下载文件
+        //获取doc类型
+        response.setContentType("text/plain;charset=utf-8");
+        
+        String userAgent = request.getHeader("User-Agent");
+        response.reset();
+        if(userAgent != null && userAgent.indexOf("MSIE") == -1) {
+            // FF
+        	String enableFileName = "=?UTF-8?B?" + (new String(org.apache.commons.codec.binary.Base64.encodeBase64(filename.getBytes("UTF-8")))) + "?=";  
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName); 
+        }else{
+            // IE   
+            String enableFileName = new String(filename.getBytes("GBK"), "ISO-8859-1");   
+            response.setHeader("Content-Disposition", "attachment; filename=" + enableFileName);
+        }
+        
+        request.setCharacterEncoding("UTF-8");  
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;  
+  
+  
+        long fileLength = tmpFile.length();  
+        response.setHeader("Content-Length", String.valueOf(fileLength));
+        
+    	bis = new BufferedInputStream(new FileInputStream(path+"/"+maps.get(0).get("imgnewname")));  
+        bos = new BufferedOutputStream(response.getOutputStream());  
+        byte[] buff = new byte[2048];  
+        int bytesRead;  
+        while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {  
+            bos.write(buff, 0, bytesRead);  
+        }  
+        bis.close();  
+        bos.close();
+	}
+	
+	/**
+	 * 打开多媒体上传图片页面
+	 * @param treeid
+	 * @param tabletype
+	 * @param parentid
+	 * @param modelMap
+	 * @return
+	 */
+	@RequestMapping(value = "/show_upload_pic_multiple", method = RequestMethod.GET)
+	public ModelAndView show_upload_pic_multiple(String treeid,String tabletype,String parentid,String status,String slttype,ModelMap modelMap) {
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("parentid", parentid);
+		modelMap.put("status", status);
+		modelMap.put("slttype", slttype);
+		// 获取数据
+		return new ModelAndView("/view/archive/archive/upload_pic_multiple", modelMap);
+	}
+	
+	/**
+	 * 执行上传多媒体文件
+	 * @param request
+	 * @param response
+	 * @throws Exception 
+	 */
+	@RequestMapping("/upload_pic_multiple")
+	public void upload_pic_multiple(HttpServletRequest request,HttpServletResponse response) throws Exception{
+		
+    	CommonsMultipartResolver multipartResolver  = new CommonsMultipartResolver(request.getSession().getServletContext());
+		if(multipartResolver.isMultipart(request)){
+			MultipartHttpServletRequest  multiRequest = (MultipartHttpServletRequest)request;
+			//获取参数
+			String treeid = request.getParameter("treeid");
+			String tabletype = request.getParameter("tabletype");
+			String parentid = request.getParameter("parentid");
+			String slttype = request.getParameter("slttype");
+			String status = request.getParameter("status");
+			
+			//获取plupload参数
+			Integer chunks = Integer.valueOf(request.getParameter("chunks"));
+			String name = request.getParameter("name");
+			Integer chunk = Integer.valueOf(request.getParameter("chunk"));
+			//获取文件列表
+			Iterator<String>  iter = multiRequest.getFileNames();
+			while(iter.hasNext()){
+				//获取文件对象
+				MultipartFile file = multiRequest.getFile((String)iter.next());
+				//获取临时文件的绝对路径
+				String contextPath = getProjectRealPath() + "file" +File.separator + "upload" + File.separator;
+				//生成临时文件
+		        String dstPath =  contextPath + name;
+		        File dstFile = new File(dstPath);
+		        // 文件已存在（上传了同名的文件)
+		        if (chunk == 0 && dstFile.exists()) {
+		            dstFile.delete();
+		            dstFile = new File(dstPath);
+		        }
+		        //合并文件
+		        cat(file, dstFile);
+		        // 完成一整个文件;
+		        if (chunk == chunks - 1) {
+		        	//获取临时文件对象
+		        	File newFile =new File(contextPath+name);
+		        	
+		        	if(newFile != null){
+		        		uploadSaveData(parentid, slttype,status,tabletype, treeid, newFile);
+					}
+		        }
+			}
+		}
+	}
+	
+	/**
+     * 将原文件，拼接到目标文件dst
+     * @param file
+     * @param dst
+     */
+    private void cat(MultipartFile file, File dst) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            if (dst.exists()) {
+                out = new BufferedOutputStream(new FileOutputStream(dst, true),BUFFER_SIZE);
+            } else {
+                out = new BufferedOutputStream(new FileOutputStream(dst),BUFFER_SIZE);
+            }
+            in = new BufferedInputStream(file.getInputStream(), BUFFER_SIZE);
+
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int len = 0;
+            while ((len = in.read(buffer)) > 0) {
+                out.write(buffer, 0, len);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != in) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != out) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    /**
+     * 多媒体文件上传完毕，插入记录
+     * @param parentid
+     * @param tabletype
+     * @param treeid
+     * @param tmpFile
+     * @return
+     * @throws Exception 
+     */
+    private String uploadSaveData(String parentid,String slttype,String status,String tabletype,
+    		String treeid,File tmpFile) throws Exception {
+    	
+    	String newName = "";
+		String oldName = "";
+		String thumbName = "";
+		
+		String filepath = "file" +File.separator + "pic" + File.separator + treeid + File.separator;
+		//获取临时文件的绝对路径
+		String path = getProjectRealPath();
+		
+		String ext = "";//扩展名
+        oldName = tmpFile.getName();
+        //获取扩展名
+        if (oldName.lastIndexOf(".") >= 0) {
+            ext = oldName.substring(oldName.lastIndexOf("."));
+        }
+        
+		String uuidString = UUID.randomUUID().toString();
+		newName = uuidString + ext;
+		thumbName = uuidString + "_thumb.jpg";
+		
+    	tmpFile.renameTo(new File(path + filepath + newName));
+    	
+    	//创建缩略图
+        if (slttype.equals("IMAGE")) {
+        	ResizeImage riImage = new ResizeImage(path + filepath + newName);
+        	riImage.setDestFile(path + filepath + thumbName);
+        	riImage.resizeFix(500, 300);
+        }
+        
+    	//档案系统字段数据
+		Map<String, String> sysFieldMap = new HashMap<String, String>();
+		//生成粘贴的档案系统参数
+		sysFieldMap.put("treeid", treeid);
+		sysFieldMap.put("tabletype", tabletype);
+		sysFieldMap.put("status", status);
+		sysFieldMap.put("parentid", parentid);
+		
+		List<Map<String, String>> archiveList = new ArrayList<Map<String,String>>();
+		
+		//创建json数据
+        HashMap<String,String> archiveMap = new HashMap<String,String>();
+
+        archiveMap.put("slt", filepath + thumbName);
+        archiveMap.put("slttype", slttype);
+        archiveMap.put("imgoldname", oldName);
+        archiveMap.put("imgnewname", filepath + newName);
+        
+        
+        archiveList.add(archiveMap);
+		
+		ResultInfo info = dynamicService.insertArchive(sysFieldMap, archiveList);
+		
+        return info.getMsg();
+    }
+    
+    /**
+     * 播放多媒体（视频或音频）
+     * @param treeid
+     * @param tabletype
+     * @param id
+     * @param modelMap
+     * @return
+     */
+    @RequestMapping(value="/showvideo.do",method=RequestMethod.GET)
+	public ModelAndView showvideo(String treeid,String tabletype,String id,ModelMap modelMap) {
+		
+		modelMap.put("treeid", treeid);
+		modelMap.put("tabletype", tabletype);
+		modelMap.put("id", id);
+		
+		//获取档案信息
+		List<String> idList = new ArrayList<String>();
+		idList.add(id);
+		List<Map<String, Object>> maps = dynamicService.get(treeid,"", tabletype, idList,null,null,null);
+		
+		
+		if (null == maps || maps.size() == 0 || !maps.get(0).get("slttype").equals("VIDEO")) {
+			modelMap.put("result","未找到多媒体文件，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		if (null == maps.get(0).get("slt") || maps.size() == 0 || !maps.get(0).get("slttype").equals("VIDEO")) {
+			modelMap.put("result","未找到多媒体文件，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		
+		String ext = "";//扩展名
+		String oldName = maps.get(0).get("imgoldname").toString();
+        //获取扩展名
+        if (oldName.lastIndexOf(".") >= 0) {
+            ext = oldName.substring(oldName.lastIndexOf("."));
+        }
+        modelMap.put("title", oldName);
+		if (ext.toLowerCase().equals(".mp4")) {
+			modelMap.put("videotype", "m4v");
+			modelMap.put("supplied", "m4v");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "html,flash");
+		}
+		else if (ext.toLowerCase().equals(".webm")) {
+			modelMap.put("supplied", "webmv");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "html,flash");
+		}
+		else if (ext.toLowerCase().equals(".ogg")) {
+			modelMap.put("supplied", "oga");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".flv")) {
+			modelMap.put("supplied", "flv");
+			modelMap.put("mediatype", "video");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".mp3")) {
+			modelMap.put("supplied", "mp3");
+			modelMap.put("mediatype", "audio");
+			modelMap.put("solution", "flash,html");
+		}
+		else if (ext.toLowerCase().equals(".wav")) {
+			modelMap.put("supplied", "wav");
+			modelMap.put("mediatype", "audio");
+			modelMap.put("solution", "flash,html");
+		}
+		else {
+			modelMap.put("result","未知多媒体文件格式，请重新尝试或与管理员联系。");
+			return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+		}
+		
+		modelMap.put("maps", maps);
+		
+		return new ModelAndView("/view/archive/archive/jplayer",modelMap);
+	}
+    
 }

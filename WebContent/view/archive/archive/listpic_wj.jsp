@@ -101,6 +101,35 @@
 	        			edit($(this).attr("id"));
 	                }
 	        	},
+	        	"show": {
+	        		name:"详细",
+	        		icon:"",
+	        		callback: function(key, options) {
+	        			show($(this).attr("id"));
+	                }
+	        	},
+	        	"setCover": {
+	        		name:"设为相册封面",
+	        		icon:"cog",
+	        		callback: function(key, options) {
+	        			setCover($(this).attr("id"));
+	                }
+	        	},
+	        	"sep1": "---------",
+	        	"upload": {
+	        		name:"上传",
+	        		icon:"attach",
+	        		callback: function(key, options) {
+	        			upload_pic_single($(this).attr("id"));
+	                }
+	        	},
+	        	"download": {
+	        		name:"下载",
+	        		icon:"attach",
+	        		callback: function(key, options) {
+	        			down_pic($(this).attr("id"));
+	                }
+	        	},
 	        	"del": {
 	        		name:"删除",
 	        		icon:"delete",
@@ -108,53 +137,13 @@
 	        			del($(this).attr("id"));
 	                }
 	        	},
-	        	"data": {
-	                "name": "数据操作", 
-	                "items": {
-	                    "fold1a-key1": {
-	                    	name: "只文件级",
-	                    	callback: function(key, options) {
-	                    		allwj();
-	    	                }
-	                    },
-	                    "fold1a-key2": {
-	                    	name: "批量修改",
-	                    	callback: function(key, options) {
-	                    		update_multiple();
-	    	                }
-	                    },
-	                    "fold1a-key3": {
-	                    	name: "Excel导入"
-	                    },
-	                    "fold1a-key4": {
-	                    	name: "导出Excel"
-	                    },
-	                    "fold1a-key5": {
-	                    	name: "数据移动"
-	                    }
-	                }
-	            },
 	        	"sep1": "---------",
 	        	"setshow":{
 	        		name:"设置",
 	        		icon:"cog",
 	        		callback: function(key, options) {
-	        			setshow('${templet.id}','01');
+	        			setshow('${templet.id}','02');
 	                }
-	        	},
-	        	"link":{
-	        		name:"挂接",
-	        		icon:"attach",
-	        		callback:function(key,options) {
-	        			doc("");
-	        		}
-	        	},
-	        	"print":{
-	        		name:"打印",
-	        		icon:"print",
-	        		callback:function(key,options) {
-	        			openprint();
-	        		}
 	        	}
 	        }
 	    });
@@ -166,31 +155,75 @@
 			height : n
 		}); */
 		
-		$('#checkall').click(function(){
-		    $('input[name="checkbox"]').attr("checked",this.checked);
-		    if (this.checked) {
-		    	$('input[name="checkbox"]').parents('tr').addClass('selected');
-		    }
-		    else {
-		    	$('input[name="checkbox"]').parents('tr').removeClass("selected");
-		    }
-		});
-		$('input[type="checkbox"]').removeAttr("checked");
-		
-		$('input[name="checkbox"]').click(function(){
-		    if (this.checked) {
-		    	$(this).parents('tr').addClass('selected');
-            }  
-            else {  
-            	$(this).parents('tr').removeClass("selected");
-            }
-		});
-		$('.shiftCheckbox').shiftcheckbox();
-		
-		var jscroll = getCookie('jscroll');
+		var jscroll = getCookie('xiangce_wj');
 		$('.xiangce').scrollTop(jscroll);
-		delCookie('jscroll');//删除cookie
+		delCookie('xiangce_wj');//删除cookie
 		
+		
+		$('.tip').mouseover(function(e){
+			var img = new Image();
+			img.src =this.src ;
+			var h = img.height;
+			
+			if (h > 300) {
+				h = h/2;
+			}
+			var $tip=$('<div id="tip"><div class="t_box"><div><s><i></i></s><img height="'+h+'" id="tipImg" src="'+this.src+'" /></div></div></div>');
+			
+			$('body').append($tip);
+			$('#tip').show('fast');
+			
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			//var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var imgWidth = $('#tipImg').width();
+			var bWidth = $('body').width();
+			
+			var t = (bheight - e.pageY);
+			var x = (bWidth - e.pageX);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			else {
+				$('#tip').css({"top":(e.pageY-60)+"px","left":(e.pageX+30)+"px"});
+			}
+			
+			if (imgWidth > x) {
+				var xx = bWidth - imgWidth - x -30;
+				$('#tip').css({"left":xx+"px"});
+			}
+			
+		}).mouseout(function(){
+		   $('#tip').remove();
+		}).mousemove(function(e){
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			//var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var imgWidth = $('#tipImg').width();
+			var bWidth = $('body').width();
+			
+			var t = (bheight - e.pageY);
+			var x = (bWidth - e.pageX);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			else {
+				$('#tip').css({"top":(e.pageY-60)+"px","left":(e.pageX+30)+"px"});
+			}
+			
+			if (imgWidth > x) {
+				var xx = bWidth - imgWidth - x -30;
+				$('#tip').css({"left":xx+"px"});
+			}
+		})
 	}
 	
 	function pageselectCallback(page_index, jq){
@@ -202,12 +235,12 @@
 	};  
 
 	function refresh() {
-		jscroll('body-wrapper');
+		jscroll('xiangce','xiangce_wj');
 		window.location.reload(true);
 	}
 	
 	function setshow(templetid,tabletype) {
-		jscroll('body-wrapper');
+		jscroll('xiangce','xiangce_wj');
 		if (templetid == "") {
 			alert("请选择左侧父档案树节点，再设置显示设置。");
 			return;
@@ -222,7 +255,7 @@
 	}
 	
 	function add() {
-		jscroll('body-wrapper');
+		jscroll('xiangce','xiangce_wj');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -252,7 +285,7 @@
 	}
 	
 	function edit(id) {
-		jscroll('body-wrapper');
+		jscroll('xiangce','xiangce_wj');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -270,7 +303,7 @@
 	}
 	
 	function del(id) {
-		jscroll('xiangce');
+		jscroll('xiangce','xiangce_wj');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -325,7 +358,7 @@
 	}
 	
 	function show(id) {
-		jscroll('body-wrapper');
+		jscroll('xiangce','xiangce_wj');
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -342,126 +375,7 @@
 		window.location.reload(true);
 	}
 	
-	function openprint() {
-		
-		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧档案节点，再查看档案电子文件。');
-			return;
-		}
-		
-		var str = "";
-		
-		$("input[name='checkbox']:checked").each(function () {
-			str+=$(this).val()+ ",";
-		});
-		
-		if (str != "") {
-			str = str.substring(0,str.length-1);
-		}
-		
-		var whObj = {
-			width : 750,
-			height : 500
-		};
-		
-		var url = "${pageContext.request.contextPath}/archive/openprint.do?treeid="+treeid+"&parentid=${parentid}&tabletype=02&ids=" + str + "&searchTxt=${searchTxt }&time=" + Date.parse(new Date());
-		var result = openShowModalDialog(url, window, whObj);
-		//window.location.reload(true);
-	}
 	
-	function update_multiple() {
-		jscroll('body-wrapper');
-		var treeid = '${selectid}';
-		if (treeid == '') {
-			alert('请选择左侧档案节点，再编辑档案。');
-			return;
-		}
-		
-		var str = "";
-		$("input[name='checkbox']:checked").each(function () {
-			str+=$(this).val()+ ",";
-		});
-		
-		if (str == "") {
-			alert("请先选择要批量编辑的数据。");
-			return;
-		}
-		
-		if (str != "") {
-			str = str.substring(0,str.length-1);
-		}
-		
-		var url = "${pageContext.request.contextPath}/archive/edit.do?treeid="+treeid+"&tabletype=02&id=" + str + "&multiple=true&time=" + Date.parse(new Date());
-		var whObj = {
-			width : 850,
-			height : 600
-		};
-		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
-	}
-	
-	function datacopy() {
-		
-		var treeid = '${selectid}';
-		
-		if (treeid == '' || treeid == '0') {
-			alert('请选择左侧档案节点，再复制档案数据。');
-			return;
-		}
-		
-		var str = "";
-		$("input[name='checkbox']:checked").each(function () {
-			str+=$(this).val()+ ",";
-		});
-		
-		if (str == "") {
-			alert("请先选择要复制的档案数据。");
-			return;
-		}
-		
-		if (str != "") {
-			str = str.substring(0,str.length-1);
-		}
-		
-		$.ajax({
-			async : false,
-			url : "${pageContext.request.contextPath}/archive/datacopy.do",
-			type : 'post',
-			data : {
-				'treeid':treeid,
-				'tabletype':'02',
-				'ids' : str
-			},
-			dataType : 'text',
-			success : function(data) {
-				alert(data);
-				refresh();
-			}
-		});
-	}
-	
-	function datapaster() {
-		var ids = '${sessionScope.CURRENT_DATA_COPY_SESSION }';
-		if (ids == "") {
-			alert("请先选择要粘贴的档案数据。");
-			return;
-		}
-		var treeid = '${selectid}';
-		
-		if (treeid == '' || treeid == '0') {
-			alert('请选择左侧档案节点，再粘贴档案数据。');
-			return;
-		}
-		
-		var url = "${pageContext.request.contextPath}/archive/opendatapaster.do?targetTreeid="+treeid+"&targetTabletype=02&parentid=${parentid}&time=" + Date.parse(new Date());
-		var whObj = {
-			width : 850,
-			height : 600
-		};
-		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
-	}
 	
 	function archiveImport() {
 		var treeid = '${selectid}';
@@ -503,14 +417,6 @@
 		
 	}
 	
-	
-	/* function showElement(elementId) {
-	  document.getElementById(elementId).style.display="block";
-	}
-	function hideElement(elementId) {
-	  document.getElementById(elementId).style.display="none";
-	} */
-	
 	function hideFirstEl(id) {
 		document.getElementById(id+"_xlan").style.display="none";
 		document.getElementById(id+"_xuanxiang").style.display="none";
@@ -521,9 +427,100 @@
 		document.getElementById(id+"_xuanxiang").style.display="block";
 	}
 	
+	function setCover(id) {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再操作。');
+			return;
+		}
+		
+		if (id == "") {
+			alert("请先选择要设置为封面的多媒体文件。");
+			return;
+		}
+		
+		$.ajax({
+			async : false,
+			url : "${pageContext.request.contextPath}/archive/setCover.do",
+			type : 'post',
+			data : {
+				'treeid':treeid,
+				'tabletype':'02',
+				'id' : id
+			},
+			dataType : 'text',
+			success : function(data) {
+				alert(data);
+			}
+		});
+	}
+	
+	function upload_pic_single(id) {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再上传多媒体文件。');
+			return;
+		}
+		
+		if (id == "") {
+			alert('请选择要上传的多媒体文件。');
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/open_upload_pic_single.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 650,
+			height : 300
+		};
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
+	function upload_pic_multiple(slttype) {
+		jscroll('xiangce','xiangce_wj');
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再上传多媒体文件。');
+			return;
+		}
+		
+		var whObj = {
+				width : 650,
+				height : 500
+			};
+		var url = "${pageContext.request.contextPath}/archive/show_upload_pic_multiple.do?treeid="+treeid+"&tabletype=02&parentid=${parentid}&status=0&slttype="+slttype+"&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		window.location.reload(true);
+	}
+	
+	function down_pic(id) {
+		
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再下载多媒体文件。');
+			return;
+		}
+		
+		var link = "${pageContext.request.contextPath}/archive/down_pic.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+        window.location.href=link;
+        return false;
+	}
+	
 </script>
 
-
+<style type="text/css">
+#tip   {position:absolute;color:#333;display:none;}
+#tip s   {position:absolute;top:40px;left:-20px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #BBA transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip s i   {position:absolute;top:-10px;left:-8px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #fff transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip .t_box   {position:relative;background-color:#CCC;filter:alpha(opacity=50);-moz-opacity:0.5;bottom:-3px;right:-3px;}
+#tip .t_box div  {position:relative;background-color:#FFF;border:1px solid #ACA899;background:#FFF;padding:1px;top:-3px;left:-3px;}
+ 
+.tip   {border:1px solid #DDD;}
+</style>
 <!--内容部分开始-->
 
 <div id="bodyer">
@@ -552,24 +549,21 @@
 					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
-					<ul id="sddm">
+					<ul id="sddm" style="width: 325px">
 						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
-						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-								<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-									<a href="javascript:;" onclick="allwj()">只文件级</a>
-								</c:if>
-								<a href="javascript:;" onclick="update_multiple()">批量修改</a>
 								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
 								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
-								<a href="javascript:;" onclick="datacopy()">复制</a>
-								<a href="javascript:;" onclick="datapaster()">粘贴</a>
+							</div>
+						</li>
+						<li><a href="javascript:;" onmouseover="mopen('m2')" onmouseout="mclosetime()">批量上传</a>
+							<div id="m2" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+								<a href="javascript:;" onclick="upload_pic_multiple('IMAGE')">上传图片</a>
+								<a href="javascript:;" onclick="upload_pic_multiple('VIDEO')">上传视频</a>
 							</div>
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
 					</ul>
 				</div>
 			</div>
@@ -583,12 +577,19 @@
 	            		<li class="pic_li" id="${archiveitem.id }">
 		                    <div class="photo22" >
 		                    	<c:set var="slt" value="${archiveitem.slt}"></c:set>
+		                    	<c:set var="slttype" value="${archiveitem.slttype}"></c:set>
 								<c:choose>
 									<c:when test="${fn:length(slt) == 0 }">
-										<img style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="170" width="220"/>
+										<img class="tip" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="170" width="220"/>
+									</c:when>
+									<c:when test="${slttype == 'VIDEO' }">
+										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/video.jpg" height="170" width="220"/>
+									</c:when>
+									<c:when test="${slttype == 'OTHER' }">
+										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="170" width="220"/>
 									</c:when>
 									<c:otherwise>
-										<img style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/${archiveitem.slt}" height="170" width="220"/>
+										<img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/${archiveitem.slt}" height="170" width="220"/>
 									</c:otherwise>
 								</c:choose>
 		                   		<div id="${archiveitem.id }_xlan" class="xlan" onclick="showElement('xuanxiang')" >

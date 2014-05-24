@@ -131,13 +131,6 @@
 	        			setshow('${templet.id}','02');
 	                }
 	        	},
-	        	"link":{
-	        		name:"挂接",
-	        		icon:"attach",
-	        		callback:function(key,options) {
-	        			doc("");
-	        		}
-	        	},
 	        	"print":{
 	        		name:"打印",
 	        		icon:"print",
@@ -182,6 +175,50 @@
 		var jscroll = getCookie('jscroll');
 		$('.body-wrapper').scrollTop(jscroll);
 		delCookie('jscroll');//删除cookie
+		
+		$('.tip').mouseover(function(e){
+			var img = new Image();
+			img.src =this.src ;
+			var h = img.height;
+			
+			if (h > 300) {
+				h = h/2;
+			}
+			var $tip=$('<div id="tip"><div class="t_box"><div><s><i></i></s><img height="'+h+'" id="tipImg" src="'+this.src+'" /></div></div></div>');
+			
+			$('body').append($tip);
+			$('#tip').show('fast');
+			
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var t = (bheight - e.pageY);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			
+		}).mouseout(function(){
+		   $('#tip').remove();
+		}).mousemove(function(e){
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var t = (bheight - e.pageY);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			else {
+				$('#tip').css({"top":(e.pageY-60)+"px","left":(e.pageX+30)+"px"});
+			}
+		})
 	}
 	function pageselectCallback(page_index, jq){
 		var searchTxt = "${searchTxt }";
@@ -446,7 +483,7 @@
 		
 	}
 	
-function datacopy() {
+	function datacopy() {
 		
 		var treeid = '${selectid}';
 		
@@ -488,7 +525,15 @@ function datacopy() {
 	
 </script>
 
-
+<style type="text/css">
+#tip   {position:absolute;color:#333;display:none;z-index:999;}
+#tip s   {position:absolute;top:40px;left:-20px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #BBA transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip s i   {position:absolute;top:-10px;left:-8px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #fff transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip .t_box   {position:relative;background-color:#CCC;filter:alpha(opacity=50);-moz-opacity:0.5;bottom:-3px;right:-3px;}
+#tip .t_box div  {position:relative;background-color:#FFF;border:1px solid #ACA899;background:#FFF;padding:1px;top:-3px;left:-3px;}
+ 
+.tip   {border:1px solid #DDD;}
+</style>
 <!--内容部分开始-->
 
 <div id="bodyer">
@@ -506,14 +551,14 @@ function datacopy() {
 	</div>
 	<div id="bodyer_right">
 		<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
-			<div class="dqwz_l">当前位置：档案管理-${treename }-案卷下全部文件级</div>
+			<div class="dqwz_l">当前位置：档案管理-${treename }-相册下全部多媒体文件</div>
 			<div class="caozuoan">
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
 					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
 					<a href="javascript:;" class="btn" onclick="search()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
-					<ul id="sddm">
+					<ul id="sddm" style="width: 325px;">
 						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
@@ -523,7 +568,6 @@ function datacopy() {
 							</div>
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
 						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
 					</ul>
 				</div>
@@ -538,7 +582,7 @@ function datacopy() {
 					<tr class="tableTopTitle-bg">
 						<td width="30px"><input type="checkbox" id="checkall"></td>
 						<td width="40px">行号</td>
-						<td width="40px">全文</td>
+						<td width="40px">预览</td>
 						<c:forEach items="${fields}" varStatus="i" var="item">
 							<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
 								<td>${item.chinesename }</td>
@@ -552,12 +596,20 @@ function datacopy() {
 						<tr class="table-SbgList">
 							<td><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
 							<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
+							<c:set var="slt" value="${archiveitem.slt}"></c:set>
+		                    <c:set var="slttype" value="${archiveitem.slttype}"></c:set>
 							<c:choose>
-								<c:when test="${archiveitem['isdoc'] == 1 }">
-									<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
+								<c:when test="${fn:length(slt) == 0 }">
+									<td><img class="tip" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="30" width="35"/></td>
+								</c:when>
+								<c:when test="${slttype == 'VIDEO' }">
+									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/video.jpg" height="30" width="35"/></td>
+								</c:when>
+								<c:when test="${slttype == 'OTHER' }">
+									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="30" width="35"/></td>
 								</c:when>
 								<c:otherwise>
-									<td></td>
+									<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/${archiveitem.slt}" height="30" width="35"/></td>
 								</c:otherwise>
 							</c:choose>
 							

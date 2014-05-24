@@ -87,7 +87,7 @@
 		/**************************************************
 	     * Context-Menu with Sub-Menu
 	     **************************************************/
-	    /* $.contextMenu({
+	    $.contextMenu({
 	        selector: '.scrollTable', 
 	        callback: function(key, options) {
 	            var m = "clicked: " + key;
@@ -111,20 +111,35 @@
 	        	"data": {
 	                "name": "数据操作", 
 	                "items": {
-	                    "fold1a-key2": {
+	                	"fold1a-key2": {
 	                    	name: "批量修改",
-                    		callback: function(key, options) {
+	                    	callback: function(key, options) {
 	                    		update_multiple();
 	    	                }
 	                    },
 	                    "fold1a-key3": {
-	                    	name: "Excel导入"
+	                    	name: "Excel导入",
+	                    	callback: function(key, options) {
+	                    		archiveImport();
+	    	                }
 	                    },
 	                    "fold1a-key4": {
-	                    	name: "导出Excel"
+	                    	name: "导出Excel",
+	                    	callback: function(key, options) {
+	                    		archiveExport();
+	    	                }
 	                    },
 	                    "fold1a-key5": {
-	                    	name: "数据移动"
+	                    	name: "复制",
+	                    	callback: function(key, options) {
+	                    		datacopy();
+	    	                }
+	                    },
+	                    "fold1a-key6": {
+	                    	name: "粘贴",
+	                    	callback: function(key, options) {
+	                    		datapaster();
+	    	                }
 	                    }
 	                }
 	            },
@@ -151,7 +166,7 @@
 	        		}
 	        	}
 	        }
-	    }); */
+	    });
 	});
 
 	function callback() {

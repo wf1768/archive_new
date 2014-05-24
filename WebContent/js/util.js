@@ -27,9 +27,14 @@ function openShowModalDialog(url,param,whparam){
 }
 
 //获取滚动条位置，存入cookie
-function jscroll(classname) {
+function jscroll(classname,name) {
 	var jscroll = $('.'+classname).scrollTop();
-	setCookie('jscroll',jscroll);
+	if (name == null) {
+		setCookie('jscroll',jscroll);
+	}
+	else {
+		setCookie(name,jscroll);
+	}
 }
 
 

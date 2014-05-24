@@ -83,10 +83,11 @@
 		
 		$.unblockUI();
 		
+		var templettype = "${templet.templettype }";
 		/**************************************************
 	     * Context-Menu with Sub-Menu
 	     **************************************************/
-	    /* $.contextMenu({
+	    $.contextMenu({
 	        selector: '.scrollTable', 
 	        callback: function(key, options) {
 	        },
@@ -108,10 +109,15 @@
 	        	"data": {
 	                "name": "数据操作", 
 	                "items": {
-	                    "fold1a-key1": {
+                		"fold1a-key1": {
 	                    	name: "只文件级",
 	                    	callback: function(key, options) {
-	                    		allwj();
+	                    		if (templettype == 'A' || templettype == 'P') {
+	                    			allwj();
+	                    		}
+	                    		else {
+	                    			alert("不能显示全文件级。");
+	                    		}
 	    	                }
 	                    },
 	                    "fold1a-key2": {
@@ -121,13 +127,28 @@
 	    	                }
 	                    },
 	                    "fold1a-key3": {
-	                    	name: "Excel导入"
+	                    	name: "Excel导入",
+	                    	callback: function(key, options) {
+	                    		archiveImport();
+	    	                }
 	                    },
 	                    "fold1a-key4": {
-	                    	name: "导出Excel"
+	                    	name: "导出Excel",
+	                    	callback: function(key, options) {
+	                    		archiveExport();
+	    	                }
 	                    },
 	                    "fold1a-key5": {
-	                    	name: "数据移动"
+	                    	name: "复制",
+	                    	callback: function(key, options) {
+	                    		datacopy();
+	    	                }
+	                    },
+	                    "fold1a-key6": {
+	                    	name: "粘贴",
+	                    	callback: function(key, options) {
+	                    		datapaster();
+	    	                }
 	                    }
 	                }
 	            },
@@ -154,7 +175,7 @@
 	        		}
 	        	}
 	        }
-	    }); */
+	    });
 	});
 
 	function callback() {
@@ -629,7 +650,7 @@
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+ 						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
 					</ul>
 				</div>
 			</div>
