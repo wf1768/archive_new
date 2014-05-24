@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>在线预览</title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+    <style type="text/css" media="screen"> 
+			html, body	{ height:100%; }
+			body { margin:0; padding:0; overflow:auto; }   
+			#flashContent { display:none; }
+     </style> 
+     <script type="text/javascript" src="js/jquery-1.8.2.js"></script>
+     <script type="text/javascript" src="flexpaper/js/swfobject.js"></script> 
+	<script type="text/javascript" src="flexpaper/js/flexpaper_flash.js"></script>
+  </head>
+  
+  <body>
+    <div style="position:absolute;left:200px;top:10px;">
+	        <a id="viewerPlaceHolder" style="width:1000px;height:800px;display:block"></a>
+	        <script type="text/javascript">
+		        function request(paras){ 
+		        	var url = location.href;  
+		        	var paraString = url.substring(url.indexOf("?")+1,url.length).split("&");  
+		        	var paraObj = {}  
+		        	for (i=0; j=paraString[i]; i++){  
+		        		paraObj[j.substring(0,j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=")+1,j.length);  
+		        	}  
+		        	var returnValue = paraObj[paras.toLowerCase()];  
+		        	if(typeof(returnValue)=="undefined"){  
+		        		return "";  
+		        	}else{  
+		        		return returnValue; 
+		        	}
+	        	}
+	        	$(function(){
+	        		var selectid = request("selectid");
+	 		        var treeid = request("treeid");
+	        		$.ajax({
+	        			async : false,
+	        			url : "doc/showSwfFile.do",
+	        			type : 'post',
+	        			dataType : 'text',
+	        			data:"treeid="+treeid+"&docid="+selectid,
+	        			success : function(data) {
+	        				if (data == "0") {
+	        					alert("对不起，没有此文件！");
+	        				}else if(data == "1"){
+	        					alert("对不起，此文件转换异常，请重新尝试或下载查看。");
+			        		} else {
+				        		var fileUrl = data;
+			        			$.ajax({
+				        			async : false,
+				        			url : "doc/filePrint.do",
+				        			type : 'post',
+				        			dataType : 'text',
+				        			data:"treeid="+treeid,
+				        			success : function(data) {
+				        				readFile(fileUrl,data);
+				        			}
+				        		});
+	        				}
+	        			}
+	        		});
+	        	});
+		        
+        		function readFile(url,isPrint){
+            		var printFlag = false;
+            		if(isPrint == "1")
+                		printFlag = true;
+            		else
+            			printFlag = false;
+    	     		 var swfVersionStr = "10.0.0";   
+    	             var xiSwfUrlStr = "playerProductInstall.swf";   
+    	             var flashvars = {   
+    	                 SwfFile : url,   
+			    	     Scale : 0.6,   
+			    	     ZoomTransition : "easeOut",   
+			    	     ZoomTime : 0.5,   
+		    	         ZoomInterval : 0.1,   
+		    	         FitPageOnLoad : false,   
+		    	         FitWidthOnLoad : true,   
+		    	         PrintEnabled : printFlag,   
+		    	         FullScreenAsMaxWindow : false,   
+		    	         ProgressiveLoading : true,   
+		    	         PrintToolsVisible : true,   
+		    	         ViewModeToolsVisible : true,   
+		    	         ZoomToolsVisible : true,   
+		    	         FullScreenVisible : true,   
+		    	         NavToolsVisible : true,   
+		    	         CursorToolsVisible : true,   
+			    	     SearchToolsVisible : true,   
+			    	     localeChain: "zh_CN"  
+			    	};   
+
+    	             var params = {}   
+        	         params.quality = "high";   
+         	         params.bgcolor = "#ffffff";   
+         	         params.allowscriptaccess = "sameDomain";   
+         	         params.allowfullscreen = "true";   
+         	         var attributes = {};   
+         	         attributes.id = "FlexPaperViewer";   
+         	         attributes.name = "FlexPaperViewer";
+         	         var news_height = $(window).height();
+         	   		 var news_width = $(window).width()-400; 
+         	         swfobject.embedSWF(   
+         	             "flexpaper/FlexPaperViewer.swf", "flashContent",   
+         	            news_width, news_height,   
+         	             swfVersionStr, xiSwfUrlStr,   
+         	             flashvars, params, attributes);   
+            		swfobject.createCSS("#flashContent", "display:block;text-align:left;");  
+            	}
+        		 
+	        </script>
+	        <div style="position:absolute;left:10px;top:10px;">   
+		      <div id="flashContent">   
+		      </div>   
+    		 </div> 
+        </div>
+  </body>
+</html>
