@@ -631,11 +631,17 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	@RequestMapping(value="/show",method=RequestMethod.GET)
-	public ModelAndView show(String treeid,String tabletype,String id,ModelMap modelMap) throws Exception {
+	public ModelAndView show(String treeid,String tabletype,String id,Integer readonly,ModelMap modelMap) throws Exception {
 		//判断id是否存在
 		if (null == id || id.equals("")) {
 			return null;
 		}
+		//readonly作为判断打开的详细页，是否显示功能按钮。例如档案里的文件详细，应该有上传按钮
+		//readonly为0，是包含上传按钮
+		if (null == readonly) {
+			readonly = 0;
+		}
+		modelMap.put("readonly", readonly);
 //		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
 //		
@@ -716,7 +722,7 @@ public class ArchiveController extends BaseConstroller {
 	}
 	
 	@RequestMapping(value="/doc",method=RequestMethod.GET)
-	public ModelAndView doc(String treeid,String tabletype,String id,ModelMap modelMap) throws Exception {
+	public ModelAndView doc(String treeid,String tabletype,String id,Integer readonly,ModelMap modelMap) throws Exception {
 		//判断id是否存在
 		if (null == id || id.equals("")) {
 			return null;
@@ -724,6 +730,13 @@ public class ArchiveController extends BaseConstroller {
 		
 		modelMap.put("treeid", treeid);
 		modelMap.put("tabletype", tabletype);
+		
+		//readonly作为判断打开的详细页，是否显示功能按钮。例如档案里的文件详细，应该有上传按钮
+		//readonly为0，是包含上传按钮
+		if (null == readonly) {
+			readonly = 0;
+		}
+		modelMap.put("readonly", readonly);
 		
 		Boolean singleArchive = false;
 		String resultUrl = "";
@@ -913,8 +926,12 @@ public class ArchiveController extends BaseConstroller {
 	 * @return
 	 */
 	@RequestMapping(value="/setshow",method=RequestMethod.GET)
-	public String setshow(String templetid,String tabletype,ModelMap modelMap) {
+	public String setshow(String templetid,String tabletype,Integer readonly,ModelMap modelMap) {
 		
+		if (null == readonly) {
+			readonly = 0;
+		}
+		modelMap.put("readonly", readonly);
 		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
 //		modelMap.put("account", account);
@@ -938,11 +955,15 @@ public class ArchiveController extends BaseConstroller {
 	 * @return
 	 */
 	@RequestMapping(value="/fieldedit",method=RequestMethod.GET)
-	public ModelAndView fieldedit(String id,ModelMap modelMap) {
+	public ModelAndView fieldedit(String id,Integer readonly,ModelMap modelMap) {
 		//判断id是否存在
 		if (id == null || id.equals("")) {
 			return null;
 		}
+		if (null == readonly) {
+			readonly = 0;
+		}
+		modelMap.put("readonly", readonly);
 		//获取对象
 		Sys_templetfield templetfield = templetfieldService.getById(id);
 		modelMap.put("field", templetfield);

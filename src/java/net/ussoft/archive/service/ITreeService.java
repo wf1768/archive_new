@@ -2,6 +2,7 @@ package net.ussoft.archive.service;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.List;
 
 import net.ussoft.archive.model.Sys_templet;
@@ -98,6 +99,15 @@ public interface ITreeService {
 	 * @return
 	 */
 	public String createTreeJson(String jsonStr,String basePath);
+	
+	/**
+	 * 根据传入的json，增加根节点和图标，并且将查询出的结果数字，赋予tree的name
+	 * @param jsonStr
+	 * @param basePath
+	 * @param countMap
+	 * @return
+	 */
+	public String createTreeJson(String jsonStr,String basePath,HashMap<String, HashMap<String, String>> treeMap);
 
 	/**
 	 * 根据账户ID，获取账户的权限  树节点范围

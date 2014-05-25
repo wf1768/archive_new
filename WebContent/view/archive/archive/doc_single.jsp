@@ -104,7 +104,9 @@
 								<c:if test="${treeauth.filedown == 1 }">
 									<a href="javascript:;" onclick="down('${doc.id}')">下载</a>
 								</c:if>
+								<c:if test="${readonly == 0 }">
 								<a href="javascript:;" onclick="del('${doc.id}')">删除</a>
+								</c:if>
 							</td>
 						</tr>
 					</c:forEach>
@@ -125,7 +127,10 @@
 									<c:if test="${treeauth.filedown == 1 }">
 										<a href="javascript:;" onclick="down('${doc.id}')">下载</a>
 									</c:if>
+									<c:if test="${readonly == 0 }">
 									<a href="javascript:;" onclick="del('${doc.id}')">删除</a>
+									</c:if>
+									
 								</td>
 							</tr>
 		            	</c:if>
@@ -135,7 +140,9 @@
 			<tr>
 				<td colspan="6" align="center">
 					<button type="button" onclick="closepage()">关闭</button>
+					<c:if test="${readonly == 0 }">
 					<button type="button" onclick="upload('${maps[0]['id']}')">上传</button>
+					</c:if>
 				</td>
 			</tr>
 		</tbody>

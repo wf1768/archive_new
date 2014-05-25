@@ -62,6 +62,28 @@
 			window.location.href = "${pageContext.request.contextPath}/archive/list.do?treeid=" + nodes.id;
 		}
 	};
+	
+	function showvideo(id) {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点。');
+			return;
+		}
+		
+		if (id == "") {
+			alert("请先选择要播放的多媒体文件。");
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/showvideo.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+	}
+	
 	$(function() {
 		var total = ${pagebean.rowCount };
 		var pagesize = ${pagebean.pageSize };
@@ -106,6 +128,20 @@
 	        		icon:"",
 	        		callback: function(key, options) {
 	        			show($(this).attr("id"));
+	                }
+	        	},
+	        	"showvideo": {
+	        		name:"播放",
+	        		icon:"",
+	        		callback: function(key, options) {
+	        			var slttype=$(this).attr("slttype");
+	        			if (slttype == "VIDEO") {
+	        				showvideo($(this).attr("id"));
+	        			}
+	        			else {
+	        				alert("只有音频视频格式才能播放。");
+	        			}
+	        			//show($(this).attr("id"));
 	                }
 	        	},
 	        	"setCover": {
@@ -271,7 +307,7 @@
 		window.location.reload(true);
 	}
 	
-	function search() {
+	function searchArchive() {
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -510,6 +546,16 @@
         return false;
 	}
 	
+	function returnAj() {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再下载多媒体文件。');
+			return;
+		}
+		window.location.href='${pageContext.request.contextPath }/archive/list.do?treeid='+treeid+'&page=${page_aj}&searchTxt=${searchTxt_aj }';
+	}
+	
 </script>
 
 <style type="text/css">
@@ -545,11 +591,11 @@
 			</div>
 			<div class="caozuoan">
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
+					<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
-					<ul id="sddm" style="width: 325px">
+					<ul id="sddm" style="width: 405px">
 						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
@@ -564,6 +610,7 @@
 							</div>
 						</li>
 						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
+						<li><a href="javascript:;" onclick="returnAj()" onmouseout="mclosetime()">返回</a></li>
 					</ul>
 				</div>
 			</div>
@@ -574,7 +621,7 @@
             	<ul>
             		<c:forEach items="${pagebean.list}" varStatus="i" var="archiveitem">
 	            		<%-- <li class="pic_li" id="${archiveitem.id }" onMouseOver="showFirstEl('${archiveitem.id }')" onMouseOut="hideFirstEl('${archiveitem.id }')"> --%>
-	            		<li class="pic_li" id="${archiveitem.id }">
+	            		<li class="pic_li" id="${archiveitem.id }" slttype="${archiveitem.slttype }">
 		                    <div class="photo22" >
 		                    	<c:set var="slt" value="${archiveitem.slt}"></c:set>
 		                    	<c:set var="slttype" value="${archiveitem.slttype}"></c:set>

@@ -106,7 +106,7 @@
 				</tr>
 				<tr class="tr1">
 					<td class="txt1">默认值 :</td>
-					<td><input type="text" id="defaultvalue" name="defaultvalue" value="${field.defaultvalue }"></td>
+					<td><input type="text" id="defaultvalue" ${readonly == 1?'readonly':'' } name="defaultvalue" value="${field.defaultvalue }"></td>
 				</tr>
 				<tr class="tr1">
 					<td class="txt1">检索字段 :</td>

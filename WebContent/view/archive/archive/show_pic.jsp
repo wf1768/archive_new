@@ -27,9 +27,16 @@
 		
 	})
 	
-	function down(id) {
-        var link = "${pageContext.request.contextPath}/doc/download.do?id=" + id;
-        //window.open(link);
+	function down_pic(id) {
+		
+		var treeid = '${treeid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再下载多媒体文件。');
+			return;
+		}
+		
+		var link = "${pageContext.request.contextPath}/archive/down_pic.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
         window.location.href=link;
         return false;
 	}
@@ -153,6 +160,7 @@
 					<button type="button" onclick="closepage()">关闭</button>
 					<c:if test="${tabletype=='02' }">
 						<button type="button" onclick="upload_pic_single('${maps[0]['id']}')">上传</button>
+						<button type="button" onclick="down_pic('${maps[0]['id']}')">下载</button>
 						<button type="button" onclick="setCover('${maps[0]['id']}')">设为相册封面</button>
 						<c:if test="${maps[0].slttype=='VIDEO' }">
 							<button type="button" onclick="showvideo('${maps[0]['id']}')">播放多媒体</button>

@@ -2,6 +2,8 @@ package net.ussoft.archive.util;
 
 import java.util.List;
 
+import org.springframework.jdbc.object.SqlCall;
+
 import net.ussoft.archive.model.Sys_templetfield;
 
 public class ArchiveUtil {
@@ -14,8 +16,7 @@ public class ArchiveUtil {
 		
 	}
 	
-	public static String createSql(String tablename,String searchTxt,List<Sys_templetfield> fields) {
-		
+	private static String createLike(String searchTxt,List<Sys_templetfield> fields ) {
 		StringBuffer sb = new StringBuffer();
 		String like = "";
 		if (null != searchTxt && !"".equals(searchTxt)) {
@@ -50,6 +51,13 @@ public class ArchiveUtil {
 			}
 		}
 		
+		return like;
+	}
+	
+	public static String createSql(String tablename,String searchTxt,List<Sys_templetfield> fields) {
+		
+		String like = createLike(searchTxt,fields);
+		
 		//得到字段
 		String fieldString = "";
 		if (null != fields && fields.size() > 0) {
@@ -67,11 +75,21 @@ public class ArchiveUtil {
 			fieldString = "*";
 		}
 		String sql = "SELECT "+fieldString+" FROM " + tablename;
-		if (!sb.toString().equals("")) {
+		if (!like.equals("")) {
 			sql += " WHERE " + like;
 		}
 		
 		return sql;
+	}
+	
+	public static String createCountSql(String tablename,String searchTxt,List<Sys_templetfield> fields) {
+		String like = createLike(searchTxt,fields);
+		
+		String sql = "SELECT count(id) FROM " + tablename;
+		if (!like.equals("")) {
+			sql += " WHERE " + like;
+		}
+		return sql ;
 	}
 
 }

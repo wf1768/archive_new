@@ -265,7 +265,7 @@
 		window.location.reload(true);
 	}
 	
-	function search() {
+	function searchArchive() {
 		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
 		
@@ -554,8 +554,8 @@
 			<div class="dqwz_l">当前位置：档案管理-${treename }-相册下全部多媒体文件</div>
 			<div class="caozuoan">
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
+					<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
 					<ul id="sddm" style="width: 325px;">

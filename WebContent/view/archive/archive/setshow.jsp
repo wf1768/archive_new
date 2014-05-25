@@ -64,9 +64,10 @@ img {
 	}
 	
 	function editField(id){
+		var readonly = '${readonly }';
 		var jscroll = $('html,body').scrollTop();
 		setCookie('jscroll',jscroll);
-		var url = "${pageContext.request.contextPath}/archive/fieldedit.do?id="+id + "&time="+Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/fieldedit.do?id="+id + "&readonly="+readonly+"&time="+Date.parse(new Date());
 		var whObj = { width: 600, height: 500 };
 		var result = openShowModalDialog(url,window,whObj);
 		reload();
@@ -310,15 +311,17 @@ img {
 					</c:if>
 					</td>
 					<td>
-							<a href="javascript:;" onclick="editField('${item.id}')" class="juse">
-								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
-								修改
-							</a>
+						<a href="javascript:;" onclick="editField('${item.id}')" class="juse">
+							<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_form_edit.png" />
+							修改
+						</a>
+						<c:if test="${readonly == 0 }">
 							<a href="javascript:;" onclick="fieldcode('${item.id}')" class="juse">
 								<img style="margin-bottom:-3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
 								代码
 							</a>
-						</td>
+						</c:if>
+					</td>
            		</tr>
            </c:forEach>
 		</tbody>

@@ -35,6 +35,23 @@ public class Constants{
 	public static final String data_copy_tabletype_session = "CURRENT_DATA_COPY_TABLETYPE_SESSION";
 	
 	/**
+	 * 智能检索，存储查询值
+	 */
+	public static final String intel_search_session = "CURRENT_INTEL_SEARCH_SESSION";
+	
+	/**
+	 * 智能检索，存储查询数量
+	 */
+	public static final String intel_search_count_session = "CURRENT_INTEL_SEARCH_COUNT_SESSION";
+	
+	/**
+	 * 智能检索，存储选择的树节点
+	 */
+	public static final String intel_search_treeid_session = "CURRENT_INTEL_SEARCH_TREEID_SESSION";
+	
+	
+	
+	/**
 	 * 总行数
 	 */
 	public static final String total_row = "TOTAL_ROW_IN_SESSION";

@@ -6,10 +6,7 @@ import java.io.Serializable;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -129,6 +126,48 @@ public class DynamicService implements IDynamicService {
 		pageBean = dynamicDao.searchForMap(sql, values, pageBean);
 		
 		return pageBean;
+	}
+	
+	@Override
+	public Integer archiveCount(String treeid,
+			String tabletype, String searchTxt, Integer status) {
+		
+		if (null == treeid || treeid.equals("")) {
+			return null;
+		}
+		
+		if (null == status || status < 0) {
+			status = 0;
+		}
+		
+		String sql = "";
+		List<Object> values = new ArrayList<Object>();
+		
+		Sys_table tables =  getTable(treeid,tabletype);
+		if (null == tables) {
+			return null;
+		}
+		
+		//获取字段
+		List<Sys_templetfield> fields = getTempletfields(treeid,tabletype);
+		
+		sql = ArchiveUtil.createSql(tables.getTablename(), searchTxt, fields);
+		
+		if (sql.contains("WHERE")) {
+			sql += " and treeid=? and status = " + status;
+		}
+		else {
+			sql += " WHERE treeid=? and status = " + status;
+		}
+		
+		//TODO 这里要加上记录访问权限
+		
+		values.clear();
+		values.add(treeid);
+		
+		Integer num = dynamicDao.getCount(sql, values);
+		
+		return num;
 	}
 	
 	private Sys_table getTable(String treeid,String tabletype) {
@@ -256,32 +295,6 @@ public class DynamicService implements IDynamicService {
 		if (null != orderby && !"".equals(orderby)) {
 			sb.append(" order by ").append(orderby);
 		}
-		
-		
-//		values.clear();
-//		StringBuilder sb = new StringBuilder("select * from ");
-//		sb.append(tables.get(0).getTablename());
-//		sb.append(" where ");
-//		sb.append(" treeid = ?");
-//		values.add(treeid);
-//		if (idList.size() > 0) {
-//			sb.append(" and id in (");
-//			Serializable[] ss=new Serializable[idList.size()];
-//			Arrays.fill(ss, "?");
-//			sb.append(StringUtils.join(ss,','));
-//			sb.append(")");
-//			values.addAll(idList);
-//		}
-//		
-//		if (null != parentid && !"".equals(parentid)) {
-//			sb.append(" and parentid = ?");
-//			values.add(parentid);
-//		}
-//		
-//		
-//		if (null != orderby && !"".equals(orderby)) {
-//			sb.append(" order by ").append(orderby);
-//		}
 		
 		List<Map<String, Object>> maps = dynamicDao.searchForMap(sql + sb.toString(), values);
 		

@@ -15,13 +15,6 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
 
-<%-- <link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.layout/layout-default-latest.css" type="text/css" />
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.layout/jQueryui_1.9.2.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.layout/jquery.layout-latest.js"></script>
- --%>
-
-<%-- <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.fixHeader.js"></script> --%>
-
 <script type="text/javascript">
 
 	$.blockUI({
@@ -172,17 +165,11 @@
 	});
 	
 	function callback() {
+		
 		var n = $(".scrollTable").height()-$(".aa").height();
-		$("#la").height($("#bodyer_right").height());
 		$('.data_table').fixHeader({
 			height : n
 		});
-		
-		/* $('#la').layout({ 
-			applyDemoStyles: false,
-			spacing_open:3, //边框的间隙
-			west__size:230
-		}); */
 		
 		$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
@@ -220,21 +207,9 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page="+page_index+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
 		}
-	};
-	
-	function isSearchWj() {
-		var openexpand = JSON.stringify(expand);
-		var searchTreeids = '${searchTreeids}';
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
-	}
-	
-	function showWj(id) {
-		var openexpand = JSON.stringify(expand);
-		var searchTreeids = '${searchTreeids}';
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }&searchTxt_aj=${searchTxt }&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids;
-	}
+	}; 
 	
 	function searchArchive() {
 		
@@ -283,7 +258,7 @@
 			return;
 		}
 		
-		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=01&id=" + id + "&readonly=1&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=02&id=" + id + "&readonly=1&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 650,
 			height : 500
@@ -331,7 +306,7 @@
 				height : 500
 			};
 		}
-		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=01&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=02&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		window.location.reload(true);
 	}
@@ -358,23 +333,12 @@
 				<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 					<div class="dqwz_l">当前位置：智能检索
 					<c:if test="${not empty treename}">
-						<c:choose>
-							<c:when test="${templet.templettype == 'A' }">
-								-${treename }-案卷级
-							</c:when>
-							<c:otherwise>
-								-${treename }-文件级
-							</c:otherwise>
-						</c:choose>
+						-${treename }-文件级
 					</c:if>
 					</div>
 					<div class="caozuoan">
 						<div style="float: right;margin-top: 3px;margin-left: 5px">
-							
-							<c:if test="${isSearchTreeid==true }">
-								<button onclick="isSearchWj()">文件级</button>
-							</c:if>
-							<button onclick="setshow('${templet.id}','01')">设置</button>
+							<button onclick="setshow('${templet.id}','02')">设置</button>
 							<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
 							<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 						</div>
@@ -388,9 +352,6 @@
 							<tr id="table_head" class="tableTopTitle-bg">
 								<td width="30px"><input type="checkbox" id="checkall"></td>
 								<td width="40px">行号</td>
-								<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-									<td width="40px">文件级</td>
-								</c:if>
 								<td width="40px">全文</td>
 								<c:forEach items="${fields}" varStatus="i" var="item">
 									<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
@@ -405,9 +366,6 @@
 								<tr class="table-SbgList">
 									<td><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
 									<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
-									<c:if test="${templet.templettype=='A' or templet.templettype == 'P'}">
-										<td><a title="文件级" href="javascript:;" onclick="showWj('${archiveitem.id}')"><img src="${pageContext.request.contextPath }/images/icons/page.png" ></a></td>
-									</c:if>
 									<c:choose>
 										<c:when test="${archiveitem['isdoc'] == 1 }">
 											<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>

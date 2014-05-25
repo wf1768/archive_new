@@ -81,8 +81,6 @@
 		selectTreeid = treeid;
 		selectNode(treeid);
 		
-		$.unblockUI();
-		
 		var templettype = "${templet.templettype }";
 		/**************************************************
 	     * Context-Menu with Sub-Menu
@@ -209,6 +207,7 @@
 		$('.body-wrapper').scrollTop(jscroll);
 		delCookie('jscroll');//删除cookie
 		
+		$.unblockUI();
 	}
 	
 	function pageselectCallback(page_index, jq){
@@ -260,7 +259,7 @@
 		window.location.reload(true);
 	}
 	
-	function search() {
+	function searchArchive() {
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
@@ -629,8 +628,8 @@
 			</div>
 			<div class="caozuoan">
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {search();}" />
-					<a href="javascript:;" class="btn" onclick="search()">查询</a>
+					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
+					<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
 					<ul id="sddm">

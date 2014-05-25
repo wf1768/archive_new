@@ -26,6 +26,17 @@ public interface IDynamicService {
 	public PageBean<Map<String,Object>> archiveList(String treeid,Boolean allwj,String parentid,String tabletype,String searchTxt,Integer status,PageBean<Map<String,Object>> pageBean);
 	
 	/**
+	 * 获取指定treeid的查询档案数量
+	 * @param treeid
+	 * @param tabletype
+	 * @param searchTxt
+	 * @param status
+	 * @return
+	 */
+	public Integer archiveCount(String treeid,String tabletype,String searchTxt,Integer status);
+	
+	
+	/**
 	 * 获取档案记录
 	 * @param treeid		档案树节点id
 	 * @param parentid		父节点id。在tabletype为02时，并且parentid不为null时，增加parentid为查询条件

@@ -3,6 +3,7 @@ package net.ussoft.archive.service.impl;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -408,6 +409,104 @@ public class TreeService implements ITreeService {
 			}
 			if (typeString.equals("W")) {
 				((JSONObject) jsonArray.get(i)).put("icon", basePath+"/images/icons/page.png");
+			}
+			
+		}
+		
+		String jsonString = JSON.toJSONString(jsonArray);
+		
+		return jsonString;
+	}
+	
+	private String createCountStr(HashMap<String, HashMap<String, String>> treeMap,String treenode) {
+		
+		String countStr = "";
+		String templettype = "";
+		Integer ajCount = 0;
+		Integer wjCount = 0;
+		for (String key: treeMap.keySet()) {
+			HashMap<String, String> countMap = treeMap.get(key);
+			String countTreeNode = countMap.get("treenode");
+			int num = countTreeNode.indexOf(treenode + "#");
+			if (num != -1 && num == 0) {
+				templettype = countMap.get("templettype");
+				if (templettype.equals("A") || templettype.equals("P")) {
+					ajCount += Integer.valueOf(countMap.get("aj").toString());
+					wjCount += Integer.valueOf(countMap.get("wj").toString());
+				}
+				else if (templettype.equals("F")) {
+					wjCount += Integer.valueOf(countMap.get("wj").toString());
+				}
+			}
+		}
+		
+		if (!"".equals(templettype)) {
+			if (templettype.equals("A") || templettype.equals("P")) {
+				countStr = "[<span style='color:red;margin-right:0px;'>案:" + ajCount + " 文:" + wjCount + "</span>]";
+			}
+			else if (templettype.equals("F")) {
+				countStr = "[<span style='color:red;margin-right:0px;'>文:" + wjCount + "</span>]";
+			}
+		}
+		return countStr;
+	}
+	
+	@Override
+	public String createTreeJson(String jsonStr, String basePath,
+			HashMap<String, HashMap<String, String>> treeMap) {
+		
+		JSONArray jsonArray = new JSONArray();
+		if (!jsonStr.equals("")) {
+			jsonArray = JSON.parseArray(jsonStr);
+		}
+		
+		//通过json对象，插入isparent
+		
+		//添加根节点
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("id", "0");
+		String baseStr = createCountStr(treeMap,"0");
+		jsonObject.put("treename", "档案树"+ baseStr);
+		jsonObject.put("treetype", "T");
+		jsonArray.add(jsonObject);
+		
+		//这里要的大写字母要注意：
+		// F：档案类型。
+		// T: 档案类型的容器夹。
+		// FT: 档案类型下的树节点容器夹
+		// W : 档案树节点
+		// 关系说明：档案类型的容器夹 包含 档案类型 包含 档案树节点夹  包含  树节点
+		for (int i=0;i<jsonArray.size();i++) {
+			String typeString = ((JSONObject) jsonArray.get(i)).get("treetype").toString();
+			if (typeString.equals("F") || typeString.equals("T") || typeString.equals("FT")) {
+				((JSONObject) jsonArray.get(i)).put("isParent", true);
+			}
+			if (typeString.equals("F")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"/images/icons/1.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"/images/icons/2.gif");
+				String countStr = createCountStr(treeMap,((JSONObject) jsonArray.get(i)).getString("treenode"));
+				((JSONObject) jsonArray.get(i)).put("treename",((JSONObject) jsonArray.get(i)).getString("treename") + countStr );
+			}
+			if (typeString.equals("T") || typeString.equals("FT")) {
+				((JSONObject) jsonArray.get(i)).put("iconClose", basePath+"/images/folder.gif");
+				((JSONObject) jsonArray.get(i)).put("iconOpen", basePath+"/images/folder-open.gif");
+			}
+			if (typeString.equals("W")) {
+				((JSONObject) jsonArray.get(i)).put("icon", basePath+"/images/icons/page.png");
+				HashMap<String, String> countMap = treeMap.get(((JSONObject) jsonArray.get(i)).get("id"));
+				if (null != countMap && countMap.size() >0) {
+					Sys_templet templet = templetDao.get(((JSONObject) jsonArray.get(i)).get("templetid").toString());
+					String templettype = templet.getTemplettype();
+					String countStr = "";
+					if (templettype.equals("A") || templettype.equals("P")) {
+						countStr = "[<span style='color:red;margin-right:0px;'>案:" + countMap.get("aj") + " 文:" + countMap.get("wj") + "</span>]";
+					}
+					else if (templettype.equals("F")) {
+						countStr = "[<span style='color:red;margin-right:0px;'>文:" + countMap.get("wj") + "</span>]";
+					}
+					
+					((JSONObject) jsonArray.get(i)).put("treename",((JSONObject) jsonArray.get(i)).getString("treename") + countStr );
+				}
 			}
 			
 		}
