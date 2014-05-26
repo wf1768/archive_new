@@ -1,16 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/picmov.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/js/dropmenu/style.css" type="text/css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/dropmenu/dropmenu.js"></script>
+
 <!-- 分页插件 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
@@ -165,13 +163,11 @@
 	});
 	
 	function callback() {
-		$(".scrollTable").height($(".scrollTable").height() - $("#aj").height()) ;
-		
 		var n = $(".scrollTable").height()-$(".aa").height();
+		$("#la").height($("#bodyer_right").height());
 		$('.data_table').fixHeader({
 			height : n
 		});
-
 		
 		/* $('#la').layout({ 
 			applyDemoStyles: false,
@@ -215,13 +211,25 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page="+page_index+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
-	}; 
+	};
+	
+	function isSearchWj() {
+		var openexpand = JSON.stringify(expand);
+		var searchTreeids = '${searchTreeids}';
+		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
+	}
+	
+	function showWj(id) {
+		var openexpand = JSON.stringify(expand);
+		var searchTreeids = '${searchTreeids}';
+		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }&searchTxt_aj=${searchTxt }&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids;
+	}
 	
 	function searchArchive() {
 		
-var searchTxt = $("#searchTxt").val();
+		var searchTxt = $("#searchTxt").val();
 		
 		if (searchTxt != "") {
 			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
@@ -242,12 +250,6 @@ var searchTxt = $("#searchTxt").val();
 		var openexpand = JSON.stringify(expand);
 		
 		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
-	}
-	
-	function returnAj() {
-		var openexpand = JSON.stringify(expand);
-		var searchTreeids = '${searchTreeids}';
-		window.location.href='${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }&expand='+openexpand+'&searchTreeids='+searchTreeids;
 	}
 	
 	function setshow(templetid,tabletype) {
@@ -274,7 +276,7 @@ var searchTxt = $("#searchTxt").val();
 			return;
 		}
 		
-		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=02&id=" + id + "&readonly=1&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/show.do?treeid="+treeid+"&tabletype=01&id=" + id + "&readonly=1&time=" + Date.parse(new Date());
 		var whObj = {
 			width : 650,
 			height : 500
@@ -322,7 +324,7 @@ var searchTxt = $("#searchTxt").val();
 				height : 500
 			};
 		}
-		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=02&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
+		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=01&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
 		window.location.reload(true);
 	}
@@ -349,132 +351,72 @@ var searchTxt = $("#searchTxt").val();
 				<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 					<div class="dqwz_l">当前位置：智能检索
 					<c:if test="${not empty treename}">
-						-${treename }-文件级
+						<c:choose>
+							<c:when test="${templet.templettype == 'P' }">
+								-${treename }-多媒体相册
+							</c:when>
+							<c:otherwise>
+								-${treename }-多媒体文件
+							</c:otherwise>
+						</c:choose>
 					</c:if>
 					</div>
 					<div class="caozuoan">
 						<div style="float: right;margin-top: 3px;margin-left: 5px">
-							<button onclick="setshow('${templet.id}','02')">设置</button>
+							
+							<c:if test="${isSearchTreeid==true }">
+								<button onclick="isSearchWj()">文件级</button>
+							</c:if>
+							<button onclick="setshow('${templet.id}','01')">设置</button>
 							<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
 							<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 						</div>
 					</div>
 					<div style="clear: both"></div>
 				</div>
-				<div style="margin-bottom: 10px;">
-					<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:998;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
-						<thead>
-							<tr class="tableTopTitle-bg">
-								<td width="40px">行号</td>
-								<c:forEach items="${ajFieldList}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
-										<td>${item.chinesename }</td>
-									</c:if>
-								</c:forEach>
-								<td>操作</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr class="table-SbgList">
-								<c:forEach items="${maps}" varStatus="i" var="archiveitem">
-										<td>${i.index+1 }</td>
-										<c:forEach items="${ajFieldList}" varStatus="j" var="fielditem">
-											<c:if test="${(fielditem.sort > 0) and (fielditem.isgridshow == 1)}">
-											<td title="${archiveitem[fielditem.englishname] }">
-											<c:choose>
-												<c:when test="${fielditem.fieldtype =='VARCHAR' }">
-													<c:set var="subStr" value="${archiveitem[fielditem.englishname]}"></c:set>
-													<c:choose>
-														<c:when test="${fn:length(subStr) > subString }">
-															${fn:substring(archiveitem[fielditem.englishname], 0, subString)}..
-														</c:when>
-														<c:otherwise>
-													      	${archiveitem[fielditem.englishname]}
-													    </c:otherwise>
-													</c:choose>
-												</c:when>
-												<c:otherwise>
-													${archiveitem[fielditem.englishname]}
-												</c:otherwise>
-											</c:choose>
-												
-											</td>
-											</c:if>
-										</c:forEach>
-								</c:forEach>
-								<td>
-									<a href="javascript:;" onclick="returnAj()" class="juse">
-										<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/arrow_undo.png" />
-										返回案卷
-									</a>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
 				<div class="scrollTable" align="left" style="padding-left:5px; ">
-					<table id="data_table" class="data_table table-Kang" aline="left" width="98%"
-						border=0 cellspacing="1" cellpadding="4">
-						<thead>
-							<tr id="table_head" class="tableTopTitle-bg">
-								<td width="30px"><input type="checkbox" id="checkall"></td>
-								<td width="40px">行号</td>
-								<td width="40px">全文</td>
-								<c:forEach items="${fields}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
-										<td>${item.chinesename }</td>
-									</c:if>
-								</c:forEach>
-								<td width="60px">操作</td>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach items="${pagebean.list}" varStatus="i" var="archiveitem">
-								<tr class="table-SbgList">
-									<td><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
-									<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
+					<div class="xiangce" style="overflow: auto;">
+		            	<ul>
+		            		<c:forEach items="${pagebean.list}" varStatus="i" var="archiveitem">
+							<li>
+								<div class="photo">
+									<a title="打开相册" href="javascript:;" onclick="showWj('${archiveitem.id}')">
+									<c:set var="slt" value="${archiveitem.slt}"></c:set>
 									<c:choose>
-										<c:when test="${archiveitem['isdoc'] == 1 }">
-											<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
+										<c:when test="${fn:length(slt) == 0 }">
+											<img src="${pageContext.request.contextPath}/images/no_photo_135.png" height="150" width="200"/>
 										</c:when>
 										<c:otherwise>
-											<td></td>
+											<img src="${pageContext.request.contextPath}/${archiveitem.slt}" height="150" width="200"/>
 										</c:otherwise>
 									</c:choose>
-									
-									<c:forEach items="${fields}" varStatus="j" var="fielditem">
-										<c:if test="${(fielditem.sort > 0) and (fielditem.isgridshow == 1)}">
-										<td title="${archiveitem[fielditem.englishname] }">
-										<c:choose>
-											<c:when test="${fielditem.fieldtype =='VARCHAR' }">
-												<c:set var="subStr" value="${archiveitem[fielditem.englishname]}"></c:set>
-												<c:choose>
-													<c:when test="${fn:length(subStr) > subString }">
-														${fn:substring(archiveitem[fielditem.englishname], 0, subString)}..
-													</c:when>
-													<c:otherwise>
-												      	${archiveitem[fielditem.englishname]}
-												    </c:otherwise>
-												</c:choose>
-											</c:when>
-											<c:otherwise>
-												${archiveitem[fielditem.englishname]}
-											</c:otherwise>
-										</c:choose>
-											
-										</td>
-										</c:if>
-									</c:forEach>
-									<td>
-										<a href="javascript:;" onclick="show('${archiveitem.id }')">
-											<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/application_view_list.png" />
-											详细
-									    </a>
-									</td>
-								</tr>
+									</a>
+								</div>
+								<div>
+									<div class="miaoshu" title="${archiveitem.tm}">
+										<span>
+											<c:set var="subStr" value="${archiveitem.tm}"></c:set>
+											<c:choose>
+												<c:when test="${fn:length(subStr) > 12 }">
+													${fn:substring(archiveitem.tm, 0, 12)}..
+												</c:when>
+												<c:otherwise>
+											      	${archiveitem.tm }
+											    </c:otherwise>
+											</c:choose>
+										</span>
+									</div>
+									<div class="xuanze_btn">
+										<%-- <a href="javascript:;" onclick="edit('${archiveitem.id }')"><img src="${pageContext.request.contextPath}/images/xiangce_03.gif" width="29" height="28" /></a>
+										<a href="javascript:;" onclick="del('${archiveitem.id }')"><img src="${pageContext.request.contextPath}/images/xiangce_05.jpg" width="29" height="28" /></a> --%>
+									</div>
+									<div style="clear: both"></div>
+								</div>
+								<div style="clear: both"></div>
+							</li>
 							</c:forEach>
-						</tbody>
-					</table>
+		              </ul>
+		            </div>
 				</div>
 				<div class="aa" style="margin-left:5px" >
 					<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >

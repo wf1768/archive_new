@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-
 <%@ include file="/view/common/header.jsp"%>
 <%@ include file="/view/common/top_menu.jsp"%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
@@ -8,12 +7,14 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/js/dropmenu/style.css" type="text/css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/dropmenu/dropmenu.js"></script>
 <!-- 分页插件 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pagination/jquery.pagination.js"></script>
+
+<!-- 右键 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.css" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.js"></script>
+
 
 <script type="text/javascript">
 
@@ -162,22 +163,15 @@
 		}
 		
 		selectNode(selectTreeid);
+		
 	});
 	
 	function callback() {
-		$(".scrollTable").height($(".scrollTable").height() - $("#aj").height()) ;
-		
 		var n = $(".scrollTable").height()-$(".aa").height();
+		$("#la").height($("#bodyer_right").height());
 		$('.data_table').fixHeader({
 			height : n
 		});
-
-		
-		/* $('#la').layout({ 
-			applyDemoStyles: false,
-			spacing_open:3, //边框的间隙
-			west__size:230
-		}); */
 		
 		$('#checkall').click(function(){
 		    $('input[name="checkbox"]').attr("checked",this.checked);
@@ -200,11 +194,76 @@
 		});
 		//$('.shiftCheckbox').shiftcheckbox();
 		
-		var jscroll = getCookie('jscroll');
-		$('.body-wrapper').scrollTop(jscroll);
-		delCookie('jscroll');//删除cookie
+		var jscroll = getCookie('xiangce_wj');
+		$('.xiangce').scrollTop(jscroll);
+		delCookie('xiangce_wj');//删除cookie
 		
 		$.unblockUI();
+		
+		$('.tip').mouseover(function(e){
+			var img = new Image();
+			img.src =this.src ;
+			var h = img.height;
+			
+			if (h > 300) {
+				h = h/2;
+			}
+			var $tip=$('<div id="tip"><div class="t_box"><div><s><i></i></s><img height="'+h+'" id="tipImg" src="'+this.src+'" /></div></div></div>');
+			
+			$('body').append($tip);
+			$('#tip').show('fast');
+			
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			//var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var imgWidth = $('#tipImg').width();
+			var bWidth = $('body').width();
+			
+			var t = (bheight - e.pageY);
+			var x = (bWidth - e.pageX);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			else {
+				$('#tip').css({"top":(e.pageY-60)+"px","left":(e.pageX+30)+"px"});
+			}
+			
+			if (imgWidth > x) {
+				var xx = bWidth - imgWidth - x -30;
+				$('#tip').css({"left":xx+"px"});
+			}
+			
+		}).mouseout(function(){
+		   $('#tip').remove();
+		}).mousemove(function(e){
+			var imgHeight = $('#tipImg').height();
+			//var oTop = $('#tip').offset().top;
+			//var oHeight = $('#tip').height();
+			var bheight = $('body').height();
+			
+			var imgWidth = $('#tipImg').width();
+			var bWidth = $('body').width();
+			
+			var t = (bheight - e.pageY);
+			var x = (bWidth - e.pageX);
+			
+			if (imgHeight > t) {
+				var bb = imgHeight - t;
+				$('#tip').css({"top":(e.pageY - bb)+"px","left":(e.pageX+30)+"px"});
+			}
+			else {
+				$('#tip').css({"top":(e.pageY-60)+"px","left":(e.pageX+30)+"px"});
+			}
+			
+			if (imgWidth > x) {
+				var xx = bWidth - imgWidth - x -30;
+				$('#tip').css({"left":xx+"px"});
+			}
+		})
 		
 	}
 	
@@ -215,13 +274,60 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page="+page_index+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
-	}; 
+	};
+	
+	function showvideo(id) {
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点。');
+			return;
+		}
+		
+		if (id == "") {
+			alert("请先选择要播放的多媒体文件。");
+			return;
+		}
+		
+		var url = "${pageContext.request.contextPath}/archive/showvideo.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+		var whObj = {
+			width : 850,
+			height : 600
+		};
+		var result = openShowModalDialog(url, window, whObj);
+	}
+	
+	function down_pic(id) {
+		
+		var treeid = '${selectid}';
+		
+		if (treeid == '' || treeid == '0') {
+			alert('请选择左侧档案节点，再下载多媒体文件。');
+			return;
+		}
+		
+		var link = "${pageContext.request.contextPath}/archive/down_pic.do?treeid="+treeid+"&tabletype=02&id="+id+"&time=" + Date.parse(new Date());
+        window.location.href=link;
+        return false;
+	}
+	
+	function isSearchWj() {
+		var openexpand = JSON.stringify(expand);
+		var searchTreeids = '${searchTreeids}';
+		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
+	}
+	
+	function showWj(id) {
+		var openexpand = JSON.stringify(expand);
+		var searchTreeids = '${searchTreeids}';
+		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }&searchTxt_aj=${searchTxt }&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids;
+	}
 	
 	function searchArchive() {
 		
-var searchTxt = $("#searchTxt").val();
+		var searchTxt = $("#searchTxt").val();
 		
 		if (searchTxt != "") {
 			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
@@ -242,12 +348,6 @@ var searchTxt = $("#searchTxt").val();
 		var openexpand = JSON.stringify(expand);
 		
 		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
-	}
-	
-	function returnAj() {
-		var openexpand = JSON.stringify(expand);
-		var searchTreeids = '${searchTreeids}';
-		window.location.href='${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }&expand='+openexpand+'&searchTreeids='+searchTreeids;
 	}
 	
 	function setshow(templetid,tabletype) {
@@ -282,51 +382,22 @@ var searchTxt = $("#searchTxt").val();
 		var result = openShowModalDialog(url, window, whObj);
 	}
 	
-	function doc(id) {
-		jscroll('body-wrapper');
-		var treeid = '${selectid}';
-		
-		if (treeid == '' || treeid == '0') {
-			alert('请选择左侧档案节点，再查看档案电子文件。');
-			return;
-		}
-		
-		var str = "";
-		if (id != "") {
-			str = id;
-		}
-		else {
-			$("input[name='checkbox']:checked").each(function () {
-				str+=$(this).val()+ ",";
-			});
-			
-			if (str == "") {
-				alert("请先选择要挂接电子文件的档案数据。");
-				return;
-			}
-			str = str.substring(0,str.length-1);
-		}
-		//判断是单个挂接还是多个。
-		var s = str.split(",");// 在每个逗号(,)处进行分解。
-		var winW = $(window).width();
-		var w = winW * 0.8;
-		if (s.length == 1) {
-			var whObj = {
-				width : 650,
-				height : 500
-			};
-		}
-		else {
-			var whObj = {
-				width : w,
-				height : 500
-			};
-		}
-		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=02&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
-		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
+	function returnAj() {
+		var openexpand = JSON.stringify(expand);
+		var searchTreeids = '${searchTreeids}';
+		window.location.href='${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }&expand='+openexpand+'&searchTreeids='+searchTreeids;
 	}
 </script>
+
+<style type="text/css">
+#tip   {position:absolute;color:#333;display:none;}
+#tip s   {position:absolute;top:40px;left:-20px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #BBA transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip s i   {position:absolute;top:-10px;left:-8px;display:block;width:0px;height:0px;font-size:0px;line-height:0px;border-color:transparent #fff transparent transparent;border-style:dashed solid dashed dashed;border-width:10px;}
+#tip .t_box   {position:relative;background-color:#CCC;filter:alpha(opacity=50);-moz-opacity:0.5;bottom:-3px;right:-3px;}
+#tip .t_box div  {position:relative;background-color:#FFF;border:1px solid #ACA899;background:#FFF;padding:1px;top:-3px;left:-3px;}
+ 
+.tip   {border:1px solid #DDD;}
+</style>
 
 <!--智能检索-内容部分开始-->
   	<div id="bodyer">
@@ -349,96 +420,54 @@ var searchTxt = $("#searchTxt").val();
 				<div class="top_dd" style="margin-bottom: 10px;position:relative;z-index:999; ">
 					<div class="dqwz_l">当前位置：智能检索
 					<c:if test="${not empty treename}">
-						-${treename }-文件级
+						-${treename }-多媒体文件
 					</c:if>
 					</div>
 					<div class="caozuoan">
 						<div style="float: right;margin-top: 3px;margin-left: 5px">
 							<button onclick="setshow('${templet.id}','02')">设置</button>
+							<button onclick="returnAj()">返回</button>
 							<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
 							<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 						</div>
 					</div>
 					<div style="clear: both"></div>
 				</div>
-				<div style="margin-bottom: 10px;">
-					<table id="aj" class="table-Kang" style="margin-left: 5px;position:relative;z-index:998;" aline="left" width="98%" border=0 cellspacing="1" cellpadding="4">
-						<thead>
-							<tr class="tableTopTitle-bg">
-								<td width="40px">行号</td>
-								<c:forEach items="${ajFieldList}" varStatus="i" var="item">
-									<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
-										<td>${item.chinesename }</td>
-									</c:if>
-								</c:forEach>
-								<td>操作</td>
-							</tr>
-						</thead>
-						<tbody>
-							<tr class="table-SbgList">
-								<c:forEach items="${maps}" varStatus="i" var="archiveitem">
-										<td>${i.index+1 }</td>
-										<c:forEach items="${ajFieldList}" varStatus="j" var="fielditem">
-											<c:if test="${(fielditem.sort > 0) and (fielditem.isgridshow == 1)}">
-											<td title="${archiveitem[fielditem.englishname] }">
-											<c:choose>
-												<c:when test="${fielditem.fieldtype =='VARCHAR' }">
-													<c:set var="subStr" value="${archiveitem[fielditem.englishname]}"></c:set>
-													<c:choose>
-														<c:when test="${fn:length(subStr) > subString }">
-															${fn:substring(archiveitem[fielditem.englishname], 0, subString)}..
-														</c:when>
-														<c:otherwise>
-													      	${archiveitem[fielditem.englishname]}
-													    </c:otherwise>
-													</c:choose>
-												</c:when>
-												<c:otherwise>
-													${archiveitem[fielditem.englishname]}
-												</c:otherwise>
-											</c:choose>
-												
-											</td>
-											</c:if>
-										</c:forEach>
-								</c:forEach>
-								<td>
-									<a href="javascript:;" onclick="returnAj()" class="juse">
-										<img style="margin-bottom: -3px" src="${pageContext.request.contextPath}/images/icons/arrow_undo.png" />
-										返回案卷
-									</a>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
 				<div class="scrollTable" align="left" style="padding-left:5px; ">
 					<table id="data_table" class="data_table table-Kang" aline="left" width="98%"
-						border=0 cellspacing="1" cellpadding="4">
+				border=0 cellspacing="1" cellpadding="4">
 						<thead>
 							<tr id="table_head" class="tableTopTitle-bg">
 								<td width="30px"><input type="checkbox" id="checkall"></td>
 								<td width="40px">行号</td>
-								<td width="40px">全文</td>
+								<td width="40px">预览</td>
 								<c:forEach items="${fields}" varStatus="i" var="item">
 									<c:if test="${(item.sort > 0) and (item.isgridshow == 1)}">
 										<td>${item.chinesename }</td>
 									</c:if>
 								</c:forEach>
-								<td width="60px">操作</td>
+								<td width="180px">操作</td>
 							</tr>
 						</thead>
 						<tbody>
 							<c:forEach items="${pagebean.list}" varStatus="i" var="archiveitem">
 								<tr class="table-SbgList">
-									<td><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
+									<td name="${archiveitem.id }"><input type="checkbox" name="checkbox" value="${archiveitem.id }" class="shiftCheckbox"></td>
 									<td>${pagebean.pageSize*(pagebean.pageNo-1) + i.index+1 }</td>
+									<c:set var="slt" value="${archiveitem.slt}"></c:set>
+				                    <c:set var="slttype" value="${archiveitem.slttype}"></c:set>
 									<c:choose>
-										<c:when test="${archiveitem['isdoc'] == 1 }">
-											<td><a title="电子全文" href="javascript:;" onclick="doc('${archiveitem.id }')"><img src="${pageContext.request.contextPath }/images/icons/attach.png" ></a></td>
+										<c:when test="${fn:length(slt) == 0 }">
+											<td><img class="tip" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="30" width="35"/></td>
+										</c:when>
+										<c:when test="${slttype == 'VIDEO' }">
+											<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/file/pic/video.jpg" height="30" width="35"/></td>
+										</c:when>
+										<c:when test="${slttype == 'OTHER' }">
+											<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/images/no_photo_135.png" height="30" width="35"/></td>
 										</c:when>
 										<c:otherwise>
-											<td></td>
+											<td><img class="tip" title="${archiveitem.sltname }" style="z-index:1;" src="${pageContext.request.contextPath}/${archiveitem.slt}" height="30" width="35"/></td>
 										</c:otherwise>
 									</c:choose>
 									

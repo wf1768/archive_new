@@ -21,7 +21,14 @@
 		if (result != "") {
 			alert(result);
 		}
-		var parentWin=window.dialogArguments;
+		
+		var tabletype = '${tabletype }';
+		
+		if (tabletype == '01') {
+			$('#aj').hide();
+		}
+		
+		//var parentWin=window.dialogArguments;
 		//var buttonValue=parentWin.document.getElementByIdx("mybutton2").value;   //获取父窗口中的对象
 		//var parentValue=parentWin.nodes;       //获取父窗口中的变量
 		
@@ -159,9 +166,11 @@
 				<td align="center">
 					<button type="button" onclick="closepage()">关闭</button>
 					<c:if test="${tabletype=='02' }">
-						<button type="button" onclick="upload_pic_single('${maps[0]['id']}')">上传</button>
+						<c:if test="${readonly==0 }">
+							<button type="button" onclick="upload_pic_single('${maps[0]['id']}')">上传</button>
+							<button type="button" onclick="setCover('${maps[0]['id']}')">设为相册封面</button>
+						</c:if>
 						<button type="button" onclick="down_pic('${maps[0]['id']}')">下载</button>
-						<button type="button" onclick="setCover('${maps[0]['id']}')">设为相册封面</button>
 						<c:if test="${maps[0].slttype=='VIDEO' }">
 							<button type="button" onclick="showvideo('${maps[0]['id']}')">播放多媒体</button>
 						</c:if>
@@ -189,6 +198,28 @@
                 </td>
             </tr>
 			
+		</tbody>
+	</table>
+	<table id="aj" width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+			<tr>
+                <td colspan="2" align="center">
+                	所属相册信息
+                </td>
+            </tr>
+            <c:forEach items="${ajField}" varStatus="j" var="item">
+				<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+					<tr>
+						<td>${item.chinesename } :</td>
+						<td>${ajMaps[0][item.englishname]}</td>
+					</tr>
+				</c:if>
+			</c:forEach>
+			<tr>
+				<td colspan="2" align="center">
+					<button type="button" onclick="closepage()">关闭</button>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 </body>

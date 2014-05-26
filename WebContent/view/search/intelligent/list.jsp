@@ -238,23 +238,25 @@
 	
 	function searchArchive() {
 		
-		var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
-		var nodes = treeObj.getCheckedNodes(true);
-		
-		var arrayObj = new Array();
-		for(var i=0;i<nodes.length;i++) {
-			arrayObj.push(nodes[i].id);
-		}
-		
-		if (arrayObj.length == 0) {
-			alert("请先选择左侧要查询的树节点，再查询.");
-			return;
-		}
-		var treeids = JSON.stringify(arrayObj);
-		var openexpand = JSON.stringify(expand);
-		
-		//var pageno = ${pagebean.pageNo };
 		var searchTxt = $("#searchTxt").val();
+		
+		if (searchTxt != "") {
+			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+			var nodes = treeObj.getCheckedNodes(true);
+			
+			var arrayObj = new Array();
+			for(var i=0;i<nodes.length;i++) {
+				arrayObj.push(nodes[i].id);
+			}
+			
+			if (arrayObj.length == 0) {
+				alert("请先选择左侧要查询的树节点，再查询.");
+				return;
+			}
+			var treeids = JSON.stringify(arrayObj);
+		}
+		
+		var openexpand = JSON.stringify(expand);
 		
 		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
 	}

@@ -550,7 +550,7 @@
 		var treeid = '${selectid}';
 		
 		if (treeid == '' || treeid == '0') {
-			alert('请选择左侧档案节点，再下载多媒体文件。');
+			alert('未获得系统参数，请重新登录，再操作。');
 			return;
 		}
 		window.location.href='${pageContext.request.contextPath }/archive/list.do?treeid='+treeid+'&page=${page_aj}&searchTxt=${searchTxt_aj }';

@@ -118,7 +118,7 @@
 					<td><input type="checkbox" id="isgridshow" name="isgridshow" ${field.isgridshow==1?'checked':'' }></td>
 				</tr>
 				<tr class="tr1">
-					<td class="txt1">列表显示 :</td>
+					<td class="txt1">著录编辑 :</td>
 					<td><input type="checkbox" id="isedit" name="isedit" ${field.isedit==1?'checked':'' }></td>
 				</tr>
 				<tr class="tr1">

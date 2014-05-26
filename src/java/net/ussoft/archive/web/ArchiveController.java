@@ -31,7 +31,6 @@ import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_config;
 import net.ussoft.archive.model.Sys_doc;
-import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
@@ -52,7 +51,6 @@ import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
 import net.ussoft.archive.util.Excel;
 import net.ussoft.archive.util.FileOperate;
-import net.ussoft.archive.util.FtpUtil;
 import net.ussoft.archive.util.ResizeImage;
 import net.ussoft.archive.util.resule.ResultInfo;
 
@@ -645,7 +643,6 @@ public class ArchiveController extends BaseConstroller {
 //		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
 //		
-//		List<Sys_templetfield> fields = treeService.geTempletfields(treeid, tabletype,account.getId());
 		List<Sys_templetfield> fields = getTempletfields(treeid, tabletype);
 		
 		modelMap.put("fields", fields);
@@ -659,6 +656,22 @@ public class ArchiveController extends BaseConstroller {
 			return null;
 		}
 		modelMap.put("maps", maps);
+		
+		
+		//如果是文件级，获取案卷级信息，页面仅显示
+		if (tabletype.equals("02")) {
+			List<Sys_templetfield> ajField = getTempletfields(treeid, "01");
+			
+			modelMap.put("ajField", ajField);
+			//获取档案信息
+			idList.clear();
+			idList.add(maps.get(0).get("parentid").toString());
+			List<Map<String, Object>> ajMaps = dynamicService.get(treeid,"", "01", idList,null,null,null);
+			
+			modelMap.put("ajMaps", ajMaps);
+		}
+		
+		
 		Sys_account_tree account_tree = accountService.getTreeAuth(account.getId(), treeid);
 		if (null == account_tree) {
 			Sys_org_tree org_tree = orgService.getTreeAuth(account.getOrgid(), treeid);

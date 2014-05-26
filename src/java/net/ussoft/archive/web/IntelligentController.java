@@ -318,9 +318,11 @@ public class IntelligentController extends BaseConstroller{
 							modelMap.put("page_aj", page_aj);
 							modelMap.put("searchTxt_aj", searchTxt_aj);
 							
+							pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, null, 0, pageBean);
 						}
-						
-						pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, sessionSearchTxt, 0, pageBean);
+						else {
+							pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, sessionSearchTxt, 0, pageBean);
+						}
 		    		}
 		    	}
 		    	else {
@@ -357,54 +359,53 @@ public class IntelligentController extends BaseConstroller{
 					if (isSearchWj == 1) {
 						url = "/view/search/intelligent/list_search_wj";
 					}
-					//如果选中的树节点在检索范围内，返回查询文件页
-//					if (isSearchTreeid) {
-//						url = "/view/search/intelligent/list_search_wj";
-//					}
-//					else {
-//						//如果不在范围内，返回正常文件页
-//						url = "/view/search/intelligent/list_wj";
-//					}
 				}
-				
-//				if (null != templet && templet.getTemplettype().equals("F")) {
-//					url = "/view/archive/archive/list";
-//				}
 				
 				if (null != templet && templet.getTemplettype().equals("P")) {
 					if ("IMAGE".equals(imageshow)) {
-						//如果选中的树节点在检索范围内，返回查询文件页
-						if (isSearchTreeid) {
-							url = "/view/search/intelligent/listpic_search";
-							if (tabletype.equals("02")) {
-								url = "/view/search/intelligent/listpic_search_wj";
-							}
+						//如果不在范围内，返回正常文件页
+						url = "/view/search/intelligent/listpic";
+						if (tabletype.equals("02")) {
+							url = "/view/search/intelligent/listpic_wj";
 						}
-						else {
-							//如果不在范围内，返回正常文件页
-							url = "/view/search/intelligent/listpic";
-							if (tabletype.equals("02")) {
-								url = "/view/search/intelligent/listpic_wj";
-							}
-						}
+//						//如果选中的树节点在检索范围内，返回查询文件页
+//						if (isSearchTreeid) {
+//							url = "/view/search/intelligent/listpic_search";
+//							if (tabletype.equals("02")) {
+//								url = "/view/search/intelligent/listpic_search_wj";
+//							}
+//						}
+//						else {
+//							//如果不在范围内，返回正常文件页
+//							url = "/view/search/intelligent/listpic";
+//							if (tabletype.equals("02")) {
+//								url = "/view/search/intelligent/listpic_wj";
+//							}
+//						}
 						
 					}
 					else {
-						
-						//如果选中的树节点在检索范围内，返回查询文件页
-						if (isSearchTreeid) {
-							url = "/view/search/intelligent/listpic_search_list";
-							if (tabletype.equals("02")) {
-								url = "/view/search/intelligent/listpic_search_list_wj";
+						url = "/view/search/intelligent/listpic_list";
+						if (tabletype.equals("02")) {
+							url = "/view/search/intelligent/listpic_wj_list";
+							if (isSearchWj == 1) {
+								url = "/view/search/intelligent/listpic_wj_list_search";
 							}
 						}
-						else {
-							//如果不在范围内，返回正常文件页
-							url = "/view/search/intelligent/listpic_list";
-							if (tabletype.equals("02")) {
-								url = "/view/search/intelligent/listpic_list_wj";
-							}
-						}
+//						//如果选中的树节点在检索范围内，返回查询文件页
+//						if (isSearchTreeid) {
+//							url = "/view/search/intelligent/listpic_search_list";
+//							if (tabletype.equals("02")) {
+//								url = "/view/search/intelligent/listpic_search_list_wj";
+//							}
+//						}
+//						else {
+//							//如果不在范围内，返回正常文件页
+//							url = "/view/search/intelligent/listpic_list";
+//							if (tabletype.equals("02")) {
+//								url = "/view/search/intelligent/listpic_list_wj";
+//							}
+//						}
 					}
 				}
 		    }

@@ -17,7 +17,13 @@
 <script>
 
 	$(function(){
-		var parentWin=window.dialogArguments;
+		var tabletype = '${tabletype }';
+		
+		if (tabletype == '01') {
+			$('#aj').hide();
+		}
+		
+		//var parentWin=window.dialogArguments;
 		//var buttonValue=parentWin.document.getElementByIdx("mybutton2").value;   //获取父窗口中的对象
 		//var parentValue=parentWin.nodes;       //获取父窗口中的变量
 		
@@ -59,7 +65,7 @@
 		
 		var treeid = '${treeid}';
 		if (treeid == '') {
-			alert('请选择左侧档案节点，再查看档案。');
+			alert('没有获得系统参数，请退出重新登录，再尝试操作。');
 			return;
 		}
 		
@@ -171,6 +177,29 @@
 					<c:if test="${readonly == 0 }">
 					<button type="button" onclick="upload('${maps[0]['id']}')">上传</button>
 					</c:if>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<table id="aj" width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
+		<tbody>
+			<tr>
+                <td colspan="2" align="center">
+                	所属案卷信息
+                </td>
+            </tr>
+            <c:forEach items="${ajField}" varStatus="j" var="item">
+				<c:if test="${(item.sort > 0) and (item.isedit == 1)}">
+					<tr>
+						<td>${item.chinesename } :</td>
+						<td>${ajMaps[0][item.englishname]}</td>
+					</tr>
+				</c:if>
+			</c:forEach>
+			<tr>
+				<td colspan="2" align="center">
+					<button type="button" onclick="closepage()">关闭</button>
 				</td>
 			</tr>
 		</tbody>
