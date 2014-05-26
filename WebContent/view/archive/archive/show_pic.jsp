@@ -160,6 +160,7 @@
 			</tr>
 		</tbody>
 	</table>
+	<c:set var="slt" value="${maps[0].slt }"></c:set>
 	<table width="600" cellspacing="0" cellpadding="8" align="center" style="margin-top:20px">
 		<tbody>
 			<tr>
@@ -170,7 +171,9 @@
 							<button type="button" onclick="upload_pic_single('${maps[0]['id']}')">上传</button>
 							<button type="button" onclick="setCover('${maps[0]['id']}')">设为相册封面</button>
 						</c:if>
+						<c:if test="${fn:length(slt) != 0 }">
 						<button type="button" onclick="down_pic('${maps[0]['id']}')">下载</button>
+						</c:if>
 						<c:if test="${maps[0].slttype=='VIDEO' }">
 							<button type="button" onclick="showvideo('${maps[0]['id']}')">播放多媒体</button>
 						</c:if>
@@ -179,7 +182,6 @@
 			</tr>
 			<tr style="width:500px">
                 <td align="center">
-                	<c:set var="slt" value="${maps[0].slt }"></c:set>
                    	<c:set var="slttype" value="${maps[0].slttype}"></c:set>
 					<c:choose>
 						<c:when test="${fn:length(slt) == 0 }">
