@@ -35,11 +35,13 @@ public class PageController {
 				return "/page/info";
 			}
 		}
-		Sys_config config = new Sys_config();
-		config.setConfigkey("SYSNAME");
-		config = configService.selectByWhere(config);
-		modelMap.put("sysname", config.getConfigvalue());
-		return "login";
+//		Sys_config config = new Sys_config();
+//		config.setConfigkey("SYSNAME");
+//		config = configService.selectByWhere(config);
+//		modelMap.put("sysname", config.getConfigvalue());
+		
+		return "redirect:/login.do"; 
+//		return "login";
     }
 	@RequestMapping("/page/content")
 	public String content() {
