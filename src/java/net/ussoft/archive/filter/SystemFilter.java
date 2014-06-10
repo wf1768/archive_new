@@ -61,7 +61,7 @@ public class SystemFilter implements Filter {
 //        }
         
 //        String[] strs = ProsReader.getString("INDICATION_APP_NAME").split("\\|");
-        String[] strs = {"kaptcha","init","page","login","css","js","image"};
+        String[] strs = {"kaptcha","init","page","login","css","js","image","onRegist"};
         if (strs != null && strs.length > 0) {  
             for (String str : strs) {
                 if (url.indexOf(str) >= 0) {

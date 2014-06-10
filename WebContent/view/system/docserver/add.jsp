@@ -82,7 +82,7 @@
 					<td>服务器类型 :</td>
 					<td>
 						<select class="s" id="servertype_l" name="servertype" reg="[^0]" tip="请先选择创建服务器类型">
-							<option value="FTP">FTP服务器</option>
+							<!-- <option value="FTP">FTP服务器</option> -->
 							<option value="LOCAL">服务器本地目录</option>
 						</select>
 					</td>

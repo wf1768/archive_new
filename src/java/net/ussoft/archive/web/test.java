@@ -14,6 +14,7 @@ public class test {
 //		0000111711171117111711171117
 //		398da0402c01b2f70178b430efb92b450178b430efb92b457c6fd1e8f6767646
 	
+	
 //	每个4位代表含义
 //	1、第一个四位如果是1117，代表系统包含前端数字档案管页面
 //	2、第二个四位如果是1117 ，代表系统是集团版
@@ -22,16 +23,47 @@ public class test {
 //	5、第五个四位如果是1117 代表系统包含多媒体管理
 //	6、第六个四位如果是1117 代表系统包含全文检索
 //	7、第七个四位如果是1117 代表系统包含全文浏览器
+	/**
+	 * 生成系统类型代码
+	 * @return
+	 */
+	public static String getSystemtype(String str) {
+		String result= "";
+		try {
+            EncryptionDecryption des = new EncryptionDecryption();// 自定义密钥
+            result = des.encrypt(str);
+            System.out.println("加密前的字符：" + str);
+            System.out.println("加密后的字符：" + result);
+            System.out.println("解密后的字符：" + des.decrypt(des.encrypt(str)));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+		return result;
+	}
+	/**
+	 * 根据系统生成的机器码，生成系统注册码
+	 * @param str
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getRegistCode(String str) throws Exception {
+		EncryptionDecryption des = new EncryptionDecryption();
+		String registCode = des.encrypt(str);
+		
+		System.out.println("注册码：" + registCode);
+		
+		return registCode;
+	}
+	
 	public static void main(String[] args) {
 		try {
+			//生成系统类型代码
             String test = "0000222211171117111711175678";
-            EncryptionDecryption des = new EncryptionDecryption("zljt");// 自定义密钥
-            System.out.println("加密前的字符：" + test);
-            System.out.println("加密后的字符：" + des.encrypt(test));
-            System.out.println("解密后的字符：" + des.decrypt(des.encrypt(test)));
-
-            System.out.println("解密后的字符："
-                    + des.decrypt("fe14c7c41f7d2a94b07d7928b21346e7"));
+            getSystemtype(test);
+            
+            //生成系统注册码
+            getRegistCode("6d2f1c3e93f6344baebe8f4f6a93059197d1a069bb8130ff");
 
         } catch (Exception e) {
             e.printStackTrace();

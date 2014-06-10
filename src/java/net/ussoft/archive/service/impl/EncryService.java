@@ -14,7 +14,7 @@ import net.ussoft.archive.util.EncryptionDecryption;
 @Service
 public class EncryService implements IEncryService {
 	
-	private String keyString = "zljt";
+//	private String keyString = "zljt";
 	
 	@Resource
 	private InitDao initDao;
@@ -24,7 +24,7 @@ public class EncryService implements IEncryService {
 		if (str == null || str.equals("") ) {
 			return "";
 		}
-		EncryptionDecryption des = new EncryptionDecryption(keyString);
+		EncryptionDecryption des = new EncryptionDecryption();
 		return des.encrypt(str);
 	}
 
@@ -33,7 +33,7 @@ public class EncryService implements IEncryService {
 		if (str == null || str.equals("") ) {
 			return "";
 		}
-		EncryptionDecryption des = new EncryptionDecryption(keyString);
+		EncryptionDecryption des = new EncryptionDecryption();
 		return des.decrypt(str);
 	}
 

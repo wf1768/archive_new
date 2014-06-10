@@ -1,6 +1,7 @@
 package net.ussoft.archive.web;
 
 import java.awt.image.BufferedImage;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,11 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_function;
+import net.ussoft.archive.model.Sys_init;
 import net.ussoft.archive.service.IAccountService;
+import net.ussoft.archive.service.IInitService;
 import net.ussoft.archive.service.IRoleService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.Constants;
+import net.ussoft.archive.util.EncryptionDecryption;
 import net.ussoft.archive.util.Logger;
+import net.ussoft.archive.util.SystemTool;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,15 +44,122 @@ public class LoginController extends BaseConstroller {
 	private IAccountService accountService;
 	@Resource
 	private IRoleService roleService;
+	@Resource
+	private IInitService initService;
 	
 	@Autowired
 	private Producer captchaProducer = null;
 	
 	@RequestMapping(value="/login")
-	public String login (ModelMap modelMap) {
+	public String login (ModelMap modelMap) throws Exception {
+		
 		HashMap<String, Object> configMap = getConfig("SYSTEM");
 		modelMap.put("sysname", configMap.get("SYSNAME"));
-		return "login";
+		
+		//系统注册验证
+		Boolean regist = regist();
+		if (regist) {
+			return "login";
+		}
+		else {
+			String mac = getLocalMacAddress();
+			String createRegistCode = getRegistCode(mac);
+			modelMap.put("registcode", createRegistCode);
+			return "regist";
+		}
+		
+	}
+	
+	//系统注册验证
+	public Boolean regist() throws Exception {
+		
+		Boolean result = false;
+		String mac = getLocalMacAddress();
+		
+		String tmp = getRegistCode(mac);
+		
+		EncryptionDecryption des = new EncryptionDecryption();
+		String createRegistCode = des.encrypt(tmp);
+		
+		//检查系统注册，如果注册不对，转到注册页.
+		Sys_init init = new Sys_init();
+		init.setInitkey("registcode");
+		init = initService.selectByWhere(init);
+		
+		if (null != init) {
+			String registcode = init.getInitvalue();
+			
+			//如果注册码为空
+			if (!init.getInitvalue().equals("") && createRegistCode.equals(registcode)) {
+				result = true;
+			}
+		}
+				
+		return result;
+	}
+	//获取本机mac地址
+	public String getLocalMacAddress() throws Exception {
+		String os = SystemTool.getOSName();
+		
+		String macAddress = "";
+		if (os.startsWith("windows")) {
+			//获取windows的ip对象
+			InetAddress idAddress = SystemTool.getInetAddress();
+			macAddress = SystemTool.getMACAddress(idAddress);
+			
+		} else if (os.startsWith("linux")) {
+			//获取linux的ip对象
+			InetAddress idAddress = SystemTool.getInetAddressOnLinux();
+			macAddress = SystemTool.getMACAddress(idAddress);
+			
+		} else {
+			//如果是mac os
+			InetAddress idAddress = SystemTool.getInetAddress();
+			macAddress = SystemTool.getMACAddress(idAddress);
+		}
+		return macAddress;
+	}
+	
+	//生成本机注册码
+	public String getRegistCode(String str) throws Exception {
+		EncryptionDecryption des = new EncryptionDecryption("regist");
+		
+		String registCode = des.encrypt(str);
+		return registCode;
+//        System.out.println("加密前的字符：" + test);
+//        System.out.println("加密后的字符：" + des.encrypt(test));
+//        System.out.println("解密后的字符：" + des.decrypt(des.encrypt(test)));
+
+	}
+	@RequestMapping(value="/onRegist", method=RequestMethod.POST)
+	public String onRegist(String initvalue,String id,HttpServletResponse resp,ModelMap modelMap) throws Exception {
+		//获取对象
+		Sys_init init = initService.selectById(id);
+		init.setInitvalue(initvalue);
+		int num = initService.update(init);
+		if (num >0) {
+			//modelMap.put("result", "修改成功");
+		}
+		else {
+			//modelMap.put("result", "修改时发生问题，请重新尝试或与管理员联系。");
+		}
+		List<Sys_init> initList = initService.list();
+		for (Sys_init sys_init : initList) {
+			modelMap.put(sys_init.getInitkey(), sys_init);
+		}
+		
+		//系统注册验证
+		Boolean regist = regist();
+		if (regist) {
+			return "login";
+		}
+		else {
+			String mac = getLocalMacAddress();
+			String createRegistCode = getRegistCode(mac);
+			modelMap.put("registcode", createRegistCode);
+			return "regist";
+		}
+				
 	}
 	
 	@RequestMapping(value="/onlogin",method=RequestMethod.POST)

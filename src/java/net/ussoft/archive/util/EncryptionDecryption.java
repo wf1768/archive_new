@@ -8,7 +8,7 @@ import javax.crypto.Cipher;
 
 public class EncryptionDecryption {
 
-	private static String strDefaultKey = "tourhb";
+	private static String strDefaultKey = "zfjt";
 
 	/** 加密工具 */
 	private Cipher encryptCipher = null;

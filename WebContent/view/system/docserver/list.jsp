@@ -131,10 +131,10 @@ function refresh() {
 						<td>服务器名称</td>
 						<td>服务器类型</td>
 						<td>服务器路径</td>
-						<td>服务器IP</td>
+						<!-- <td>服务器IP</td>
 						<td>FTP帐户</td>
 						<td>FTP密码</td>
-						<td>FTP端口</td>
+						<td>FTP端口</td> -->
 						<td>状态</td>
 						<td>描述</td>
 						<td>操作</td>
@@ -147,10 +147,10 @@ function refresh() {
 						<td>${item.servername}</td>
 						<td>${item.servertype}</td>
 						<td>${item.serverpath}</td>
-						<td>${item.serverip}</td>
+						<%-- <td>${item.serverip}</td>
 						<td>${item.ftpuser}</td>
 						<td>${item.ftppassword}</td>
-						<td>${item.serverport}</td>
+						<td>${item.serverport}</td> --%>
 						<td>
 						<c:if test="${item.serverstate==1 }">
 							<font color="red">已启用</font>

@@ -33,12 +33,13 @@ public class GetMacAddress {
              process = Runtime.getRuntime().exec("ifconfig eth0");
              bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));     
              String line = null;     
-             int index = -1;     
+             int index = -1;
+             line = bufferedReader.readLine();
              while ((line = bufferedReader.readLine()) != null) {     
                     /**  
                      *  寻找标示字符串[hwaddr]   
                      */  
-                 index = line.toLowerCase().indexOf("hwaddr");    
+                 index = line.toLowerCase().indexOf("hwaddr");
                     /**  
                      * 找到了  
                      */  
@@ -51,7 +52,7 @@ public class GetMacAddress {
                  }     
              }     
          } catch (IOException e) {     
-             e.printStackTrace();     
+             e.printStackTrace(); 
          } finally {     
              try {     
                  if (bufferedReader != null) {     
