@@ -15,17 +15,21 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import net.ussoft.archive.dao.AccountTreeDao;
 import net.ussoft.archive.dao.DocDao;
 import net.ussoft.archive.dao.DocserverDao;
 import net.ussoft.archive.dao.DynamicDao;
+import net.ussoft.archive.dao.OrgTreeDao;
 import net.ussoft.archive.dao.TableDao;
 import net.ussoft.archive.dao.TempletDao;
 import net.ussoft.archive.dao.TempletfieldDao;
 import net.ussoft.archive.dao.TreeDao;
 import net.ussoft.archive.model.PageBean;
 import net.ussoft.archive.model.Sys_account;
+import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
+import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_templetfield;
@@ -43,6 +47,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 @Service
 public class DynamicService implements IDynamicService {
@@ -62,7 +68,40 @@ public class DynamicService implements IDynamicService {
 	@Resource
 	private DocDao docDao;
 	@Resource
+	private AccountTreeDao accountTreeDao;
+	@Resource
+	private OrgTreeDao orgTreeDao;
+	
+	@Resource
 	private HttpServletRequest request;
+	
+	/**
+	 * 获取帐户或组的tree节点的数据访问权限
+	 * @param account
+	 * @param treeid
+	 * @return
+	 */
+	private String getTreeAuth(Sys_account account,String treeid) {
+		Sys_account_tree account_tree = new Sys_account_tree();
+		account_tree.setAccountid(account.getId());
+		account_tree.setTreeid(treeid);
+		account_tree = accountTreeDao.searchOne(account_tree);
+		//判断当前帐户对当前tree节点的数据访问权限是否设置
+		if (null != account_tree && !"".equals(account_tree.getFilter())) {
+			return account_tree.getFilter();
+		}
+		//如果没有设置，获取帐户所属组的数据访问权限
+		Sys_org_tree org_tree = new Sys_org_tree();
+		org_tree.setOrgid(account.getOrgid());
+		org_tree.setTreeid(treeid);
+		org_tree = orgTreeDao.searchOne(org_tree);
+		//判断当前帐户对当前tree节点的数据访问权限是否设置
+		if (null != org_tree && !"".equals(org_tree.getFilter())) {
+			return org_tree.getFilter();
+		}
+
+		return "";
+	}
 	
 	@Override
 	public PageBean<Map<String, Object>> archiveList(String treeid,Boolean allwj,String parentid,String tabletype,String searchTxt,
@@ -91,10 +130,42 @@ public class DynamicService implements IDynamicService {
 			sql += " WHERE treeid=? and status = " + status;
 		}
 		
-		//TODO 这里要加上记录访问权限
-		
 		values.clear();
 		values.add(treeid);
+		
+		//TODO 这里要加上记录访问权限
+//		sql += " and tm like '%2007%'";
+		Sys_account accountSession = (Sys_account) CommonUtils.getSessionAttribute(request, Constants.user_in_session);
+		String dataFilter = getTreeAuth(accountSession,treeid);
+		//如果当前节点的数据访问权限不为空
+		if (null != dataFilter && !"".equals(dataFilter)) {
+			//循环判断属于当前treeid和tabletype的数据访问权限，加入sql
+			JSONArray jsonArray = new JSONArray();
+			jsonArray = JSON.parseArray(dataFilter);
+			
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject = (JSONObject)jsonArray.get(i);
+				
+				String filterTableType = (String) jsonObject.get("tableType");
+				if (null != filterTableType && !"".equals(filterTableType)) {
+					String filterSelectField = (String) jsonObject.get("selectField");
+					String filterOper = (String) jsonObject.get("oper");
+					String filterDataAuthValue = (String) jsonObject.get("dataAuthValue");
+					if (filterTableType.equals(tabletype)) {
+						sql += " and " + filterSelectField;
+						if (filterOper.equals("equal")) {
+							sql += " = ?";
+							values.add(filterDataAuthValue);
+						}
+						else {
+							sql += " like '%"+filterDataAuthValue+"%'";
+						}
+					}
+				}
+//				[{"dataAuthValue":"kolllljhh","fieldname":"归档单位","id":"10084513-c588-4380-815c-eb184f03e0ff","oper":"equal","selectField":"GDDW","tableType":"01"},{"dataAuthValue":"90","fieldname":"文件号","id":"d58575a2-e5a4-46ce-a56f-4edd09876e1e","oper":"equal","selectField":"WJH","tableType":"02"}]
+			}
+		}
+		
 		//如果是文件级，并且不显示全文件，赋予parentid
 		if (tabletype.equals("02") && allwj == false) {
 			if (null != parentid && !parentid.equals("")) {

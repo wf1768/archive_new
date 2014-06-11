@@ -830,13 +830,23 @@ public class ArchiveController extends BaseConstroller {
 			modelMap.put("codeMap", codeMap);
 			
 			List<Sys_doc> docs = new ArrayList<Sys_doc>();
-			//获取档案的电子全文  TODO 要获取当前帐户电子全文权限范围的
+			//获取档案的电子全文 
 			if (maps.get(0).get("isdoc").toString().equals("1")) {
 				String sql = "select * from sys_doc where tableid=? and fileid=?";
 				List<Object> values = new ArrayList<Object>();
 				values.clear();
 				values.add(table.getId());
 				values.add(id);
+				// TODO 获取当前帐户电子全文权限范围的
+				String docauth = account_tree.getDocauth();
+				if (null != docauth && !"".equals(docauth)) {
+					if (!"1".equals(docauth)) {
+						sql += " and docauth=?";
+						values.add(docauth);
+					}
+				}
+				
+				
 				docs = docService.exeSql(sql, values);
 			}
 			
