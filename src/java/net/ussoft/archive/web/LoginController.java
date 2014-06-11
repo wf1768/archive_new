@@ -103,19 +103,24 @@ public class LoginController extends BaseConstroller {
 		
 		String macAddress = "";
 		if (os.startsWith("windows")) {
-			//获取windows的ip对象
-			InetAddress idAddress = SystemTool.getInetAddress();
-			macAddress = SystemTool.getMACAddress(idAddress);
+//			//获取windows的ip对象
+//			InetAddress idAddress = SystemTool.getInetAddress();
+//			macAddress = SystemTool.getMACAddress(idAddress);
+			macAddress = SystemTool.getWindowsMACAddress();
 			
 		} else if (os.startsWith("linux")) {
-			//获取linux的ip对象
-			InetAddress idAddress = SystemTool.getInetAddressOnLinux();
-			macAddress = SystemTool.getMACAddress(idAddress);
+//			//获取linux的ip对象
+//			InetAddress idAddress = SystemTool.getInetAddressOnLinux();
+//			macAddress = SystemTool.getMACAddress(idAddress);
 			
+			macAddress = SystemTool.getLinuxMACAddress();
 		} else {
-			//如果是mac os
-			InetAddress idAddress = SystemTool.getInetAddress();
-			macAddress = SystemTool.getMACAddress(idAddress);
+//			//如果是mac os
+//			InetAddress idAddress = SystemTool.getInetAddress();
+//			macAddress = SystemTool.getMACAddress(idAddress);
+			
+			macAddress = SystemTool.getMacosMACAddress();
+			
 		}
 		return macAddress;
 	}

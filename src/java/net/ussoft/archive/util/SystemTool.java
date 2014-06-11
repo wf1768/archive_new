@@ -160,6 +160,55 @@ public class SystemTool {
 		return mac;
 	}
 	
+	/**   
+     * 获取widnows网卡的mac地址.   
+     * @return mac地址   
+     */     
+    public static String getWindowsMACAddress() {     
+        String mac = null;     
+        BufferedReader bufferedReader = null;     
+        Process process = null;     
+        try {     
+              /**  
+               * windows下的命令，显示信息中包含有mac地址信息    
+               */  
+            process = Runtime.getRuntime().exec("ipconfig /all");   
+            bufferedReader = new BufferedReader(new InputStreamReader(process     
+                    .getInputStream()));     
+            String line = null;     
+            int index = -1;     
+            while ((line = bufferedReader.readLine()) != null) {     
+                   /**  
+                    *  寻找标示字符串[physical address]   
+                    */  
+                index = line.toLowerCase().indexOf("physical address");    
+                if (index != -1) {   
+                    index = line.indexOf(":");   
+                    if (index != -1) {   
+                           /**  
+                            *   取出mac地址并去除2边空格  
+                            */  
+                       mac = line.substring(index + 1).trim();    
+                   }   
+                    break;     
+                }   
+            }   
+        } catch (IOException e) {     
+            e.printStackTrace();     
+        }finally {     
+            try {     
+                if (bufferedReader != null) {     
+                    bufferedReader.close();     
+                  }     
+            }catch (IOException e1) {     
+                e1.printStackTrace();     
+              }     
+            bufferedReader = null;     
+            process = null;     
+        }     
+     
+        return mac;     
+    }     
 	
 	//以上是通过语句获取mac地址，但有时候不准确，以下是通过ip地址获取。
 	
@@ -341,9 +390,9 @@ public class SystemTool {
 	 * @throws Exception 
      */     
     public static void main(String[] argc) throws Exception {
-    	System.out.println(getMacosxUUID());
-    	System.out.println(getMacosMACAddress());
-    	
+    	System.out.println("macos uuid :" + getMacosxUUID());
+    	System.out.println("macos macadd:" + getMacosMACAddress());
+
     	InetAddress ip=InetAddress.getLocalHost();
     	
     	System.out.println(getMACAddress(ip));

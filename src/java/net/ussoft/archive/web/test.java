@@ -63,7 +63,7 @@ public class test {
             getSystemtype(test);
             
             //生成系统注册码
-            getRegistCode("6d2f1c3e93f6344baebe8f4f6a93059197d1a069bb8130ff");
+            getRegistCode("2382956be5d8baae90453e7f7455c079558ca2c8fc31d610");
 
         } catch (Exception e) {
             e.printStackTrace();
