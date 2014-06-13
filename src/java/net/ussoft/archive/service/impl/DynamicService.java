@@ -231,10 +231,42 @@ public class DynamicService implements IDynamicService {
 			sql += " WHERE treeid=? and status = " + status;
 		}
 		
-		//TODO 这里要加上记录访问权限
+		
 		
 		values.clear();
 		values.add(treeid);
+		
+		//TODO 这里要加上记录访问权限
+		Sys_account accountSession = (Sys_account) CommonUtils.getSessionAttribute(request, Constants.user_in_session);
+		String dataFilter = getTreeAuth(accountSession,treeid);
+		//如果当前节点的数据访问权限不为空
+		if (null != dataFilter && !"".equals(dataFilter)) {
+			//循环判断属于当前treeid和tabletype的数据访问权限，加入sql
+			JSONArray jsonArray = new JSONArray();
+			jsonArray = JSON.parseArray(dataFilter);
+			
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject jsonObject = (JSONObject)jsonArray.get(i);
+				
+				String filterTableType = (String) jsonObject.get("tableType");
+				if (null != filterTableType && !"".equals(filterTableType)) {
+					String filterSelectField = (String) jsonObject.get("selectField");
+					String filterOper = (String) jsonObject.get("oper");
+					String filterDataAuthValue = (String) jsonObject.get("dataAuthValue");
+					if (filterTableType.equals(tabletype)) {
+						sql += " and " + filterSelectField;
+						if (filterOper.equals("equal")) {
+							sql += " = ?";
+							values.add(filterDataAuthValue);
+						}
+						else {
+							sql += " like '%"+filterDataAuthValue+"%'";
+						}
+					}
+				}
+//				[{"dataAuthValue":"kolllljhh","fieldname":"归档单位","id":"10084513-c588-4380-815c-eb184f03e0ff","oper":"equal","selectField":"GDDW","tableType":"01"},{"dataAuthValue":"90","fieldname":"文件号","id":"d58575a2-e5a4-46ce-a56f-4edd09876e1e","oper":"equal","selectField":"WJH","tableType":"02"}]
+			}
+		}
 		
 		Integer num = dynamicDao.getCount(sql, values);
 		

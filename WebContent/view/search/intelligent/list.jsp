@@ -335,7 +335,7 @@
 		}
 		var url = "${pageContext.request.contextPath}/archive/doc.do?treeid="+treeid+"&tabletype=01&id=" + str + "&readonly=1&time=" + Date.parse(new Date());
 		var result = openShowModalDialog(url, window, whObj);
-		window.location.reload(true);
+		//window.location.reload(true);
 	}
 </script>
 
