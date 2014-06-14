@@ -8,7 +8,7 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.8.2.js"></script>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css" type="text/css">
 
@@ -27,11 +27,11 @@
 		if(list.length>0){
 			for (var i=0;i<list.length;i++) {
 				doc += "<table cellpadding=0 cellspacing=0 class=\"result_tab\" width=\"100%\">";
-				doc += "<tr><td width=\"10%\">文件名</td><td width=\"45%\">"+list[i].docoldname+"</td><td width=\"15%\">所属档案库</td><td width=\"30%\">"+list[i].treename+"</td></tr>";
-				doc += "<tr><td>文件类型</td><td>"+list[i].docext+"</td><td>文件长度</td><td>"+list[i].doclength+"</td></tr>";
-				doc += "<tr><td>上传人</td><td>"+list[i].creater+"</td><td>上传日期</td><td>"+list[i].createtime+"</td></tr>";
-				doc += "<tr><td>摘要</td><td colspan=\"3\">"+list[i].summary+"</td></tr>";
-				doc += "<tr><td colspan=\"4\"><button  class=\"btn btn-info btn-small\" onClick=\"openContentDialog('"+list[i].docid+"','"+list[i].treeid+"')\">查看预览</button><button  class=\"btn btn-info btn-small\" onClick=\"fileDown('"+list[i].docid+"','"+list[i].treeid+"')\">下载全文</button> </td></tr>";
+				doc += "<tr><td class=\"bgc\" width=\"10%\">文件名</td><td width=\"45%\">"+list[i].docoldname+"</td><td class=\"bgc\" width=\"15%\">所属档案库</td><td class=\"mb2\" width=\"30%\">"+list[i].treename+"</td></tr>";
+				doc += "<tr><td class=\"bgc\">文件类型</td><td>"+list[i].docext+"</td><td class=\"bgc\">文件长度</td><td class=\"mb2\">"+list[i].doclength+"</td></tr>";
+				doc += "<tr><td class=\"bgc\">上传人</td><td>"+list[i].creater+"</td><td class=\"bgc\">上传日期</td><td class=\"mb2\">"+list[i].createtime+"</td></tr>";
+				doc += "<tr><td class=\"bgc\">摘要</td><td class=\"mb2\" colspan=\"3\">"+list[i].summary+"</td></tr>";
+				doc += "<tr><td class=\"mb2 mb1\" colspan=\"4\"><button  class=\"btn-info\" onClick=\"openContentDialog('"+list[i].docid+"','"+list[i].treeid+"')\">查看预览</button><button  class=\"btn-info\" onClick=\"fileDown('"+list[i].docid+"','"+list[i].treeid+"')\">下载全文</button> </td></tr>";
 				doc += "</table>";
 			}
 		}else{
@@ -44,7 +44,7 @@
 <script type="text/javascript">
 	var setting = {
 		check: {
-			enable: true,
+			enable: true
 		},
 		view: {
 			dblClickExpand:false,
@@ -88,7 +88,7 @@
 		if (scht.length > 0 ) scht = scht.substring(0, scht.length-1);
 		var treeObj = $("#treeSel");
 		var schTreeid = $("#schTreeid");
-		treeObj.attr("value", v);
+		//treeObj.attr("value", v);
 		schTreeid.attr("value",scht);
 	}
 
@@ -181,70 +181,81 @@
 </script>
 
 <script type="text/javascript">
-
-$(function(){
-	var total = ${result}.ROWCOUNT;
-	var pagesize = ${result}.PAGESIZE;
-	var pageno = ${result}.CURRENTPAGE;
-	$("#pagination").pagination(total, {
-        'items_per_page'      : pagesize,
-        'num_display_entries' : 5,
-        'num_edge_entries'    : 2,
-        'current_page'	      : pageno,
-        'prev_text'           : "上一页",
-        'next_text'           : "下一页",
-        /* 'link_to'			  : url, */
-        'callback'            : pageselectCallback
-    });
-});
-
-function pageselectCallback(page_index, jq){
-	var searchTxt = "${searchText }";
-	var pageno = ${pageBean["CURRENTPAGE"]};//${pagebean.pageNo };
-	if (page_index != pageno) {
-		window.location.href="${pageContext.request.contextPath }/fulltext/search.do?schTreeid=${schTreeid}&treeids=${treeids}&treeid=${treeid}&currentPage="+page_index+"&searchText="+searchTxt;
-	}
-}; 
-
-//预览
-function openContentDialog(selectid,treeid) {
-	$.ajax({
-		async : false,
-		url : "../doc/preview.do",
-		type : 'post',
-		dataType : 'text',
-		data:"treeid="+treeid+"&docid="+selectid,
-		success : function(data) {
-			if (data == "0") {
-				alert("对不起，您没有权限预览此文件！");
-			} else {
-				var a=document.createElement("a");  
-				a.target="_blank"; 
-				a.href="../readFile.html?selectid="+selectid+"&treeid="+treeid;
-				document.body.appendChild(a);  
-				a.click()
-			}
-		}
+	
+	$(function(){
+		var total = ${result}.ROWCOUNT;
+		var pagesize = ${result}.PAGESIZE;
+		var pageno = ${result}.CURRENTPAGE;
+		$("#pagination").pagination(total, {
+	        'items_per_page'      : pagesize,
+	        'num_display_entries' : 5,
+	        'num_edge_entries'    : 2,
+	        'current_page'	      : pageno,
+	        'prev_text'           : "上一页",
+	        'next_text'           : "下一页",
+	        /* 'link_to'			  : url, */
+	        'callback'            : pageselectCallback
+	    });
 	});
 	
-}
-//下载
-function fileDown(docId,treeid){
-	$.ajax({
-		async : false,
-		url : "../doc/fileDown.do",
-		type : 'post',
-		dataType : 'text',
-		data:"treeid="+treeid,
-		success : function(data) {
-			if (data == "1") {
-				window.location.href="../doc/download.do?id="+docId+"&treeid="+treeid;
-			} else {
-				alert("对不起，您没有权限下载此文件！");
-			}
+	function pageselectCallback(page_index, jq){
+		var searchTxt = "${searchText }";
+		var pageno = ${pageBean["CURRENTPAGE"]};//${pagebean.pageNo };
+		if (page_index != pageno) {
+			window.location.href="${pageContext.request.contextPath }/fulltext/search.do?schTreeid=${schTreeid}&treeids=${treeids}&treeid=${treeid}&currentPage="+page_index+"&searchText="+searchTxt;
 		}
-	});
-}
+	}; 
+	
+	//预览
+	function openContentDialog(selectid,treeid) {
+		$.ajax({
+			async : false,
+			url : "../doc/preview.do",
+			type : 'post',
+			dataType : 'text',
+			data:"treeid="+treeid+"&docid="+selectid,
+			success : function(data) {
+				if (data == "0") {
+					alert("对不起，您没有权限预览此文件！");
+				} else {
+					var a=document.createElement("a");  
+					a.target="_blank"; 
+					a.href="../readFile.html?selectid="+selectid+"&treeid="+treeid;
+					document.body.appendChild(a);  
+					a.click()
+				}
+			}
+		});
+		
+	}
+	//下载
+	function fileDown(docId,treeid){
+		$.ajax({
+			async : false,
+			url : "../doc/fileDown.do",
+			type : 'post',
+			dataType : 'text',
+			data:"treeid="+treeid,
+			success : function(data) {
+				if (data == "1") {
+					window.location.href="../doc/download.do?id="+docId+"&treeid="+treeid;
+				} else {
+					alert("对不起，您没有权限下载此文件！");
+				}
+			}
+		});
+	}
+	
+	function check(){
+		var st = $('#searchText').val();
+		st = $.trim(st);
+		if(st.replace(/\s+/g,"") == ""){
+			alert("请输入查询值");
+			return false;
+		}else{
+			return true;
+		}
+	}
 
 </script>
 
@@ -264,31 +275,21 @@ function fileDown(docId,treeid){
   		</div>
   		<div id="bodyer_right">
   			<!-- 搜索 -->
-  			<div align="center"><div style="width: 43%">
-	        	<div id="nav-bar-middle">
-	            	<form class="nav-searchbar-inner" method="get" action="search.do" id="nav-searchbar">
-	            		<input type="hidden" id="schTreeid" name="schTreeid" value="all" />
-	       				<input type="hidden" name="currentPage" value="0" />
-			            <div class="nav-submit-button nav-sprite">
-			              <input type="submit" title="搜索" class="nav-submit-input" value="搜 索">
-			            </div>
-			            <span class="nav-sprite nav-facade-active" id="nav-search-in" style="width: auto;">
-			              <span id="nav-search-in-content" style="width: auto; overflow: visible;">
-			                <input id="treeSel" type="text" readonly value="全部分类" onclick="showMenu();" />
-			              </span>
-			              <span class="nav-down-arrow"></span>
-			            </span>
-			            <div class="nav-searchfield-width">
-			              <div id="nav-iss-attach">
-			                <input type="text" name="searchText" value="${searchText }" title="输入要搜索的内容..." id="twotabsearchtextbox">
-			              </div>
-			            </div>
-		        	</form>
-		        </div>
+  			<div align="center"><div >
+	        	<div style=" margin:15px 0px 5px">
+	        	<form action="search.do" id="searchform" method="get" onsubmit="return check()">
+	        		<input type="hidden" id="schTreeid" name="schTreeid" value="all" />
+	       			<input type="hidden" name="currentPage" value="0" />
+			        <fieldset>
+                                        <div class="xztxt"><div id="treeSel" onclick="showMenu();" class="div5 div7">选择类型</div><div class="div5"><input id="searchText" name="searchText" value="${searchText }" class="sousuok"><input type="submit" value="搜索" class="sousuob"></div></div>
+			       		                  
+			        </fieldset>
+		      	</form>
+               </div>
        		</div></div>
        		<!-- 检索结果 -->
        		<div align="center">
-       			<div id="cont"></div>
+       			<div id="cont" class="scrollTable"></div>
        		</div>
        		<div class="aa" style="margin-left:5px" >
 				<table class=" " aline="left" width="100%" border=0 cellspacing="0" cellpadding="0" >
@@ -296,7 +297,7 @@ function fileDown(docId,treeid){
 						<c:choose>
 							<c:when test="${pageBean[\"PAGES\"] > 1}">
 								<td><p style="color: #3366CC;font-weight: bold;">当前第 ${pageBean["CURRENTPAGE"]} 页，共 ${pageBean["PAGES"]} 页，每页${pageBean["PAGESIZE"]} 行，共${pageBean["ROWCOUNT"]} 行</p></td>
-								<td id="pagination" class="fenye pagination" ></td>
+								<td id="pagination" class="fenye pagination" style="text-align:right"></td>
 							</c:when>
 							<c:otherwise>
 								<c:if test="${pageBean[\"ROWCOUNT\"] != 0}">
@@ -315,7 +316,7 @@ function fileDown(docId,treeid){
 	
 <!-- 分类查询树 -->
 	<div id="menuContent" class="menuContent" style="display:none; position: absolute;">
-		<ul id="searchTreeM" class="ztree" style="margin-top:0; width:180px; height: 200px;"></ul>
+		<ul id="searchTreeM" class="ztree ztree1" ></ul>
 	</div>
 	
 <%@ include file="/view/common/footer.jsp"%>

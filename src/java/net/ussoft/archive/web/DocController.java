@@ -574,14 +574,14 @@ public class DocController extends BaseConstroller {
         	String savePath = "";
         	if ("LOCAL".equals(serverType)) {
         		savePath = docServer.getServerpath();
-        	}else if ("FTP".equals(serverType)) {
-        		savePath = docServer.getServerpath();
-        	}
+        	}//else if ("FTP".equals(serverType)) {
+        		//savePath = docServer.getServerpath();
+        	//}
         	String pdf2swfPath = request.getSession().getServletContext().getRealPath("/WEB-INF/tools/swftools/pdf2swf.exe ");
         	docConverter.setPdf2swfPath(pdf2swfPath);
         	String fileName = savePath + "/" + doc.getDocpath() + doc.getDocnewname();
         	docConverter.setFile(fileName);
-        	String temp = "/SWFFILE/" + doc.getDocpath();
+        	String temp = "/file/SWFFILE/" + doc.getDocpath();
 			String tableIndexDir = request.getSession().getServletContext().getRealPath(temp)+ File.separator;
 			File file =new File(tableIndexDir);    
 			//如果文件夹不存在则创建    

@@ -18,7 +18,7 @@ public class CallOpenoffice {
 		Runtime rn = Runtime.getRuntime();
 		Process p = null;
 		try {
-			String startService = "F:\\openoprenoffice.bat";
+			String startService = "c:\\openoprenoffice.bat";
 			File file = new File(startService); //"c:\\openoprenoffice.bat"
 			if (false == file.exists()) {
 				FileWriter writer = new FileWriter(startService); //"c:\\openoprenoffice.bat "

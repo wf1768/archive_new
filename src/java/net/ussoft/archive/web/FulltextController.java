@@ -45,7 +45,7 @@ public class FulltextController extends BaseConstroller{
 	@Resource
 	private ISearchService searchService;
 	
-	private final int pageSize = 2;
+	private final int pageSize = 5;
 	
 	/**
 	 * 全文检索 - 检索页

@@ -200,6 +200,53 @@ public class DynamicService implements IDynamicService {
 	}
 	
 	@Override
+	public PageBean<Map<String, Object>> archiveList(String w_sql,String treeid,Boolean allwj,String parentid,String tabletype,Integer status,PageBean<Map<String, Object>> pageBean) {
+		if (null == treeid || treeid.equals("")) {
+			return null;
+		}
+		
+		List<Object> values = new ArrayList<Object>();
+		Sys_table tables =  getTable(treeid,tabletype);
+		if (null == tables) {
+			return null;
+		}
+		//获取字段
+		List<Sys_templetfield> fields = getTempletfields(treeid,tabletype);
+		
+		String sql = ArchiveUtil.createSql(tables.getTablename(), "", fields);
+		
+		if (sql.contains("WHERE")) {
+			sql += " and treeid=? and status = " + status + w_sql;
+		}
+		else {
+			sql += " WHERE treeid=? and status = " + status + w_sql;
+		}
+		
+		//TODO 这里要加上记录访问权限
+		values.clear();
+		values.add(treeid);
+		//如果是文件级，并且不显示全文件，赋予parentid
+		if (tabletype.equals("02") && allwj == false) {
+			if (null != parentid && !parentid.equals("")) {
+				values.add(parentid);
+			}
+		}
+		//如果是全文件，判断要取文件级的范围，部分案卷级的全部文件，还是全部案卷级的文件
+		if (allwj) {
+			if (null != parentid && !"".equals(parentid)) {
+				String[] idArr = parentid.split(",");
+				List<String> idList = Arrays.asList(idArr);
+				if (null != idList && idList.size() > 0) {
+					values.addAll(idList);
+				}
+			}
+		}
+		pageBean = dynamicDao.searchForMap(sql, values, pageBean);
+		
+		return pageBean;
+	}
+	
+	@Override
 	public Integer archiveCount(String treeid,
 			String tabletype, String searchTxt, Integer status) {
 		

@@ -23,9 +23,9 @@ public class IndexerService implements IIndexerService {
 	}
 
 	public String createIndex(String docServerid, List<Sys_doc> docList,
-			HashMap<String, String> contentMap, String openMode) {
+			HashMap<String, String> contentMap, String openMode,String l_path) {
 		Indexer indexer = new Indexer();
-		return indexer.CreateIndex(docServerid, docList, contentMap, openMode);
+		return indexer.CreateIndex(docServerid, docList, contentMap, openMode,l_path);
 	}
 
 }

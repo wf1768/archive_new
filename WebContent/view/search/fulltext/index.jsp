@@ -17,7 +17,7 @@
 <script type="text/javascript">
 	var setting = {
 		check: {
-			enable: true,
+			enable: true
 		},
 		view: {
 			dblClickExpand:false,
@@ -61,7 +61,7 @@
 		if (scht.length > 0 ) scht = scht.substring(0, scht.length-1);
 		var treeObj = $("#treeSel");
 		var schTreeid = $("#schTreeid");
-		treeObj.attr("value", v);
+		//treeObj.attr("value", v);
 		schTreeid.attr("value",scht);
 	}
 
@@ -85,6 +85,17 @@
 	$(function() {
 		$.fn.zTree.init($("#searchTreeM"), setting,nodes);
 	});
+
+	function check(){
+		var st = $('#searchText').val();
+		st = $.trim(st);
+		if(st.replace(/\s+/g,"") == ""){
+			alert("请输入查询值");
+			return false;
+		}else{
+			return true;
+		}
+	}
 </script>
 
 
@@ -94,15 +105,17 @@
    		<div id="bodyer_left" style="width: auto;"></div>
     	<div id="bodyer_right">
     		<div class="xtgl">
-	        	<form action="search.do" id="searchform" method="get">
+              <div>
+	        	<form action="search.do" id="searchform" method="get" onsubmit="return check()">
 	        		<input type="hidden" id="schTreeid" name="schTreeid" value="all" />
 	       			<input type="hidden" name="currentPage" value="0" />
 			        <fieldset>
-			       		<input id="treeSel" type="text" readonly value="全部分类" onclick="showMenu();" />
-			          	<input name="searchText"><input type="submit" value="搜索">
+                                        <div class="xztxt"><div id="treeSel" onclick="showMenu();" class="div5 div7">选择类型</div><div class="div5"><input id="searchText" name="searchText" class="sousuok"><input type="submit" value="搜索" class="sousuob"></div></div>
+			       		                  
 			        </fieldset>
 		      	</form>
-		      	<div class="alert alert-info fade in">
+               </div>
+		      	<div class="tishi" >
 					<strong>提示！</strong>
 					欢迎使用档案查询模块。本系统对中文智能分词，您在模糊检索时，请尽量输入词组，例如"北京"、"南京"。对于英文，请输入完整单词。
 				</div>
@@ -115,7 +128,7 @@
 
 <!-- 分类查询树 -->
 	<div id="menuContent" class="menuContent" style="display:none; position: absolute;">
-		<ul id="searchTreeM" class="ztree" style="margin-top:0; width:180px; height: 200px;"></ul>
+		<ul id="searchTreeM" class="ztree ztree1" ></ul>
 	</div>
 	
 <%@ include file="/view/common/footer.jsp"%>
