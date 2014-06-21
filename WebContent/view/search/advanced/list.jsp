@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/dropmenu/style.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/search.css" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 <!-- 分页插件 -->
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/pagination/pagination.css" type="text/css">
@@ -91,8 +93,8 @@
 				html += '        <option value="7" '+(array[i].operatorType =="7"?"selected":"") +'>包含</option>';
 				html += '    </select>';
 				html += '    <input type="text" name="'+array[i].id+'" class="input-large" id="'+array[i].id+'" value="'+array[i].value+'" title="值" />';
-				html += '    <button type="button" style="margin-bottom: 9px;" class="btn btn-mini btn-danger delete-query-item" title="删除条件">';
-				html += '        <i class="icon-minus icon-white"></i>';
+				html += '    <button type="button"  class="btn btn-mini btn-danger delete-query-item" title="删除条件">';
+				html += '        <i >-</i>';
 				html += '    </button>';
 				html += '</div>';
 				
@@ -128,7 +130,14 @@
 		}
 	};
 
-	
+	function callback() {
+		$(".scrollTable").height($(".scrollTable").height() - 210) ;
+		
+		var n = $(".scrollTable").height()-$(".aa").height();
+		$('.data_table').fixHeader({
+			height : n
+		});
+	}
 </script>
 
 <script type="text/javascript">
@@ -181,8 +190,8 @@
 			html += '        <option value="7">包含</option>';
 			html += '    </select>';
 			html += '    <input type="text" name="'+fieldNameId+'" class="input-large" id="'+fieldNameId+'" value="" title="值" />';
-			html += '    <button type="button" style="margin-bottom: 9px;" class="btn btn-mini btn-danger delete-query-item" title="删除条件">';
-			html += '        <i class="icon-minus icon-white"></i>';
+			html += '    <button type="button"  class=" delete-query-item" title="删除条件">';
+			html += '        <i >-</i>';
 			html += '    </button>';
 			html += '</div>';
 			
@@ -379,21 +388,24 @@
 			<div class="query-group">
 				<div class="form-horizontal">
 					<div class="control-group">
-						<label for="servername" class="control-label">匹配以下</label>
+						
 						<div class="controls">
-							<div class="span3"><select id="selectField" class="input-small group-type span2"></select>
-			                <button type="button" class="btn btn-mini btn-success add-query-item" onclick="addTerm();" title="增加一个条件">
-			                    <i class="icon-plus icon-white"></i>
-			                </button></div>
-			                <div><input type="text" id="tableType" value="${tabletype }" /></div>
+							<div class="span3">
+                            <label for="servername" class="control-label">匹配以下:</label>
+                            <select id="selectField" class="input-small group-type "></select>
+			                <input type="button" class="btn btn-mini btn-success add-query-item" onclick="addTerm();" value="+" title="增加一个条件">
+			                   
+			                </input></div>
+			                <div style="display:none"><input type="text" id="tableType" value="${tabletype }" /></div>
 			                <div class="span1"><button class="btn btn-primary" onclick="doSearch();">查询</button></div>
+                           <div style="clear: both"></div>
 						</div>
 					</div>
 				</div>
-				<div class="form-horizontal">
-					<div class="control-group">
-						<label for="servername" class="control-label">档案类型</label>
-						<div id="templeType" class="controls">
+				<div >
+					<div class="control-group2">
+						<div class="control-label2"><label for="servername" >档案类型:</label></div>
+						<div id="templeType" >
 							
 						</div>
 					</div>
