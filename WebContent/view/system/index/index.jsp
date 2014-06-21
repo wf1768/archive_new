@@ -66,7 +66,7 @@
 			<div class="dqwz">当前位置：系统维护-系统配置-参数设置</div>
 		</div>
 		<div class="scrollTable" align="left" style="padding-left:5px; "> 
-			<a href="javascript:;" onclick="submit();">创建索引</a>
+			<a href="javascript:;" onclick="submit();" style=" width:120px; height:30px; color:#FFF; text-align:center; line-height:30px; background:#08408B; display:block; border-radius:3px; margin-left:5px;">创建索引</a>
 		</div>
 	</div>
 	<div style="clear: both"></div>
