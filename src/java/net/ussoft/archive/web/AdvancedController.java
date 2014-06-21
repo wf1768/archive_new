@@ -245,6 +245,7 @@ public class AdvancedController extends BaseConstroller{
 		Sys_templet templet = treeService.getTemplet(treeid);
 		modelMap.put("templet", templet);
 		modelMap.put("selectid", treeid);
+		modelMap.put("groupitem", groupitem);
 		
 		return new ModelAndView("/view/search/advanced/list",modelMap);
 	}
@@ -262,6 +263,10 @@ public class AdvancedController extends BaseConstroller{
 		//获取当前session登录帐户
 		Sys_account account = getSessionAccount();
 		
+		if (null == tabletype || tabletype.equals("")) {
+			tabletype = "01";
+		}
+		
 		//得到节点对应的模板。用来判断档案类型
 		Sys_templet templet = treeService.getTemplet(treeid);
 		String result = "var templeType='"+templet.getTemplettype()+"';";
@@ -269,7 +274,6 @@ public class AdvancedController extends BaseConstroller{
 		//获取档案字段(先取帐户自己的字段配置，如果没有，获取系统的)
 		List<Sys_templetfield> fieldList = new ArrayList<Sys_templetfield>();
 		fieldList = treeService.getTempletfields(treeid, tabletype,account.getId());
-		
 		if (null == fieldList || fieldList.size() == 0) {
 			fieldList = treeService.geTempletfields(treeid, tabletype);
 		}
@@ -381,7 +385,7 @@ public class AdvancedController extends BaseConstroller{
 			}
 			//防止数字错误
 			if (pageSize < 0) {
-				pageSize = 30;
+				pageSize = 20;
 			}
 			if (subString < 0) {
 				subString = 10;
@@ -395,19 +399,7 @@ public class AdvancedController extends BaseConstroller{
 			//如果是文件级，获取对应的案卷级，供文件级页面显示
 			if (tabletype.equals("02") && allwj==false) {
 				List<Sys_templetfield> ajFieldList = treeService.getTempletfields(treeid, "01",account.getId());
-				
 				modelMap.put("ajFieldList", ajFieldList);
-				//获取aj级信息
-//				List<String> idList = new ArrayList<String>();
-//				idList.add(parentid);
-//				List<Map<String, Object>> maps = dynamicService.get(treeid,"", "01", idList,null,null,null);
-//				modelMap.put("maps", maps);
-				
-//				Integer page_aj = Integer.valueOf(request.getParameter("page_aj").toString());
-//				String searchTxt_aj = request.getParameter("searchTxt_aj");
-//				modelMap.put("page_aj", page_aj);
-//				modelMap.put("searchTxt_aj", searchTxt_aj);
-				
 			}
 			modelMap.put("parentid", parentid);
 			pageBean.setOrderBy(getOrderby(fieldList));
@@ -461,7 +453,7 @@ public class AdvancedController extends BaseConstroller{
 				list = JSON.parseObject(groupitem,new ArrayList().getClass());
 				for(int i=0;i<list.size();i++){
 					HashMap<String, String> map = (HashMap<String, String>) JSON.parseObject(list.get(i).toString(),new HashMap<String,String>().getClass());
-					String column = map.get("name");
+					String column = map.get("id");
 					String oper = map.get("operatorType");
 					String value = map.get("value");
 					
@@ -481,6 +473,8 @@ public class AdvancedController extends BaseConstroller{
 			pageBean = dynamicService.archiveList(sql.toString(),treeid,allwj,parentid,tabletype,0,pageBean);
 			modelMap.put("fields", fieldList);
 			modelMap.put("treename", tree.getTreename());
+			
+			modelMap.put("groupitem", groupitem);
 		}
 		modelMap.put("pagebean", pageBean);
 		
@@ -488,69 +482,11 @@ public class AdvancedController extends BaseConstroller{
 		Sys_templet templet = treeService.getTemplet(treeid);
 		modelMap.put("templet", templet);
 		modelMap.put("selectid", treeid);
+		modelMap.put("tabletype", tabletype);
 		
 		return new ModelAndView("/view/search/advanced/list",modelMap);
 	}
-    /*public ModelAndView searchAdvanced(HttpServletResponse response,String treeid,String tabletype,String groupitem,ModelMap modelMap) throws IOException{
-		modelMap = super.getModelMap("SEARCHMANAGE","SEARCHADVANCED");
-		PrintWriter out = response.getWriter();
-		Sys_tree tree = treeService.getById(treeid);
-		//获取table
-		Sys_table table = new Sys_table();
-		table.setTempletid(tree.getTempletid());
-		table.setTabletype(tabletype);
-		table = tableService.selectByWhere(table);
 
-		//获取数据访问权限
-		String filter = getDataAuth(treeid);
-		String fieldAuth_Sql = ""; //权限字段Sql
-	    if(!"".equals(filter) && filter != null){
-			List list = new ArrayList();
-			//如果已经设置过
-			list = (List) JSON.parseObject(filter, new ArrayList().getClass());
-			for (int i=0;i<list.size();i++) {
-				HashMap<String, String> map = (HashMap<String, String>) JSON.parseObject(list.get(i).toString(),new HashMap<String,String>().getClass());
-				if (map.get("tableType").equals(tabletype)) {
-					String selF = map.get("selectField");
-					String selFv = map.get("dataAuthValue");
-					String oper = map.get("oper");
-					if("like".equals(oper)){
-						fieldAuth_Sql += " AND "+selF + " like'%" + selFv +"%'";
-					}else if("equal".equals(oper)){
-						fieldAuth_Sql += " AND "+selF + " = '" + selFv +"'";
-					}
-				}
-			}
-	    }
-            
-		StringBuffer sql = new StringBuffer(); //列表
-    	sql.append("SELECT * FROM "+ table.getTablename() +" WHERE 1=1 AND TREEID='"+treeid+"'");
-    	StringBuffer sql_count = new StringBuffer(); //统计
-    	sql_count.append("SELECT COUNT(0) FROM "+ table.getTablename() +" WHERE 1=1 AND TREEID='"+treeid+"'");
-		if(!"".equals(groupitem)){
-			List list = new ArrayList();
-			list = JSON.parseObject(groupitem,new ArrayList().getClass());
-			for(int i=0;i<list.size();i++){
-				HashMap<String, String> map = (HashMap<String, String>) JSON.parseObject(list.get(i).toString(),new HashMap<String,String>().getClass());
-				String column = map.get("name");
-				String oper = map.get("operatorType");
-				String value = map.get("value");
-				
-				sql.append(" AND " +BaseSelector.getSql(Integer.parseInt(oper), column, value));
-	    		sql_count.append(" AND " +BaseSelector.getSql(Integer.parseInt(oper), column, value));
-			}
-		}
-		//访问权
-		if(!fieldAuth_Sql.equals("")){
-    		sql.append(fieldAuth_Sql);
-    		sql_count.append(fieldAuth_Sql);
-    	}
-		
-    	System.out.println(sql.toString());
-
-    	return null;
-    }*/
-	
 	/**
      * 获取数据访问权限
      * @param 

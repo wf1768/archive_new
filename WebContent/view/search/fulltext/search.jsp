@@ -24,6 +24,7 @@
 	function showResultList() {
 		var list = ${result}.DATA;
 		var doc = "";
+		var isFileShow = ${isFileShow};
 		if(list.length>0){
 			for (var i=0;i<list.length;i++) {
 				doc += "<table cellpadding=0 cellspacing=0 class=\"result_tab\" width=\"100%\">";
@@ -31,7 +32,11 @@
 				doc += "<tr><td class=\"bgc\">文件类型</td><td>"+list[i].docext+"</td><td class=\"bgc\">文件长度</td><td class=\"mb2\">"+list[i].doclength+"</td></tr>";
 				doc += "<tr><td class=\"bgc\">上传人</td><td>"+list[i].creater+"</td><td class=\"bgc\">上传日期</td><td class=\"mb2\">"+list[i].createtime+"</td></tr>";
 				doc += "<tr><td class=\"bgc\">摘要</td><td class=\"mb2\" colspan=\"3\">"+list[i].summary+"</td></tr>";
-				doc += "<tr><td class=\"mb2 mb1\" colspan=\"4\"><button  class=\"btn-info\" onClick=\"openContentDialog('"+list[i].docid+"','"+list[i].treeid+"')\">查看预览</button><button  class=\"btn-info\" onClick=\"fileDown('"+list[i].docid+"','"+list[i].treeid+"')\">下载全文</button> </td></tr>";
+				if(!isFileShow){
+					doc += "<tr><td class=\"mb2 mb1\" colspan=\"4\"><button  class=\"btn-info\" onClick=\"fileDown('"+list[i].docid+"','"+list[i].treeid+"')\">下载全文</button> </td></tr>";
+				}else{
+					doc += "<tr><td class=\"mb2 mb1\" colspan=\"4\"><button  class=\"btn-info\" onClick=\"openContentDialog('"+list[i].docid+"','"+list[i].treeid+"')\">查看预览</button><button  class=\"btn-info\" onClick=\"fileDown('"+list[i].docid+"','"+list[i].treeid+"')\">下载全文</button> </td></tr>";
+				}
 				doc += "</table>";
 			}
 		}else{

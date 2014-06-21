@@ -14,6 +14,7 @@ import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IDocserverService;
+import net.ussoft.archive.service.IEncryService;
 import net.ussoft.archive.service.ISearchService;
 import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.CommonUtils;
@@ -44,6 +45,8 @@ public class FulltextController extends BaseConstroller{
 	private IDocserverService docserverService;
 	@Resource
 	private ISearchService searchService;
+	@Resource
+    private IEncryService encryService;
 	
 	private final int pageSize = 5;
 	
@@ -71,10 +74,11 @@ public class FulltextController extends BaseConstroller{
 	 * @param schTreeid 要查询的树节点
 	 * @param searchText
 	 * @return
+	 * @throws Exception 
 	 */
 	@SuppressWarnings({ "unchecked" })
 	@RequestMapping(value="/search",method=RequestMethod.GET)
-	public ModelAndView search(ModelMap modelMap,String schTreeid,String searchText,HttpServletRequest request,int currentPage){
+	public ModelAndView search(ModelMap modelMap,String schTreeid,String searchText,HttpServletRequest request,int currentPage) throws Exception{
 		modelMap = super.getModelMap("SEARCHMANAGE","SEARCHFILE");
 		HashMap bb = new HashMap();
 		if(currentPage == 0)
@@ -83,7 +87,7 @@ public class FulltextController extends BaseConstroller{
 		StringBuffer sbTreeid = new StringBuffer();
 		
 		List<Sys_docserver> docserverList = docserverService.list();
-		Sys_docserver docserver = docserverList.get(1);
+		Sys_docserver docserver = docserverList.get(0);
 		
 		//要查询的树节点
 		String schTreeids = "";
@@ -166,6 +170,13 @@ public class FulltextController extends BaseConstroller{
 		modelMap.put("schTreeid", schTreeid); 
 		//检索的关键字
 		modelMap.put("searchText", searchText);
+		Boolean isFileShow = false;
+		//获取有没有全文浏览器，如果没有，前台不显示查看按钮
+		if (encryService.getInit(24)) {
+			isFileShow = true;
+		}
+		modelMap.put("isFileShow", isFileShow);
+		
 		return new ModelAndView("/view/search/fulltext/search",modelMap);
 	}
 

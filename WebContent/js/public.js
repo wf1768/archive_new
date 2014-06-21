@@ -36,6 +36,8 @@ $(function() {
 		
 		var h = winH - topH1 - bottH - 80;
 
+		var secH = $('.query-group').height();
+		
 		$("#bodyer_right").height(leftH);
 		$("#bodyer_left").height(h);
 		// $("#fanye").width($("#shuju").height());

@@ -1,11 +1,14 @@
 package net.ussoft.archive.web;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -45,14 +48,17 @@ public class IndexController extends BaseConstroller{
 	/**
 	 * 创建电子全文索引
 	 * @return
+	 * @throws IOException 
 	 * @throws Exception 
 	 */
-	@RequestMapping(value="/createIndex",method=RequestMethod.GET)
-	public ModelAndView createFilesIndexer(ModelMap modelMap){
+	@RequestMapping(value="/createIndex",method=RequestMethod.POST)
+	public void createFilesIndexer(HttpServletResponse response) throws IOException{
+		PrintWriter out = response.getWriter();
+		
 		//此处应创建所有服务器下的电子。。。。。暂时本地
 		//取得当前开启的服务器
 		List<Sys_docserver> docserverList = docserverService.list();
-		System.out.println(docserverList.size());
+//		System.out.println(docserverList.size());
 		for(int i=0;i<docserverList.size();i++){
 			Sys_docserver docserver = docserverList.get(i);
 			
@@ -133,7 +139,7 @@ public class IndexController extends BaseConstroller{
 	    		indexerService.createIndex(docserver.getId(), list, map, "CREATE",init.getInitvalue());
 	    	}
 		}
-    	return new ModelAndView("/view/system/index/index",modelMap);
+//    	return new ModelAndView("/view/system/index/index",modelMap);
 	}
 	
 }
