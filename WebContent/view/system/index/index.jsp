@@ -5,21 +5,33 @@
 <%-- <%@ include file="/view/common/top_second_menu.jsp"%> --%>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table_main.css" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
 <script type="text/javascript">
 
-function openwindow(id){  
-	//var result = window.showModalDialog("edit.do?id="+id,"查看窗口","toolbars=0;location=no;status=no;resizable=no;dialogWidth=700px;dialogHeight=400px;scrollbars=0");
-	var url = "edit.do?id="+id + "&time="+Date.parse(new Date());
-	var whObj = { width: 600, height: 300 };
-	var result = openShowModalDialog(url,null,whObj);
-	window.location.reload(true); // 刷新窗体
-	
-}
-
-
-//-->
+	function lodding(){
+		$.blockUI({
+			message:"正在进行加载，请稍候...",
+			css: {
+		        padding: '15px',
+		        width:"300px"
+		    } 
+		}); 
+	}
+	function submit() {
+		lodding(); 
+		setTimeout(function () { 
+			$.ajax({
+				async : false,
+				url: "${pageContext.request.contextPath}/index/createIndex.do",
+				type : 'post',
+				dataType : 'text',
+				success : function(data) {
+					$.unblockUI();
+				}
+			});
+		},200);  
+	}
 </script>
-
 
 <!--内容部分开始-->
 
@@ -33,7 +45,7 @@ function openwindow(id){
 			</dt>
 			<dd>
 				<ul>
-					<li><a href="${pageContext.request.contextPath}/config/list.do" class="txt2 on"><img
+					<li><a href="${pageContext.request.contextPath}/config/list.do" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_07.png"
 							width="18" height="15" class="tubiao1" /><span>参数设置</span></a></li>
 					<li><a href="${pageContext.request.contextPath}/docserver/list.do" class="txt2"><img
@@ -42,7 +54,7 @@ function openwindow(id){
 					<li><a href="${pageContext.request.contextPath}/config/docauthlist.do" class="txt2"><img
 							src="${pageContext.request.contextPath}/images/i_10.png"
 							width="18" height="13" class="tubiao1" /><span>电子文件权限</span></a></li>
-					<li><a href="${pageContext.request.contextPath}/index/index.do" class="txt2"><img
+					<li><a href="${pageContext.request.contextPath}/index/index.do" class="txt2 on"><img
 							src="${pageContext.request.contextPath}/images/i_14.png"
 							width="18" height="13" class="tubiao1" /><span>索引维护</span></a></li>
 				</ul>
@@ -54,7 +66,7 @@ function openwindow(id){
 			<div class="dqwz">当前位置：系统维护-系统配置-参数设置</div>
 		</div>
 		<div class="scrollTable" align="left" style="padding-left:5px; "> 
-			<a href="${pageContext.request.contextPath}/index/createIndex.do">创建索引</a>
+			<a href="javascript:;" onclick="submit();" style=" width:120px; height:30px; color:#FFF; text-align:center; line-height:30px; background:#08408B; display:block; border-radius:3px; margin-left:5px;">创建索引</a>
 		</div>
 	</div>
 	<div style="clear: both"></div>

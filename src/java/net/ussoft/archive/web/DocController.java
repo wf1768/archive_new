@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -23,6 +25,7 @@ import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_account_tree;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
+import net.ussoft.archive.model.Sys_init;
 import net.ussoft.archive.model.Sys_org_tree;
 import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
@@ -31,6 +34,7 @@ import net.ussoft.archive.service.IAccountService;
 import net.ussoft.archive.service.IDocService;
 import net.ussoft.archive.service.IDocserverService;
 import net.ussoft.archive.service.IDynamicService;
+import net.ussoft.archive.service.IInitService;
 import net.ussoft.archive.service.IOrgService;
 import net.ussoft.archive.service.ITableService;
 import net.ussoft.archive.service.ITempletService;
@@ -38,6 +42,7 @@ import net.ussoft.archive.service.ITreeService;
 import net.ussoft.archive.util.CommonUtils;
 import net.ussoft.archive.util.FileOperate;
 import net.ussoft.archive.util.FtpUtil;
+import net.ussoft.archive.util.openoffice.CallOpenoffice;
 import net.ussoft.archive.util.openoffice.DocConverter;
 import net.ussoft.archive.util.resule.ResultInfo;
 
@@ -81,9 +86,12 @@ public class DocController extends BaseConstroller {
 	private IAccountService accountService;
 	@Resource
 	private IOrgService orgService;
+	@Resource
+	private IInitService initService;
 	
 	private static final int BUFFER_SIZE = 2 * 1024;
-    
+	private Process process = null;
+	
 	@Autowired
     CommonsMultipartResolver multipartResolver;
 	
@@ -574,14 +582,21 @@ public class DocController extends BaseConstroller {
         	String savePath = "";
         	if ("LOCAL".equals(serverType)) {
         		savePath = docServer.getServerpath();
-        	}else if ("FTP".equals(serverType)) {
-        		savePath = docServer.getServerpath();
-        	}
+        	}//else if ("FTP".equals(serverType)) {
+        		//savePath = docServer.getServerpath();
+        	//}
+        	//openoffice安装地址
+        	Sys_init init_openofficeurl = initService.selectById("3");
+        	//文件转换bat路径
+        	Sys_init init_serviceurl = initService.selectById("4");
+        	//开启OpenOffice服务
+        	DistorySoffice(init_serviceurl.getInitvalue(),init_openofficeurl.getInitvalue());
+        	
         	String pdf2swfPath = request.getSession().getServletContext().getRealPath("/WEB-INF/tools/swftools/pdf2swf.exe ");
         	docConverter.setPdf2swfPath(pdf2swfPath);
         	String fileName = savePath + "/" + doc.getDocpath() + doc.getDocnewname();
         	docConverter.setFile(fileName);
-        	String temp = "/SWFFILE/" + doc.getDocpath();
+        	String temp = "/file/SWFFILE/" + doc.getDocpath();
 			String tableIndexDir = request.getSession().getServletContext().getRealPath(temp)+ File.separator;
 			File file =new File(tableIndexDir);    
 			//如果文件夹不存在则创建    
@@ -667,4 +682,66 @@ public class DocController extends BaseConstroller {
 		}
     }
     
+    /**
+	 * 开启soffice进程
+	 * */
+	public void DistorySoffice(String startService,String installURL) {
+		try {
+			// 显示进程
+			process = Runtime.getRuntime().exec("tasklist");
+			Scanner in = new Scanner(process.getInputStream());
+			boolean flag = false;
+			while (in.hasNextLine()) {
+				String processString = in.nextLine();
+				if (processString.contains("soffice.exe")) {
+					flag = true;
+					// 关闭soffice进程的命令
+//					String cmd = "taskkill /f /im soffice.exe";
+//					process = Runtime.getRuntime().exec(cmd);
+//					System.out.println("openoffice正常关闭.......");
+					System.out.println("OpenOffice服务已开启。。。");
+				}
+			}
+			if(!flag){
+				CallOpenoffice(startService, installURL);
+				DistorySoffice(startService, installURL);
+				System.out.println("进行开启OpenOffice服务。。。");
+			}
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 开启openoffice服务
+	 * */
+	public void CallOpenoffice(String startService,String installURL) {
+		Runtime rn = Runtime.getRuntime();
+		Process p = null;
+		try {
+			//String startService = "f:\\openoprenoffice.bat";
+			File file = new File(startService); //"c:\\openoprenoffice.bat"
+			if (false == file.exists()) {
+				FileWriter writer = new FileWriter(startService); //"c:\\openoprenoffice.bat "
+				writer.write("@echo   off ");
+				writer.write("\r\n ");
+				writer.write("C:");
+				writer.write("\r\n ");
+				// D:\\Program Files\\OpenOffice 4\\program： openoffice的安装路径路径
+//				String installURL = "C:\\Program Files (x86)\\OpenOffice 4\\program";
+				writer.write("cd "+installURL); //C:\\Program Files\\OpenOffice 4\\program
+				writer.write("\r\n ");
+//				writer.write("soffice -headless -accept="
+//						+ "socket,host=127.0.0.1,port=8100;urp;"
+//						+ " -nofirststartwizard");
+				writer.write("soffice -headless -accept=\"socket,host=127.0.0.1,port=8100;urp;\" -nofirststartwizard");
+				writer.write("\r\n ");
+				writer.write("@echo   on ");
+				writer.close();
+			}
+			p = rn.exec("cmd.exe /C "+startService); //c:\\openoprenoffice.bat
+		}catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
 }

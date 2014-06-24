@@ -16,5 +16,5 @@ public interface IIndexerService {
 	public void createIndex(String tablename,List fieldList,List dataList,String openMode);
 	
 	//创建电子全文索引
-	public String createIndex(String docServerid,List<Sys_doc> docList,HashMap<String,String> contentMap,String openMode);
+	public String createIndex(String docServerid,List<Sys_doc> docList,HashMap<String,String> contentMap,String openMode,String l_path);
 }

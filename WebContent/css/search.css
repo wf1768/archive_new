@@ -1,244 +1,35 @@
 /*
 	检索利用 CSS
 */
-/* search tree type */
-ul.ztree {
-    background: none repeat scroll 0 0 #DBDBDB;
-    border: 1px solid #617775;
-    height: 360px;
-    margin-top: 10px;
-    overflow-x: auto;
-    overflow-y: scroll;
-    width: 220px;
-}
-
-/*全文检索*/
-#searchform {
-    display: block;
-    height: 60px;
-    margin: auto;
-    overflow: hidden;
-    padding: 50px 0 20px;
-}
-#searchform > fieldset {
-    border: 0 none;
-    margin: 0;
-    padding: 3px;
-}
-#searchform > fieldset > input[id="treeSel"] {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    border-color: #D8D8D8 -moz-use-text-color #D8D8D8 #D8D8D8;
-    border-image: none;
-    border-style: solid none solid solid;
-    border-width: 1px medium 1px 1px;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 5px;
-    width: 180px;
-}
-#searchform > fieldset > input[name="searchText"] {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    border-color: #D8D8D8 -moz-use-text-color #D8D8D8 #D8D8D8;
-    border-image: none;
-    border-style: solid none solid solid;
-    border-width: 1px medium 1px 1px;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 5px;
-    width: 400px;
-}
-#searchform > fieldset > input[type="submit"] {
-    -moz-appearance: none;
-    background-image: linear-gradient(to bottom, #FBFBFB, #F3F3F3);
-    border: 1px solid #D8D8D8;
-    cursor: pointer;
-    height: 32px;
-    line-height: 30px;
-    width: 86px;
-}
-
-.fade.in {
-    opacity: 1;
-}
-.alert-info {
-    background-color: #D9EDF7;
-    border-color: #BCE8F1;
-    color: #3A87AD;
-}
-.alert {
-    background-color: #FCF8E3;
-    border: 1px solid #FBEED5;
-    border-radius: 4px;
-    color: #C09853;
-    margin-bottom: 18px;
-    padding: 8px 35px 8px 14px;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    font-size: 15px;
-}
-.fade {
-    opacity: 0;
-    transition: opacity 0.15s linear 0s;
-}
-.result_tab{
-	border: 1px solid #FF0000;
-	border-collapse:collapse;
-	margin: 5px 0 5px 0;
-	width: 80%
-}
-.result_tab td{border:1px solid #d8e4f2;background:#fff;color:#333;padding:3px;vertical-align:middle;}
-
-
-#nav-bar-middle {
-    -moz-box-sizing: border-box;
-    height: 55px;
-    overflow: hidden;
-    padding: 0;
-    white-space: nowrap;
-    width: auto;
-}
-
-.result_tab td {
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #D8E4F2;
-    color: #333333;
-    padding: 3px;
-    vertical-align: middle;
-}
-div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, textarea, p, blockquote, th, td {
-    margin: 0;
-    padding: 0;
-}
-.result_tab {
-    border-collapse: collapse;
-}
-body {
-    font-family: "微软雅黑";
-    font-size: 12px;
-}
-#nav-searchbar {
-    -moz-box-sizing: border-box;
-    border-radius: 4px;
-    display: block;
-    margin: 10px 0 0;
-    overflow: hidden;
-    position: relative;
-    white-space: nowrap;
-    width: auto;
-}
-
-.nav-submit-button {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    -moz-box-sizing: border-box;
-    background-color: #5B626A;
-    background-position: 0 -381px;
-    border-color: #485059 #2C3137 #363C43 #485059;
-    border-image: none;
-    border-radius: 0 4px 4px 0;
-    border-style: solid;
-    border-width: 1px;
-    cursor: pointer;
-    display: inline-block;
-    float: right;
-    height: 35px;
-    overflow: hidden;
-    position: relative;
-    width: auto;
-    z-index: 1;
-}
-.nav-sprite-v1 .nav-sprite {
-    background-position: 0 1000px;
-    background-repeat: repeat-x;
-}
-#nav-search-in {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    -moz-box-sizing: border-box;
-    background-position: 0 -532px;
-    border-color: #BDBDBD #CDCDCD #CDCDCD;
-    border-image: none;
-    border-radius: 4px 0 0 4px;
-    border-right: 1px solid #CDCDCD;
-    border-style: solid;
-    border-width: 1px;
-    display: inline-block;
-    float: left;
-    height: 35px;
-    overflow: hidden;
-    position: relative;
-}
-.nav-searchfield-width {
-    -moz-box-sizing: border-box;
-    background: none repeat scroll 0 0 #FFFFFF;
-    border-bottom: 1px solid #CDCDCD;
-    border-top: 1px solid #BDBDBD;
-    height: 35px;
-    overflow: hidden;
-    width: auto;
-}
-#nav-iss-attach {
-    height: 100%;
-    padding: 0;
-    position: relative;
-    white-space: normal;
-}
-#twotabsearchtextbox {
-    -moz-box-sizing: border-box;
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    border: medium none;
-    box-shadow: none;
-    color: #333333;
-    font-family: "arial","sans-serif";
-    font-size: 15px;
-    height: 23px;
-    left: 0;
-    margin: 0;
-    outline: medium none;
-    padding: 0 0 0 8px;
-    position: absolute;
-    top: 6px;
-    width: 100%;
-}
-.nav-submit-input {
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    border: medium none;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: inline-block;
-    font-family: "arial","sans-serif";
-    font-size: 13px;
-    font-weight: bold;
-    height: 100%;
-    line-height: 33px;
-    margin: 0 11px;
-    outline: medium none;
-    padding: 0;
-    text-align: center;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-    vertical-align: middle;
-    width: 50px;
-}
-#treeSel {
-    -moz-box-sizing: border-box;
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    border: medium none;
-    box-shadow: none;
-    color: #333333;
-    font-family: "arial","sans-serif";
-    font-size: 15px;
-    height: 33px;
-    outline: medium none;
-    padding: 0 0 0 8px;
-    top: 6px;
-    width: 100%;
-}
+.sousuok { width:400px; height:30px; border:1px solid #08408b; padding:0; line-height:30px;}
+.sousuob{ width:80px; height:32px; background:#08408b; color:#FFF; line-height:32px; text-align:center; border:none; margin-left:2px; padding:0;cursor:pointer; }
+.sousuob:hover{background:#2A84C7;}
+.chose{ width:20px; height:20px; padding:0 0 0 5px; background: no-repeat; border:none; cursor:pointer;  margin-left:15px; margin-top:2px }
+.xztxt{ font-size:14px; color:#333; margin:0 auto; width:630px; line-height:30px}
+.ztree1{ width:180px; height: 200px;  border:1px solid #08408b; overflow:auto; background:#FFF;}
+.tishi{ font-size:12px; color:#F90; margin-top:20px;}
+.div5{ float:left; }
+.div7{  border-top:1px solid #08408b; height:29.5px; padding:0 0 0 10px;cursor:pointer; *height:30px; background:url(../images/x2.png); width:100px; text-align:left; border-bottom:1px solid #08408b; border-left:1px solid #08408b;margin-top:1px}
+#cont{ overflow-y:auto; }
+#cont table{ margin:10px; background:#FFF; width:97%;}
+#cont table tr td{ border-top:1px solid #08408b; padding:8px; border-left:1px solid #08408b; text-align:left; }
+.mb2{ border-right:1px solid #08408b; }
+.mb1{ border-bottom:1px solid #08408b; }
+.bgc{ background:#E7EFF7;}
+.btn-info{ height:25px; line-height:25px; color:#FFF; background:#08408b; border-radius:3px; text-align:center; padding:0 10px; border:0; margin-left:3px;cursor:pointer;}
+.btn-info:hover{ background:#2A84C7; }
+.query-group{ height:200px; overflow-y:scroll; background:#fff;overflow-x:hidden;}
+.controls{ width:430px; margin:25px auto; height:27px}
+.span3{float:left;}
+.input-small{ width:180px; height:25px; border:1px solid #CCC; margin-left:10px; background:#FFF}
+.add-query-item{ width:30px; height:27px; text-align:center; line-height:24px; color:#FFF; background:#096; border:none;border-radius:3px;  cursor:pointer;}
+icon-plus{ }
+.span1{float:left;}
+.btn-primary{ width:60px; height:27px; text-align:center; line-height:24px; color:#FFF; background:#36C; border:none;border-radius:3px; margin-left:50px; cursor:pointer;}
+.control-label2{ float:left;}
+#templeType{ float:left; margin-left:10px;}
+.span2{width:120px; height:20px; border:1px solid #CCC;  background:#FFF; border-radius:5px;}
+.input-large{width:120px; height:20px; border:1px solid #CCC;  background:#FFF; border-radius:5px; margin:0 10px;}
+.delete-query-item{ width:20px; height:18px; line-height:13px; color:#FFF; background:#F90; border:none;border-radius:2px;  cursor:pointer; *height:24px; *width:24px; font-size:16px;  text-align:center;}
+.query-item{ margin-bottom:10px;}
+.control-group2{ width:430px; margin:15px auto; height:27px}

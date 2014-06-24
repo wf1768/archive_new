@@ -165,9 +165,10 @@ public class Indexer {
 	 * @param openMode			创建方式
 	 * @param docList			电子全文list
 	 * @param contentMap		电子全文内容map
+	 * @param l_path			索引生成目录
 	 * @return
 	 */
-	public String CreateIndex(String docServerid,List<Sys_doc> docList,HashMap<String,String> contentMap,String openMode) {
+	public String CreateIndex(String docServerid,List<Sys_doc> docList,HashMap<String,String> contentMap,String openMode,String l_path) {
 		
 		if (null == docServerid || "".equals(docServerid)) {
 			return "error";
@@ -180,7 +181,8 @@ public class Indexer {
 //			String fileIndexDir = ServletActionContext.getServletContext().getRealPath(temp)+ File.separator;
 			
 //			String fileIndexDir = getSystem("LUCENE_URL")+docServerid;
-			String fileIndexDir = "E:\\WorkSpaces\\apache-tomcat-6.0.29\\webapps\\archive_v\\LUCENE\\" + docServerid;
+//			String fileIndexDir = "E:\\WorkSpaces\\apache-tomcat-6.0.29\\webapps\\archive_v\\LUCENE\\" + docServerid;
+			String fileIndexDir = l_path + docServerid;
 			
 //			System.out.println(fileIndexDir);
 			// 创建Directory对象

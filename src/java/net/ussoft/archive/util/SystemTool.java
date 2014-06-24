@@ -9,8 +9,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-import sun.tools.tree.ThisExpression;
-
 /**
  * @className: SystemTool
  * @description: 获取MAC地址
