@@ -138,6 +138,7 @@ public class ReadOaController extends BaseConstroller{
 	    		
 	        	sysDoc.setDocserverid(docServer.get("serverId"));
 	        	sysDoc.setDoctype("0");
+	        	sysDoc.setDocauth("1");
 	        	sysDoc.setCreatetime(CommonUtils.getTimeStamp());
 	        	sysDoc.setFileid(id);
 //	        	sysDoc.setTableid("75f6f49a-29f2-4551-ac09-1a0f92d59bdf");
