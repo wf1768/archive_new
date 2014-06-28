@@ -33,7 +33,7 @@ public class DatabaseManager {
 
     String uPwd = "sa";
     
-    public final String OADB_URL = "oadb.properties";
+    public final String OADB_URL = "jdbc.properties";
     
     public DatabaseManager() {
     	

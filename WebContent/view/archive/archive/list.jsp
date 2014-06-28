@@ -18,6 +18,11 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.css" type="text/css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.js"></script>
 <script>
+
+	var FW_TREEID = '3043624b-9a1d-478c-b1aa-49c036c26ac2'; //发文
+	var SW_TREEID = '4efef2f9-16b8-4160-8093-79e1245f5d76'; //收文
+	var NQ_TREEID = '0f6ab59f-03ae-419e-b0e6-e1706be67d67'; //内请
+
 	$.blockUI({
 		message:"正在进行加载，请稍候...",
 		css: {
@@ -80,6 +85,13 @@
 		var treeid = "${selectid}";
 		selectTreeid = treeid;
 		selectNode(treeid);
+
+		//控制OA读取是否显示
+		if(FW_TREEID == treeid || SW_TREEID == treeid || NQ_TREEID == treeid){
+			$("#oa_data").show();
+		}else{
+			$("#oa_data").hide();
+		}
 		
 		var templettype = "${templet.templettype }";
 		/**************************************************
@@ -593,7 +605,37 @@
         return false;
 		
 	}
-	
+
+	//读取OA数据
+	function readOAData(){
+		var treeid = '${selectid}';
+		//判断当前节点的treeid是不是指定的
+		//1.发文，2.收文，3.内
+		var oa_property = '';
+		
+		if(FW_TREEID == treeid){
+			oa_property = '1';
+		}else if(SW_TREEID == treeid){
+			oa_property = '2';
+		}else if(NQ_TREEID == treeid){
+			oa_property = '3';
+		}
+		$.ajax({
+			async : false,
+			url : "${pageContext.request.contextPath}/readOa/read.do",
+			type : 'post',
+			data : {
+				'treeid':treeid,
+				'tableType':'01',
+				'edoc_property' : oa_property
+			},
+			dataType : 'text',
+			success : function(data) {
+				alert(data);
+				refresh();
+			}
+		});
+	}
 </script>
 
 
@@ -632,7 +674,9 @@
 					<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
-					<ul id="sddm">
+					<ul id="sddm" style="width:578px">
+						<li id="oa_data"><a href="javascript:;" onclick="readOAData()" onmouseout="mclosetime()">OA</a></li>
+						
 						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
 						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
