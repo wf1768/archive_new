@@ -68,36 +68,18 @@ public class ReadOaController extends BaseConstroller{
     	param[1] = 1;  //档案读取OA标示，1为未读取，0为已读取
     	param[2] = edoc_property;
     	List list = manager.queryForList(sql, param);
+    	//获取当前treeid下数据
+		Sys_tree tree = treeService.getById(treeid);
+		//获取table
+		Sys_table table = new Sys_table();
+		table.setTempletid(tree.getTempletid());
+		table.setTabletype(tableType);
+		table = tableService.selectByWhere(table);
+    	List<Sys_templetfield> fieldList = treeService.geTempletfields(treeid, tableType);
+    	Map<String, String> docServer = getDocServer();
     	if(list.size()>0){
-    		//获取当前treeid下数据
-			Sys_tree tree = treeService.getById(treeid);
-			//获取table
-			Sys_table table = new Sys_table();
-			table.setTempletid(tree.getTempletid());
-			table.setTabletype(tableType);
-			table = tableService.selectByWhere(table);
-			
-	    	List<Sys_templetfield> fieldList = treeService.geTempletfields(treeid, tableType);
-	    	
-	    	
 	    	//添加到本库
-//	    	dynamicService.exeSql(archive_insert_sql);
-	    	insert(list, treeid,table.getTablename(),table.getId(), fieldList,edoc_property);
-	    	
-	    	//修改OA库
-//	    	Object[] param_up = new Object[4];
-//	    	param_up[0] = 0;
-//	    	param_up[1] = 1;
-//	    	param_up[2] = 1;
-//	    	param_up[3] = edoc_property;
-//	    	String oa_sql_up = "UPDATE EDoc_Archive SET isend=? WHERE in_use=? AND isend=? AND EDOC_Property=?";
-//	    	manager.updateObject(oa_sql_up, param_up);
-	    	//读取文件
-//	    	for(int i=0;i<list.size();i++){
-//	    		Map data = (Map) list.get(i);
-//	    		String archiveId = String.valueOf(data.get("id"));
-//	    		readSysDoc(archiveId,table.getTablename());
-//	    	}
+	    	insert(list, treeid,table.getTablename(),table.getId(), fieldList,edoc_property,docServer);
     	}
     	return null;
     }
@@ -108,15 +90,17 @@ public class ReadOaController extends BaseConstroller{
      * @param id
      * @param archiveId  oa
      * @param tableName
+     * @param tableId
+     * @param docServer
      * */
-    private void readSysDoc(String treeid,String id,String archiveId,String tableName,String tableId){
+    private void readSysDoc(String treeid,String id,String archiveId,String tableName,String tableId,Map<String,String> docServer){
     	Object[] param = new Object[1];
     	param[0] = archiveId;
     	String sql ="SELECT id,archive_id,file_name,file_type,content,file_size FROM Doc_Content where archive_id=?";
 //    	List sysList = manager.queryForList(sql, param);
     	ResultSet rset = manager.preExecuteSelect(sql, param);
     	String docPath = getDocPath(treeid); //存放目录
-    	Map<String, String> docServer = getDocServer();
+//    	Map<String, String> docServer = getDocServer();
     	try {
 			while(rset.next()){
 				Sys_doc sysDoc = new Sys_doc();
@@ -200,8 +184,9 @@ public class ReadOaController extends BaseConstroller{
      * @param tableId
      * @param fieldList
      * @param edoc_property 档案类型
+     * @param docServer obj
      * */
-    public boolean insert(List<HashMap<String, String>> list,String treeid,String tableName,String tableId,List<Sys_templetfield> fieldList,String edoc_property) {
+    public boolean insert(List<HashMap<String, String>> list,String treeid,String tableName,String tableId,List<Sys_templetfield> fieldList,String edoc_property,Map<String, String> docServer) {
 
         //sb存储insert语句values前的
         StringBuffer sb = new StringBuffer();
@@ -261,7 +246,7 @@ public class ReadOaController extends BaseConstroller{
     	    	//读取文件
     	    	Map data = (Map) list.get(z);
 	    		String oa_archiveId = String.valueOf(data.get("id"));
-    	    	readSysDoc(treeid,id,oa_archiveId,tableName,tableId);
+    	    	readSysDoc(treeid,id,oa_archiveId,tableName,tableId,docServer);
                 
     	    	//修改OA库
     	    	Object[] param_up = new Object[5];

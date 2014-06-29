@@ -607,35 +607,48 @@
 	}
 
 	//读取OA数据
-	function readOAData(){
-		var treeid = '${selectid}';
-		//判断当前节点的treeid是不是指定的
-		//1.发文，2.收文，3.内
-		var oa_property = '';
-		
-		if(FW_TREEID == treeid){
-			oa_property = '1';
-		}else if(SW_TREEID == treeid){
-			oa_property = '2';
-		}else if(NQ_TREEID == treeid){
-			oa_property = '3';
-		}
-		$.ajax({
-			async : false,
-			url : "${pageContext.request.contextPath}/readOa/read.do",
-			type : 'post',
-			data : {
-				'treeid':treeid,
-				'tableType':'01',
-				'edoc_property' : oa_property
-			},
-			dataType : 'text',
-			success : function(data) {
-				alert(data);
-				refresh();
-			}
-		});
+	function lodding(){
+		$.blockUI({
+			message:"正在进行加载，请稍候...",
+			css: {
+		        padding: '15px',
+		        width:"300px"
+		    } 
+		}); 
 	}
+	function readOAData() {
+		lodding(); 
+		setTimeout(function () { 
+			var treeid = '${selectid}';
+			//判断当前节点的treeid是不是指定的
+			//1.发文，2.收文，3.内
+			var oa_property = '';
+			
+			if(FW_TREEID == treeid){
+				oa_property = '1';
+			}else if(SW_TREEID == treeid){
+				oa_property = '2';
+			}else if(NQ_TREEID == treeid){
+				oa_property = '3';
+			}
+			$.ajax({
+				async : false,
+				url : "${pageContext.request.contextPath}/readOa/read.do",
+				type : 'post',
+				data : {
+					'treeid':treeid,
+					'tableType':'01',
+					'edoc_property' : oa_property
+				},
+				dataType : 'text',
+				success : function(data) {
+					//$.unblockUI();
+					refresh();
+				}
+			});
+		},200);  
+	}
+	
 </script>
 
 
