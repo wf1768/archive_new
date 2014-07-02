@@ -27,4 +27,6 @@ public interface IInitService {
 	
 	public Sys_init selectByWhere(Sys_init init);
 
+	Sys_init insert(Sys_init init);
+
 }

@@ -59,7 +59,7 @@ public class test {
 	public static void main(String[] args) {
 		try {
 			//生成系统类型代码
-            String test = "0000222211171117111711171117";
+            String test = "0000000000001117000000000000";
             getSystemtype(test);
             
             //生成系统注册码

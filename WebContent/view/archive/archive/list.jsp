@@ -19,9 +19,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.contextMenu/jquery.contextMenu.js"></script>
 <script>
 
-	var FW_TREEID = '3043624b-9a1d-478c-b1aa-49c036c26ac2'; //发文
-	var SW_TREEID = '4efef2f9-16b8-4160-8093-79e1245f5d76'; //收文
-	var NQ_TREEID = '0f6ab59f-03ae-419e-b0e6-e1706be67d67'; //内请
+	var FW_TREEID = '1136a13a-2885-4230-bab8-cd525b8b5963'; //发文
+	var SW_TREEID = 'f8e7dcb2-7f34-49a4-92cf-a540413648ea'; //收文
+	var NQ_TREEID = '694e8c1f-6e6a-40c0-be27-1d6af3df7569'; //内请
 
 	$.blockUI({
 		message:"正在进行加载，请稍候...",

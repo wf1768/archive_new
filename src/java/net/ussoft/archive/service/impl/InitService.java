@@ -28,6 +28,13 @@ public class InitService implements IInitService {
 
 	@Transactional("txManager")
 	@Override
+	public Sys_init insert(Sys_init init) {
+		Sys_init tmp = initDao.save(init);
+		return tmp;
+	}
+	
+	@Transactional("txManager")
+	@Override
 	public int update(Sys_init init) {
 		Sys_init tmp = initDao.update(init);
 		if (null != tmp) {

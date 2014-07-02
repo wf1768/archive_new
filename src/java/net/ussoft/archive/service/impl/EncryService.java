@@ -62,11 +62,13 @@ public class EncryService implements IEncryService {
 		init = (Sys_init) initList.get(0);
 		
 		String decStr = Decryption(init.getInitvalue());
-		
-		String iString = decStr.substring(num, num + 4);
-		
-		if (iString.equals("1117")) {
-			return true;
+		try {
+			String iString = decStr.substring(num, num + 4);
+			if (iString.equals("1117")) {
+				return true;
+			}
+		} catch (Exception e) {
+			return false;
 		}
 		
 		return false;
