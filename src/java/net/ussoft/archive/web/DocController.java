@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.ussoft.archive.base.BaseConstroller;
 import net.ussoft.archive.model.Sys_account;
 import net.ussoft.archive.model.Sys_account_tree;
+import net.ussoft.archive.model.Sys_code;
 import net.ussoft.archive.model.Sys_doc;
 import net.ussoft.archive.model.Sys_docserver;
 import net.ussoft.archive.model.Sys_init;
@@ -31,6 +34,7 @@ import net.ussoft.archive.model.Sys_table;
 import net.ussoft.archive.model.Sys_templet;
 import net.ussoft.archive.model.Sys_tree;
 import net.ussoft.archive.service.IAccountService;
+import net.ussoft.archive.service.ICodeService;
 import net.ussoft.archive.service.IDocService;
 import net.ussoft.archive.service.IDocserverService;
 import net.ussoft.archive.service.IDynamicService;
@@ -88,6 +92,9 @@ public class DocController extends BaseConstroller {
 	private IOrgService orgService;
 	@Resource
 	private IInitService initService;
+	
+	@Resource
+    private ICodeService codeService;
 	
 	private static final int BUFFER_SIZE = 2 * 1024;
 	private Process process = null;
@@ -743,5 +750,47 @@ public class DocController extends BaseConstroller {
 		}catch (Exception e1) {
 			e1.printStackTrace();
 		}
+	}
+	
+	/**
+	 * 打开设置电子全文权限页面
+	 * @param ids
+	 */
+	@RequestMapping(value="/openSetDocauth",method=RequestMethod.GET)
+	public ModelAndView setDocauth(String ids,ModelMap modelMap) {
+		modelMap.put("ids",ids);
+		//获取电子全文代码
+		Sys_code code = new Sys_code();
+		code.setTempletfieldid("DOCAUTH");
+		List<Sys_code> codes = codeService.selectByWhere(code);
+		modelMap.put("docauth", codes);
+		return new ModelAndView("/view/archive/archive/setDocauth",modelMap);
+	}
+	
+	@RequestMapping(value="/setDocauth",method=RequestMethod.POST)
+	public void updateDocauth(String ids,String authid,HttpServletResponse response) throws IOException {
+		
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String result = "success";
+		if (authid == null || "".equals(authid) || ids == null || "".equals(ids) ) {
+			result = "failure";
+			out.print(result);
+			return;
+		}
+		
+		
+		String[] idArr = ids.split(",");
+		
+		for (String id : idArr) {
+			Sys_doc doc = new Sys_doc();
+			doc.setId(id);
+			doc.setDocauth(authid);
+			docService.update(doc);
+		}
+		
+		out.print(result);
 	}
 }

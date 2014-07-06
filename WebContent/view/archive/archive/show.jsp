@@ -181,7 +181,7 @@
 								<td align="center">${codeMap[doc.docauth] }</td>
 								<td align="center">
 									<c:if test="${treeauth.filescan == 1 && isFileShow == true}">
-										<a href="javascript:;" onclick="">查看</a>
+										<a href="javascript:;" onclick="openContentDialog('${doc.id}')">查看</a>
 									</c:if>
 									<c:if test="${treeauth.filedown == 1 }">
 										<a href="javascript:;" onclick="down('${doc.id}')">下载</a>

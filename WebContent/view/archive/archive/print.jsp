@@ -12,7 +12,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.jqprint-0.3.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.blockUI.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/print.util_zf.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/print.util.js"></script>
 <%-- <script src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script> --%>
 <!-- 配置文件 -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/umeditor1_2_2/umeditor.config.js"></script>

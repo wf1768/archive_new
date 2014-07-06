@@ -11,10 +11,24 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/json2.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/util.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialog_util.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.shiftcheckbox.js"></script>
 
 <base target="_self">
 
 <script>
+	$(function(){
+		$('#checkall').click(function(){
+		    $('input[name="checkbox"]').attr("checked",this.checked);
+		    if (this.checked) {
+		    	$('input[name="checkbox"]').parents('tr').addClass('selected');
+		    }
+		    else {
+		    	$('input[name="checkbox"]').parents('tr').removeClass("selected");
+		    }
+		});
+		$('input[type="checkbox"]').removeAttr("checked");
+		$('.shiftCheckbox').shiftcheckbox();
+	})
 
 	function down(id) {
         var link = "${pageContext.request.contextPath}/doc/download.do?id=" + id;
@@ -89,6 +103,29 @@
 		
 	}
 	
+	function setDocauth() {
+		var str = "";
+		
+		$("input[name='checkbox']:checked").each(function () {
+			str+=$(this).val()+ ",";
+		});
+		
+		if (str == "") {
+			alert("请先选择要设置权限的电子全文。");
+			return;
+		}
+		str = str.substring(0,str.length-1);
+		
+		var whObj = {
+				width : 450,
+				height : 300
+			};
+			
+		var url = "${pageContext.request.contextPath}/doc/openSetDocauth.do?ids=" + str + "&time=" + Date.parse(new Date());
+		var result = openShowModalDialog(url, window, whObj);
+		reload();
+	}
+	
 </script>
 <title>查看档案电子文件</title>
 </head>
@@ -105,6 +142,7 @@
                 </td>
             </tr>
             <tr>
+            	<td width="30px"><input type="checkbox" id="checkall"></td>
                 <td align="center">序号</td>
                 <td align="center">文件名</td>
                 <td align="center">类型</td>
@@ -116,6 +154,8 @@
             	<c:when test="${treeauth.docauth == '1' }">
             		<c:forEach items="${docs}" varStatus="i" var="doc">
 						<tr>
+							<td><input type="checkbox" name="checkbox" value="${doc.id }" class="shiftCheckbox"></td>
+							
 							<td align="center">${i.index+1 }</td>
 							<td align="center">${doc.docoldname}</td>
 							<td align="center">${doc.docext}</td>
@@ -146,7 +186,7 @@
 								<td align="center">${codeMap[doc.docauth] }</td>
 								<td align="center">
 									<c:if test="${treeauth.filescan == 1 && isFileShow == true}">
-										<a href="javascript:;" onclick="">查看</a>
+										<a href="javascript:;" onclick="openContentDialog('${doc.id}')">查看</a>
 									</c:if>
 									<c:if test="${treeauth.filedown == 1 }">
 										<a href="javascript:;" onclick="down('${doc.id}')">下载</a>
@@ -164,6 +204,7 @@
 			<tr>
 				<td colspan="6" align="center">
 					<button type="button" onclick="closepage()">关闭</button>
+					<button type="button" onclick="setDocauth()">设置权限</button>
 					<c:if test="${readonly == 0 }">
 					<button type="button" onclick="upload('${maps[0]['id']}')">上传</button>
 					</c:if>

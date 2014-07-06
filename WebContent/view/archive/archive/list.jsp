@@ -683,7 +683,7 @@
 			</div>
 			<div class="caozuoan">
 				<div style="float: right;margin-top: 3px;margin-left: 5px">
-					<input type="text" id="searchTxt" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
+					<input type="text" id="searchTxt" style="width:80px" value="${searchTxt }" onKeyDown="javascript:if (event.keyCode==13) {searchArchive();}" />
 					<a href="javascript:;" class="btn" onclick="searchArchive()">查询</a>
 				</div>
 				<div style="float: right;margin-top: 8px;">
