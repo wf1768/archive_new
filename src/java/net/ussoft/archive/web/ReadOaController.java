@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
-//@Controller
+@Controller
 @RequestMapping(value="readOa")
 public class ReadOaController extends BaseConstroller{
 	
@@ -61,12 +61,12 @@ public class ReadOaController extends BaseConstroller{
     public String readOaList(String treeid,String tableType,String edoc_property){
     	//文档类型EDOC_Property，1.发文，2.收文，3.内请
     	String sql = "SELECT Archive_ID AS id,DocNO AS wjh,Title AS tm,SubmitUnit AS cbdw,SubmitUser AS jbr,SubmitDate AS wjrq,CenterName AS zxmc,signuser AS cbswqbr,signcomment AS cbswqbyj,checkuser AS cbswhgr,checkcomment AS cbswhgyj,meetcomment AS hq,leadercomment AS ldps,doccomeunit AS lwdw,sender AS cs, '"+
-    	treeid+"' as treeid,2 as status FROM EDoc_Archive where in_use=? and isend=? and EDOC_Property=?";
+    	treeid+"' as treeid,2 as status FROM EDoc_Archive where isend=? and EDOC_Property=?";
     	//System.out.println("====="+sql+"======");
-    	Object[] param = new Object[3];
-    	param[0] = 1;  //老系统的标示
-    	param[1] = 1;  //档案读取OA标示，1为未读取，0为已读取
-    	param[2] = edoc_property;
+    	Object[] param = new Object[2];
+//    	param[0] = 1;  //老系统的标示
+    	param[0] = 1;  //档案读取OA标示，1为未读取，0为已读取
+    	param[1] = edoc_property;
     	List list = manager.queryForList(sql, param);
     	//获取当前treeid下数据
 		Sys_tree tree = treeService.getById(treeid);
@@ -109,7 +109,11 @@ public class ReadOaController extends BaseConstroller{
 	    		String fileName = rset.getString("file_name"); //文件名称
 	    		String file_type = rset.getString("file_type");	//文件类型
 	    		if("".equals(fileName)){
-	    			fileName = "未知文件";
+	    			fileName = "未知文件" + file_type;
+	    		}
+	    		String s=fileName.substring(0,1);
+	    		if (".".equals(s)) {
+	    			fileName = "未知文件" + file_type;
 	    		}
 	    		sysDoc.setDocoldname(fileName);
 	    		sysDoc.setDocext(file_type); //扩展名   
@@ -249,13 +253,14 @@ public class ReadOaController extends BaseConstroller{
     	    	readSysDoc(treeid,id,oa_archiveId,tableName,tableId,docServer);
                 
     	    	//修改OA库
-    	    	Object[] param_up = new Object[5];
+    	    	Object[] param_up = new Object[4];
     	    	param_up[0] = 0;
+//    	    	param_up[1] = 1;
     	    	param_up[1] = 1;
-    	    	param_up[2] = 1;
-    	    	param_up[3] = edoc_property;
-    	    	param_up[4] = oa_archiveId;
-    	    	String oa_sql_up = "UPDATE EDoc_Archive SET isend=? WHERE in_use=? AND isend=? AND EDOC_Property=? AND archive_id=?";
+    	    	param_up[2] = edoc_property;
+    	    	param_up[3] = oa_archiveId;
+//    	    	String oa_sql_up = "UPDATE EDoc_Archive SET isend=? WHERE in_use=? AND isend=? AND EDOC_Property=? AND archive_id=?";
+    	    	String oa_sql_up = "UPDATE EDoc_Archive SET isend=? WHERE isend=? AND EDOC_Property=? AND archive_id=?";
     	    	manager.updateObject(oa_sql_up, param_up);
     	    	
                 //清空sb和value ，进行创建下一条sql
