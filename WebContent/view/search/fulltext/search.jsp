@@ -227,7 +227,7 @@
 					a.target="_blank"; 
 					a.href="../readFile.html?selectid="+selectid+"&treeid="+treeid;
 					document.body.appendChild(a);  
-					a.click()
+					a.click();
 				}
 			}
 		});

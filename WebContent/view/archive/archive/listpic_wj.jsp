@@ -596,21 +596,21 @@
 				</div>
 				<div style="float: right;margin-top: 8px;">
 					<ul id="sddm" style="width: 405px">
-						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
-						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
-							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
-								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
-							</div>
-						</li>
+					<li><a href="javascript:;" onclick="returnAj()" onmouseout="mclosetime()">返回</a></li>
+					<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m2')" onmouseout="mclosetime()">批量上传</a>
 							<div id="m2" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 								<a href="javascript:;" onclick="upload_pic_multiple('IMAGE')">上传图片</a>
 								<a href="javascript:;" onclick="upload_pic_multiple('VIDEO')">上传视频</a>
 							</div>
 						</li>
-						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="returnAj()" onmouseout="mclosetime()">返回</a></li>
+						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
+							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
+								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
+							</div>
+						</li>
+						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
 					</ul>
 				</div>
 			</div>

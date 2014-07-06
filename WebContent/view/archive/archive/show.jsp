@@ -78,6 +78,30 @@
 		reload();
 	}
 	
+	//预览
+	function openContentDialog(docid) {
+		var treeid = '${treeid}';
+		$.ajax({
+			async : false,
+			url : "${pageContext.request.contextPath}/doc/preview.do",
+			type : 'post',
+			dataType : 'text',
+			data:"treeid="+treeid+"&docid="+docid,
+			success : function(data) {
+				if (data == "0") {
+					alert("对不起，您没有权限预览此文件！");
+				} else {
+					var a=document.createElement("a");  
+					a.target="_blank"; 
+					a.href="../readFile.html?selectid="+docid+"&treeid="+treeid;
+					document.body.appendChild(a);  
+					a.click();
+				}
+			}
+		});
+		
+	}
+	
 </script>
 <title>查看档案</title>
 </head>
@@ -134,7 +158,7 @@
 							<td align="center">${codeMap[doc.docauth] }</td>
 							<td align="center">
 								<c:if test="${treeauth.filescan == 1 && isFileShow == true }">
-									<a href="javascript:;" onclick="">查看</a>
+									<a href="javascript:;" onclick="openContentDialog('${doc.id}')">查看</a>
 								</c:if>
 								<c:if test="${treeauth.filedown == 1 }">
 									<a href="javascript:;" onclick="down('${doc.id}')">下载</a>

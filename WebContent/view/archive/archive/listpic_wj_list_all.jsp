@@ -559,7 +559,8 @@
 				</div>
 				<div style="float: right;margin-top: 8px;">
 					<ul id="sddm" style="width: 325px;">
-						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
+						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 								<a href="javascript:;" onclick="update_multiple()">批量修改</a>
@@ -567,8 +568,8 @@
 								<a href="javascript:;" onclick="datacopy()">复制</a>
 							</div>
 						</li>
-						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
+						
 					</ul>
 				</div>
 				

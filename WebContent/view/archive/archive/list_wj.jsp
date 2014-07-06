@@ -594,8 +594,9 @@
 				</div>
 				<div style="float: right;z-index:999;margin-top: 8px;">
 					<ul id="sddm">
-						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
-						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
+						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
+						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 								<a href="javascript:;" onclick="update_multiple()">批量修改</a>
@@ -605,9 +606,8 @@
 								<a href="javascript:;" onclick="datapaster()">粘贴</a>
 							</div>
 						</li>
-						<li><a href="javascript:;" onclick="setshow('${templet.id}','02')" onmouseout="mclosetime()">设置</a></li>
-						<li><a href="javascript:;" onclick="doc('')" onmouseout="mclosetime()">挂接</a></li>
-						<li><a href="javascript:;" onclick="openprint()" onmouseout="mclosetime()">打印</a></li>
+						<li><a href="javascript:;" onclick="del()" onmouseout="mclosetime()">删除</a></li>
+						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
 					</ul>
 				</div>
 			</div>

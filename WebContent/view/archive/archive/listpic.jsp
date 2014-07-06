@@ -615,14 +615,14 @@
 				</div>
 				<div style="float: right;margin-top: 8px;">
 					<ul id="sddm" style="width: 250px">
-						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
+						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
 						<li><a href="javascript:;" onmouseover="mopen('m1')" onmouseout="mclosetime()">数据操作</a>
 							<div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 								<a href="javascript:;" onclick="archiveImport()">Excel导入</a>
 								<a href="javascript:;" onclick="archiveExport()">导出Excel</a>
 							</div>
 						</li>
-						<li><a href="javascript:;" onclick="setshow('${templet.id}','01')" onmouseout="mclosetime()">设置</a></li>
+						<li><a href="javascript:;" onclick="add()" onmouseout="mclosetime()">添加</a></li>
 					</ul>
 				</div>
 			</div>

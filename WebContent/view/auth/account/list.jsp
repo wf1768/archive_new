@@ -250,7 +250,7 @@
 						<td>
 						<c:choose>
 							<c:when test="${item.accountstate==1 }">
-								<a href="javascript:;" onclick="updatestate('${item.id}',0)" >启用</a>
+								<a href="javascript:;" onclick="updatestate('${item.id}',0)" ><font color="blue">启用</font></a>
 							</c:when>
 							<c:when test="${item.accountstate==0 }">
 								<a href="javascript:;" onclick="updatestate('${item.id}',1)" ><font color="red">禁用</font></a>
