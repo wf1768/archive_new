@@ -37,6 +37,11 @@ public class ConfigService implements IConfigService {
 	public List<Sys_config> list(String accountid) {
 		Sys_config config = new Sys_config();
 		config.setAccountid(accountid);
+		if (!"SYSTEM".equals(accountid)) {
+			getAccountConfig(accountid);
+			
+		}
+		
 		return configDao.search(config);
 	}
 
@@ -125,17 +130,33 @@ public class ConfigService implements IConfigService {
 		config.setAccountid(accountid);
 		List<Sys_config> configs = configDao.search(config);
 		
-		if (null == configs || configs.size() == 0) {
-			//创建帐户自己的配置文件
-//			Sys_config config1 = new Sys_config();
+		if (accountid.equals("SYSTEM")) {
+			return configs;
+		}
+		
+		Boolean page = false;
+		Boolean substring = false;
+		Boolean imageshow = false;
+		for (Sys_config sys_config : configs) {
+			if (sys_config.getConfigkey().equals("PAGE")) {
+				page = true;
+			}
+			if (sys_config.getConfigkey().equals("SUBSTRING")) {
+				substring = true;
+			}
+			if (sys_config.getConfigkey().equals("IMAGESHOW")) {
+				imageshow = true;
+			}
+		}
+		if (!page) {
 			config.setConfigkey("PAGE");
 			config.setAccountid("SYSTEM");
 			config = selectByWhere(config);
 			config.setId(UUID.randomUUID().toString());
 			config.setAccountid(accountid);
 			insert(config);
-			
-			//创建字段截取字数config
+		}
+		if (!substring) {
 			Sys_config config2 = new Sys_config();
 			config2.setId(UUID.randomUUID().toString());
 			config2.setAccountid(accountid);
@@ -144,8 +165,8 @@ public class ConfigService implements IConfigService {
 			config2.setConfigname("截取文字显示");
 			config2.setConfigvalue("8");
 			insert(config2);
-			
-			//创建字段截取字数config
+		}
+		if (!imageshow) {
 			Sys_config config3 = new Sys_config();
 			config3.setId(UUID.randomUUID().toString());
 			config3.setAccountid(accountid);
@@ -154,57 +175,99 @@ public class ConfigService implements IConfigService {
 			config3.setConfigname("多媒体文件显示");
 			config3.setConfigvalue("IMAGE");
 			insert(config3);
-			
-			
-			Sys_config config1 = new Sys_config();
-			config1.setAccountid(accountid);
-			
-			configs = configDao.search(config1);
 		}
-		else {
-			Boolean page = false;
-			Boolean substring = false;
-			Boolean imageshow = false;
-			for (Sys_config sys_config : configs) {
-				if (sys_config.getConfigkey().equals("PAGE")) {
-					page = true;
-				}
-				if (sys_config.getConfigkey().equals("SUBSTRING")) {
-					substring = true;
-				}
-				if (sys_config.getConfigkey().equals("IMAGESHOW")) {
-					imageshow = true;
-				}
-			}
-			if (!page) {
-				config.setConfigkey("PAGE");
-				config.setAccountid("SYSTEM");
-				config = selectByWhere(config);
-				config.setId(UUID.randomUUID().toString());
-				config.setAccountid(accountid);
-				insert(config);
-			}
-			if (!substring) {
-				Sys_config config2 = new Sys_config();
-				config2.setId(UUID.randomUUID().toString());
-				config2.setAccountid(accountid);
-				config2.setConfigkey("SUBSTRING");
-				config2.setConfigmemo("列表显示截取后文字数");
-				config2.setConfigname("截取文字显示");
-				config2.setConfigvalue("8");
-				insert(config2);
-			}
-			if (!imageshow) {
-				Sys_config config3 = new Sys_config();
-				config3.setId(UUID.randomUUID().toString());
-				config3.setAccountid(accountid);
-				config3.setConfigkey("IMAGESHOW");
-				config3.setConfigmemo("多媒体文件显示样式");
-				config3.setConfigname("多媒体文件显示");
-				config3.setConfigvalue("IMAGE");
-				insert(config3);
-			}
-		}
+		
+		Sys_config config1 = new Sys_config();
+		config1.setAccountid(accountid);
+		
+		configs.clear();
+		configs = configDao.search(config1);
+		
+//		if (null == configs || configs.size() == 0) {
+//			//创建帐户自己的配置文件
+////			Sys_config config1 = new Sys_config();
+//			config.setConfigkey("PAGE");
+//			config.setAccountid("SYSTEM");
+//			config = selectByWhere(config);
+//			config.setId(UUID.randomUUID().toString());
+//			config.setAccountid(accountid);
+//			insert(config);
+//			
+//			//创建字段截取字数config
+//			Sys_config config2 = new Sys_config();
+//			config2.setId(UUID.randomUUID().toString());
+//			config2.setAccountid(accountid);
+//			config2.setConfigkey("SUBSTRING");
+//			config2.setConfigmemo("列表显示截取后文字数");
+//			config2.setConfigname("截取文字显示");
+//			config2.setConfigvalue("8");
+//			insert(config2);
+//			
+//			//创建字段截取字数config
+//			Sys_config config3 = new Sys_config();
+//			config3.setId(UUID.randomUUID().toString());
+//			config3.setAccountid(accountid);
+//			config3.setConfigkey("IMAGESHOW");
+//			config3.setConfigmemo("多媒体文件显示样式");
+//			config3.setConfigname("多媒体文件显示");
+//			config3.setConfigvalue("IMAGE");
+//			insert(config3);
+//			
+//			
+//			Sys_config config1 = new Sys_config();
+//			config1.setAccountid(accountid);
+//			
+//			configs = configDao.search(config1);
+//		}
+//		else {
+//			Boolean page = false;
+//			Boolean substring = false;
+//			Boolean imageshow = false;
+//			for (Sys_config sys_config : configs) {
+//				if (sys_config.getConfigkey().equals("PAGE")) {
+//					page = true;
+//				}
+//				if (sys_config.getConfigkey().equals("SUBSTRING")) {
+//					substring = true;
+//				}
+//				if (sys_config.getConfigkey().equals("IMAGESHOW")) {
+//					imageshow = true;
+//				}
+//			}
+//			if (!page) {
+//				config.setConfigkey("PAGE");
+//				config.setAccountid("SYSTEM");
+//				config = selectByWhere(config);
+//				config.setId(UUID.randomUUID().toString());
+//				config.setAccountid(accountid);
+//				insert(config);
+//			}
+//			if (!substring) {
+//				Sys_config config2 = new Sys_config();
+//				config2.setId(UUID.randomUUID().toString());
+//				config2.setAccountid(accountid);
+//				config2.setConfigkey("SUBSTRING");
+//				config2.setConfigmemo("列表显示截取后文字数");
+//				config2.setConfigname("截取文字显示");
+//				config2.setConfigvalue("8");
+//				insert(config2);
+//			}
+//			if (!imageshow) {
+//				Sys_config config3 = new Sys_config();
+//				config3.setId(UUID.randomUUID().toString());
+//				config3.setAccountid(accountid);
+//				config3.setConfigkey("IMAGESHOW");
+//				config3.setConfigmemo("多媒体文件显示样式");
+//				config3.setConfigname("多媒体文件显示");
+//				config3.setConfigvalue("IMAGE");
+//				insert(config3);
+//			}
+//			
+//			Sys_config config1 = new Sys_config();
+//			config1.setAccountid(accountid);
+//			
+//			configs = configDao.search(config1);
+//		}
 		
 		
 		return configs;

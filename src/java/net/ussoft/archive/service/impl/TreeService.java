@@ -440,12 +440,26 @@ public class TreeService implements ITreeService {
 			}
 		}
 		
+		//修改：查到了才显示数量，没查到就不显示，看起来更清楚
+		String ajTxt = "";
+		String wjTxt = "";
+		if (null != ajCount && ajCount > 0) {
+			ajTxt = "案:" + ajCount;
+		}
+		
+		if (null != wjCount && wjCount > 0) {
+			wjTxt = "文:" + wjCount;
+		}
+		
 		if (!"".equals(templettype)) {
-			if (templettype.equals("A") || templettype.equals("P")) {
+			if ("0".equals(treenode)) {
 				countStr = "[<span style='color:red;margin-right:0px;'>案:" + ajCount + " 文:" + wjCount + "</span>]";
 			}
+			else if (templettype.equals("A") || templettype.equals("P")) {
+				countStr = "[<span style='color:red;margin-right:0px;'>" + ajTxt + " " + wjTxt + "</span>]";
+			}
 			else if (templettype.equals("F")) {
-				countStr = "[<span style='color:red;margin-right:0px;'>文:" + wjCount + "</span>]";
+				countStr = "[<span style='color:red;margin-right:0px;'>" + wjTxt+ "</span>]";
 			}
 		}
 		return countStr;
@@ -497,13 +511,13 @@ public class TreeService implements ITreeService {
 				if (null != countMap && countMap.size() >0) {
 					Sys_templet templet = templetDao.get(((JSONObject) jsonArray.get(i)).get("templetid").toString());
 					String templettype = templet.getTemplettype();
-					String countStr = "";
-					if (templettype.equals("A") || templettype.equals("P")) {
-						countStr = "[<span style='color:red;margin-right:0px;'>案:" + countMap.get("aj") + " 文:" + countMap.get("wj") + "</span>]";
-					}
-					else if (templettype.equals("F")) {
-						countStr = "[<span style='color:red;margin-right:0px;'>文:" + countMap.get("wj") + "</span>]";
-					}
+					String countStr = countMap.get("countStr");
+//					if (templettype.equals("A") || templettype.equals("P")) {
+//						countStr = "[<span style='color:red;margin-right:0px;'>案:" + countMap.get("aj") + " 文:" + countMap.get("wj") + "</span>]";
+//					}
+//					else if (templettype.equals("F")) {
+//						countStr = "[<span style='color:red;margin-right:0px;'>文:" + countMap.get("wj") + "</span>]";
+//					}
 					
 					((JSONObject) jsonArray.get(i)).put("treename",((JSONObject) jsonArray.get(i)).getString("treename") + countStr );
 				}

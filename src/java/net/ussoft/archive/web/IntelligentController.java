@@ -77,14 +77,29 @@ public class IntelligentController extends BaseConstroller{
 				Sys_templet templet = treeService.getTemplet(sys_tree.getId());
 				if (templet.getTemplettype().equals("A") || templet.getTemplettype().equals("P")) {
 					Integer ajCount = dynamicService.archiveCount(sys_tree.getId(), "01", searchTxt, 0);
-					if (null == ajCount || ajCount < 0) {
-						ajCount = 0;
-					}
+					
 					Integer wjCount = dynamicService.archiveCount(sys_tree.getId(), "02", searchTxt, 0);
-					if (null == wjCount || wjCount < 0) {
-						wjCount = 0;
+					
+					//修改：查到了才显示数量，没查到就不显示，看起来更清楚
+					String ajTxt = "";
+					String wjTxt = "";
+					if (null != ajCount && ajCount > 0) {
+						ajTxt = "案:" + ajCount;
 					}
-					String countStr = "[<span style='color:red;margin-right:0px;'>案:" + ajCount + " 文:" + wjCount + "</span>]";
+					
+					if (null != wjCount && wjCount > 0) {
+						wjTxt = "文:" + wjCount;
+					}
+					
+					String countStr = "[<span style='color:red;margin-right:0px;'>" + ajTxt + " " + wjTxt + "</span>]";
+//					if (null == ajCount || ajCount < 0) {
+//						ajCount = 0;
+//					}
+//					Integer wjCount = dynamicService.archiveCount(sys_tree.getId(), "02", searchTxt, 0);
+//					if (null == wjCount || wjCount < 0) {
+//						wjCount = 0;
+//					}
+//					String countStr = "[<span style='color:red;margin-right:0px;'>案:" + ajCount + " 文:" + wjCount + "</span>]";
 					HashMap<String, String> countMap = new HashMap<String, String>();
 					countMap.put("countStr", countStr);
 					countMap.put("aj", ajCount.toString());
@@ -95,11 +110,16 @@ public class IntelligentController extends BaseConstroller{
 				}
 				else if (templet.getTemplettype().equals("F")) {
 					Integer wjCount = dynamicService.archiveCount(sys_tree.getId(), "01", searchTxt, 0);
-					if (null == wjCount || wjCount < 0) {
-						wjCount = 0;
+					
+					//修改：查到了才显示数量，没查到就不显示，看起来更清楚
+					String wjTxt = "";
+					
+					if (null != wjCount && wjCount > 0) {
+						wjTxt = "文:" + wjCount;
 					}
+					
 					HashMap<String, String> countMap = new HashMap<String, String>();
-					String countStr = "[<span style='color:red;margin-right:0px;'>文:" + wjCount + "</span>]";
+					String countStr = "[<span style='color:red;margin-right:0px;'>" + wjTxt + "</span>]";
 					countMap.put("countStr", countStr);
 					countMap.put("wj", wjCount.toString());
 					countMap.put("templettype", templet.getTemplettype());
@@ -163,7 +183,40 @@ public class IntelligentController extends BaseConstroller{
 	
 	
 	@RequestMapping(value="/list",method=RequestMethod.GET)
-	public ModelAndView list(String searchTreeids,String parentid,String treeid,String tabletype,Integer page,
+	public ModelAndView list(ModelMap modelMap,HttpServletRequest request){
+		modelMap = super.getModelMap("SEARCHMANAGE","SEARCH");
+		
+		//默认访问查询案卷页
+		String url = "/view/search/intelligent/list";
+		
+		//获取当前session登录帐户
+		Sys_account account = getSessionAccount();
+		//根据当前帐户id，获取帐户的档案树节点，用来档案管理里画档案树
+		List<Sys_tree> trees = treeService.getAuthTree(account.getId());
+		
+		//获取点击后页面右侧档案类型列表
+		PageBean<Map<String, Object>> pageBean = new PageBean<Map<String,Object>>();
+
+	    String treeJson = "";
+		if (null != trees && trees.size() >0 ) {
+			treeJson = JSON.toJSONString(trees);
+		}
+	    treeJson = treeService.createTreeJson(treeJson, getProjectBasePath());
+		modelMap.put("treeList", treeJson);
+		modelMap.put("pagebean", pageBean);
+		modelMap.put("isSearchTreeid", false);
+		
+		CommonUtils.removeSessionAttribute(request, Constants.intel_search_count_session);
+		CommonUtils.removeSessionAttribute(request, Constants.intel_search_session);
+		CommonUtils.removeSessionAttribute(request, Constants.intel_search_treeid_session);
+		return new ModelAndView(url,modelMap);
+
+		
+		
+	}
+	
+	@RequestMapping(value="/listSearch",method=RequestMethod.POST)
+	public ModelAndView listSearch(String searchTreeids,String parentid,String treeid,String tabletype,Integer page,
 			String searchTxt,String expand ,Integer isSearchWj,ModelMap modelMap,HttpServletRequest request){
 		modelMap = super.getModelMap("SEARCHMANAGE","SEARCH");
 		
@@ -201,11 +254,11 @@ public class IntelligentController extends BaseConstroller{
 		//如果没有treeid，并且查询值为空，就直接返回到智能检索页面
 		if (null == treeid || treeid.equals("")) {
 			if (null == searchTxt || searchTxt.trim().equals("")) {
-			    String treeJson = "";
+				String treeJson = "";
 				if (null != trees && trees.size() >0 ) {
 					treeJson = JSON.toJSONString(trees);
 				}
-			    treeJson = treeService.createTreeJson(treeJson, getProjectBasePath());
+				treeJson = treeService.createTreeJson(treeJson, getProjectBasePath());
 				modelMap.put("treeList", treeJson);
 				modelMap.put("pagebean", pageBean);
 				modelMap.put("isSearchTreeid", false);
@@ -220,32 +273,32 @@ public class IntelligentController extends BaseConstroller{
 		
 		//获取session里的查询值，与传入的查询值比较，如果不相同，重新计算选中的树节点的查询数量。
 		Object object = CommonUtils.getSessionAttribute(request, Constants.intel_search_session);
-	    String sessionSearchTxt = object == null ? null : (String) object;
-	    
-	    HashMap<String, HashMap<String, String>> treeMap = new HashMap<String, HashMap<String,String>>();
-	    
-	    modelMap.put("searchTreeids", searchTreeids);
-	    
-	    //获取session里的树节点，如果树节点变化，也要重新查。
+		String sessionSearchTxt = object == null ? null : (String) object;
+		
+		HashMap<String, HashMap<String, String>> treeMap = new HashMap<String, HashMap<String,String>>();
+		
+		modelMap.put("searchTreeids", searchTreeids);
+		
+		//获取session里的树节点，如果树节点变化，也要重新查。
 		Object objectTreeid = CommonUtils.getSessionAttribute(request, Constants.intel_search_treeid_session);
 		String sessionTreeid =  objectTreeid == null ? null : objectTreeid.toString();
 		
-	    //计算查询值，在选中的树节点的数据中，数量
+		//计算查询值，在选中的树节点的数据中，数量
 //	    if (null == sessionSearchTxt || !sessionSearchTxt.equals(searchTxt) || null == sessionTreeid || !sessionTreeid.equals(searchTreeids)) {
-	    if (null == treeid || "".equals(treeid)) {
-	    	if (null == sessionSearchTxt || !sessionSearchTxt.equals(searchTxt) || null == sessionTreeid || !sessionTreeid.equals(searchTreeids)) {
-	    		//获取选中节点
-		    	if (null != searchTreeids && !"".equals(searchTreeids) && searchTreeids.length() > 2) {
-		    		//计算选中树节点的查询数量，存入session
-		    		createSearchCount(searchTreeids,searchTxt,request);
-		    	}
-	    	}
-	    }
-	    else {
-	    	//如果页面选择了tree，获取数据
-		    if (null != treeid && !"".equals(treeid)) {
-		    	
-		    	//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
+		if (null == treeid || "".equals(treeid)) {
+			if (null == sessionSearchTxt || !sessionSearchTxt.equals(searchTxt) || null == sessionTreeid || !sessionTreeid.equals(searchTreeids)) {
+				//获取选中节点
+				if (null != searchTreeids && !"".equals(searchTreeids) && searchTreeids.length() > 2) {
+					//计算选中树节点的查询数量，存入session
+					createSearchCount(searchTreeids,searchTxt,request);
+				}
+			}
+		}
+		else {
+			//如果页面选择了tree，获取数据
+			if (null != treeid && !"".equals(treeid)) {
+				
+				//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
 				HashMap<String, Object> configMap = getConfig(account.getId());
 				//每页行数
 				Integer pageSize = 30;
@@ -283,26 +336,26 @@ public class IntelligentController extends BaseConstroller{
 					pageBean.setPageNo(page);
 				}
 				
-		    	List<String> treeidList = (List<String>) JSON.parse(sessionTreeid);
-		    	
-		    	//判断选择的treeid在不在查询范围内，如果在，获取查询后的数据，如果不在，获取全部数据
-		    	Boolean isSearchTreeid = false;
-		    	if (null != treeidList && treeidList.size() > 0) {
-		    		for (String str : treeidList) {
+				List<String> treeidList = (List<String>) JSON.parse(sessionTreeid);
+				
+				//判断选择的treeid在不在查询范围内，如果在，获取查询后的数据，如果不在，获取全部数据
+				Boolean isSearchTreeid = false;
+				if (null != treeidList && treeidList.size() > 0) {
+					for (String str : treeidList) {
 						if (str.equals(treeid)) {
 							isSearchTreeid = true;
 						}
 					}
-		    	}
-		    	modelMap.put("isSearchTreeid", isSearchTreeid);
-		    	
-		    	//如果当前选中的treeid在查询里
-		    	if (isSearchTreeid) {
-		    		if (isSearchWj == 1) {
-		    			pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, sessionSearchTxt, 0, pageBean);
-		    		}
-		    		else {
-		    			//如果当前treeid不在检索里，如果是文件级，获取对应的案卷级，供文件级页面显示
+				}
+				modelMap.put("isSearchTreeid", isSearchTreeid);
+				
+				//如果当前选中的treeid在查询里
+				if (isSearchTreeid) {
+					if (isSearchWj == 1) {
+						pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, sessionSearchTxt, 0, pageBean);
+					}
+					else {
+						//如果当前treeid不在检索里，如果是文件级，获取对应的案卷级，供文件级页面显示
 						if (tabletype.equals("02")) {
 							List<Sys_templetfield> ajFieldList = treeService.getTempletfields(treeid, "01",account.getId());
 							
@@ -323,10 +376,10 @@ public class IntelligentController extends BaseConstroller{
 						else {
 							pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, sessionSearchTxt, 0, pageBean);
 						}
-		    		}
-		    	}
-		    	else {
-		    		//如果当前treeid不在检索里，如果是文件级，获取对应的案卷级，供文件级页面显示
+					}
+				}
+				else {
+					//如果当前treeid不在检索里，如果是文件级，获取对应的案卷级，供文件级页面显示
 					if (tabletype.equals("02")) {
 						List<Sys_templetfield> ajFieldList = treeService.getTempletfields(treeid, "01",account.getId());
 						
@@ -344,11 +397,11 @@ public class IntelligentController extends BaseConstroller{
 						
 					}
 					
-		    		pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, null, 0, pageBean);
-		    	}
-		    	modelMap.put("searchTxt", sessionSearchTxt);
-		    	
-		    	//获取templet
+					pageBean = dynamicService.archiveList(treeid, false, parentid, tabletype, null, 0, pageBean);
+				}
+				modelMap.put("searchTxt", sessionSearchTxt);
+				
+				//获取templet
 				Sys_templet templet = treeService.getTemplet(treeid);
 				modelMap.put("templet", templet);
 				modelMap.put("selectid", treeid);
@@ -408,17 +461,17 @@ public class IntelligentController extends BaseConstroller{
 //						}
 					}
 				}
-		    }
-	    }
-	    
-	    modelMap.put("pagebean", pageBean);
-	    //获取session里的查询值的数量，赋予页面显示。
+			}
+		}
+		
+		modelMap.put("pagebean", pageBean);
+		//获取session里的查询值的数量，赋予页面显示。
 		Object objectCountMap = CommonUtils.getSessionAttribute(request, Constants.intel_search_count_session);
 		treeMap =  objectCountMap == null ?null : (HashMap<String, HashMap<String, String>>)objectCountMap;
-	    
+		
 //	    modelMap.put("treeMap", treeMap);
-	    
-	    String treeJson = "";
+		
+		String treeJson = "";
 		if (null != trees && trees.size() >0 ) {
 			treeJson = JSON.toJSONString(trees);
 		}
@@ -428,9 +481,9 @@ public class IntelligentController extends BaseConstroller{
 		else {
 			treeJson = treeService.createTreeJson(treeJson, getProjectBasePath(),treeMap);
 		}
-	    
+		
 		modelMap.put("treeList", treeJson);
-	    
+		
 		return new ModelAndView(url,modelMap);
 	}
 	

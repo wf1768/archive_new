@@ -99,13 +99,14 @@ public class SearchService implements ISearchService {
 			
 			HashMap<String, Integer> resultMap = new HashMap<String, Integer>();
 			resultMap.put(treeid, hits.totalHits);
-			
+			indexSearch.getIndexReader().close();
 			indexSearch.close();
 			return resultMap;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
+				indexSearch.getIndexReader().close();
 				indexSearch.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -290,6 +291,8 @@ public class SearchService implements ISearchService {
 				}
 				resultList.add(map);
 			}
+//			reader.close();
+			indexSearch.getIndexReader().close();
 			indexSearch.close();
 			resultMap.put("DATA", resultList);
 			resultMap.put("ROWCOUNT", rowCount);
@@ -299,6 +302,7 @@ public class SearchService implements ISearchService {
 			e.printStackTrace();
 		} finally {
 			try {
+				indexSearch.getIndexReader().close();
 				indexSearch.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -347,12 +351,15 @@ public class SearchService implements ISearchService {
 //			System.out.println("找到了" + hits.totalHits + "个");
 			HashMap<String, Integer> resultMap = new HashMap<String, Integer>();
 			resultMap.put(treeid, hits.totalHits);
+			
+			indexSearch.getIndexReader().close();
 			indexSearch.close();
 			return resultMap;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
+				indexSearch.getIndexReader().close();
 				indexSearch.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -528,6 +535,7 @@ public class SearchService implements ISearchService {
 				}
 				resultList.add(map);
 			}
+			indexSearch.getIndexReader().close();
 			indexSearch.close();
 			
 			resultMap.put("DATA", resultList);
@@ -538,6 +546,7 @@ public class SearchService implements ISearchService {
 			e.printStackTrace();
 		} finally {
 			try {
+				indexSearch.getIndexReader().close();
 				indexSearch.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -693,6 +702,7 @@ public class SearchService implements ISearchService {
 				}
 				resultList.add(map);
 			}
+			indexSearch.getIndexReader().close();
 			indexSearch.close();
 			resultMap.put("DATA", resultList);
 			resultMap.put("ROWCOUNT", rowCount);
@@ -702,6 +712,7 @@ public class SearchService implements ISearchService {
 			e.printStackTrace();
 		} finally {
 			try {
+				indexSearch.getIndexReader().close();
 				indexSearch.close();
 			} catch (IOException e) {
 				e.printStackTrace();

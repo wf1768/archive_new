@@ -160,6 +160,7 @@ public class ArchiveController extends BaseConstroller {
 		
 		//获取每页条数(首先获取帐户自己的页数配置，如果没有设置，读取系统配置)
 		HashMap<String, Object> configMap = getConfig(account.getId());
+//		List<Sys_config> configs = configService.getAccountConfig(account.getId());
 		//每页行数
 		Integer pageSize = 30;
 		//字段截取标准。（列表里字段长度超过标准，被截取)

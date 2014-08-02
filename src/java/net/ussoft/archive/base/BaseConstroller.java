@@ -69,7 +69,8 @@ public class BaseConstroller {
 	 * 获取系统配置表（sys_config）内容，形成map类型。供子类
 	 */
 	public HashMap<String, Object> getConfig(String accountid) {
-		List<Sys_config> configList = configService.list(accountid);
+//		List<Sys_config> configList = configService.list(accountid);
+		List<Sys_config> configList = configService.getAccountConfig(accountid);
 		
 		HashMap<String, Object> configMap = new HashMap<String, Object>();
 		for (Sys_config config : configList) {

@@ -137,7 +137,51 @@
 		} else {
 			var openexpand = JSON.stringify(expand);
 			var searchTreeids = '${searchTreeids}';
-			window.location.href = "${pageContext.request.contextPath}/intelligent/list.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "searchTreeids";
+			valueArr[0] = searchTreeids;
+			nameArr[1] = "expand";
+			valueArr[1] = openexpand;
+			nameArr[2] = "treeid";
+			valueArr[2] = nodes.id;
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			/* //jquery生成form提交
+		    var action = "listSearch.do";  
+		    // 创建Form  
+		    var form = $('<form></form>');  
+		    // 设置属性  
+		    form.attr('action', action);  
+		    form.attr('method', 'post');  
+		    // form的target属性决定form在哪个页面提交  
+		    // _self -> 当前页面 _blank -> 新页面
+		    form.attr('target', '_self');  
+		    // 创建Input  
+		    var searchTreeids_input = $('<input type="text" name="searchTreeids" />');
+		    searchTreeids_input.attr('value', searchTreeids);  
+		    // 附加到Form  
+		    form.append(searchTreeids_input);
+		    
+		    var expand_input = $('<input type="text" name="expand" />');
+		    expand_input.attr('value', openexpand);
+		    // 附加到Form  
+		    form.append(expand_input);
+		    
+		    var treeid_input = $('<input type="text" name="treeid" />');
+		    treeid_input.attr('value', nodes.id);
+		    // 附加到Form  
+		    form.append(treeid_input);
+		    form.appendTo("body");
+	        form.css('display','none');
+	        
+		    // 提交表单  
+		    form.submit(); */
+		    
+			//window.location.href = "${pageContext.request.contextPath}/intelligent/listSearch.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
 	};
 	
@@ -220,21 +264,88 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page="+page_index+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "treeid";
+			valueArr[0] = "${selectid}";
+			nameArr[1] = "page";
+			valueArr[1] = page_index;
+			nameArr[2] = "expand";
+			valueArr[2] = openexpand;
+			nameArr[3] = "searchTreeids";
+			valueArr[3] = searchTreeids;
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page="+page_index+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
 	};
 	
 	function isSearchWj() {
 		var openexpand = JSON.stringify(expand);
 		var searchTreeids = '${searchTreeids}';
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
+		
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "treeid";
+		valueArr[0] = "${selectid}";
+		nameArr[1] = "tabletype";
+		valueArr[1] = "02";
+		nameArr[2] = "expand";
+		valueArr[2] = openexpand;
+		nameArr[3] = "searchTreeids";
+		valueArr[3] = searchTreeids;
+		nameArr[4] = "isSearchWj";
+		valueArr[4] = "1";
+		
+		post("listSearch.do",nameArr,valueArr);
+		
+		//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
 	}
 	
 	function showWj(id) {
 		var openexpand = JSON.stringify(expand);
 		var searchTreeids = '${searchTreeids}';
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }&searchTxt_aj=${searchTxt }&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids;
+		
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "treeid";
+		valueArr[0] = "${selectid}";
+		nameArr[1] = "parentid";
+		valueArr[1] = id;
+		nameArr[2] = "page_aj";
+		valueArr[2] = "${pagebean.pageNo }";
+		nameArr[3] = "searchTxt_aj";
+		valueArr[3] = "${searchTxt }";
+		nameArr[4] = "tabletype";
+		valueArr[4] = "02";
+		nameArr[5] = "expand";
+		valueArr[5] = openexpand;
+		nameArr[6] = "searchTreeids";
+		valueArr[6] = searchTreeids;
+		
+		post("listSearch.do",nameArr,valueArr);
+		
+		//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?" +
+		//		"treeid=${selectid}&parentid="+id+"&page_aj=${pagebean.pageNo }"
+		//		+"&searchTxt_aj=${searchTxt }&tabletype=02&expand="+openexpand + "&searchTreeids="+searchTreeids;
 	}
+	
+	function post(URL, nameArr,valueArr) {
+	    $("body").append("<form></form>");  
+	    $("body").find("form").attr("action",URL);  
+	    $("body").find("form").attr("method","post");  
+	    $("body").find("form").attr("display","none");
+	    
+	    for (var i=0;i<nameArr.length;i++) {
+	    	$("body").find("form").append("<input type='text' name='"+nameArr[i]+"' value = '"+valueArr[i]+"'></input>");  
+	    }
+	    $("body").find("form").submit();  
+	} 
 	
 	function searchArchive() {
 		
@@ -258,7 +369,49 @@
 		
 		var openexpand = JSON.stringify(expand);
 		
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "searchTreeids";
+		valueArr[0] = treeids;
+		nameArr[1] = "expand";
+		valueArr[1] = openexpand;
+		nameArr[2] = "searchTxt";
+		valueArr[2] = searchTxt;
+		
+		post("listSearch.do",nameArr,valueArr);
+		/* //jquery生成form提交
+	    var action = "listSearch.do";  
+	    // 创建Form  
+	    var form = $('<form></form>');  
+	    // 设置属性  
+	    form.attr('action', action);  
+	    form.attr('method', 'post');  
+	    // form的target属性决定form在哪个页面提交  
+	    // _self -> 当前页面 _blank -> 新页面  
+	    form.attr('target', '_self');  
+	    // 创建Input  
+	    var searchTreeids_input = $('<input type="text" name="searchTreeids" />');
+	    searchTreeids_input.attr('value', treeids);  
+	    // 附加到Form  
+	    form.append(searchTreeids_input);
+	    
+	    var expand_input = $('<input type="text" name="expand" />');
+	    expand_input.attr('value', openexpand);
+	    // 附加到Form  
+	    form.append(expand_input);
+	    
+	    var searchTxt_input = $('<input type="text" name="searchTxt" />');
+	    searchTxt_input.attr('value', searchTxt);
+	    // 附加到Form  
+	    form.append(searchTxt_input);
+	    form.appendTo("body");
+        form.css('display','none');
+        
+	    // 提交表单  
+	    form.submit();   */
+		
+		//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
 	}
 	
 	function setshow(templetid,tabletype) {

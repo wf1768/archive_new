@@ -426,9 +426,20 @@ public abstract class BaseDaoMysqlImpl<T,ID> extends JdbcDaoSupport implements B
 		if(StringUtils.isEmpty(sql))return 0;
 		if(values==null)values=new ArrayList<Object>();
 		//TODO wf 修改，这里原始的sql，有错误。有时间看一下为什么会报错
-		StringBuilder sb=new StringBuilder("select count(*) from (");
-		sb.append(sql);
-		sb.append(") as _tn");
+//		StringBuilder sb=new StringBuilder("select count(id) from (");
+//		sb.append(sql);
+//		sb.append(") as _tn");
+//		
+//		if(log.isInfoEnabled()){
+//			log.debug("select count : "+sb.toString()+" values:"+values);
+//		}
+		
+		//因传入的sql是带select的，原外面套了一层select count 这样效率非常低。以下改为解析sql，获取表名和where后面的sql，拼接
+		String regex = "(?<=from)";
+        String[] strs = sql.toLowerCase().split(regex);
+        
+        StringBuilder sb=new StringBuilder("select count(id) from ");
+		sb.append(strs[1]);
 		
 //		StringBuilder sb = new StringBuilder();
 //		sb.append("select count(*) from ").append(this.tableName).append(" ").append(sql);

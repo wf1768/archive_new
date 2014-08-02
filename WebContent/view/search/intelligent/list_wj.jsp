@@ -130,9 +130,35 @@
 		} else {
 			var openexpand = JSON.stringify(expand);
 			var searchTreeids = '${searchTreeids}';
-			window.location.href = "${pageContext.request.contextPath}/intelligent/list.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "searchTreeids";
+			valueArr[0] = searchTreeids;
+			nameArr[1] = "expand";
+			valueArr[1] = openexpand;
+			nameArr[2] = "treeid";
+			valueArr[2] = nodes.id;
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			//window.location.href = "${pageContext.request.contextPath}/intelligent/list.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
 	};
+	
+	function post(URL, nameArr,valueArr) {
+	    $("body").append("<form></form>");  
+	    $("body").find("form").attr("action",URL);  
+	    $("body").find("form").attr("method","post");  
+	    $("body").find("form").attr("display","none");
+	    
+	    for (var i=0;i<nameArr.length;i++) {
+	    	$("body").find("form").append("<input type='text' name='"+nameArr[i]+"' value = '"+valueArr[i]+"'></input>");  
+	    }
+	    $("body").find("form").submit();  
+	} 
+	
 	
 	var nodes =  ${treeList};
 	$(function() {
@@ -215,13 +241,41 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}&searchTxt_aj=${searchTxt_aj }&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "treeid";
+			valueArr[0] = "${selectid}";
+			nameArr[1] = "parentid";
+			valueArr[1] = "${parentid}";
+			nameArr[2] = "page_aj";
+			valueArr[2] = "${page_aj}";
+			nameArr[3] = "searchTxt_aj";
+			valueArr[3] = "${searchTxt_aj }";
+			nameArr[4] = "tabletype";
+			valueArr[4] = "02";
+			nameArr[5] = "page";
+			valueArr[5] = page_index;
+			nameArr[6] = "searchTxt";
+			valueArr[6] = searchTxt;
+			nameArr[7] = "expand";
+			valueArr[7] = openexpand;
+			nameArr[8] = "searchTreeids";
+			valueArr[8] = searchTreeids;
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?"
+			//		+"treeid=${selectid}&parentid=${parentid}&page_aj=${page_aj}"
+			//		+"&searchTxt_aj=${searchTxt_aj }&tabletype=02"
+			//		+"&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
 	}; 
 	
 	function searchArchive() {
 		
-var searchTxt = $("#searchTxt").val();
+		var searchTxt = $("#searchTxt").val();
 		
 		if (searchTxt != "") {
 			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
@@ -241,13 +295,44 @@ var searchTxt = $("#searchTxt").val();
 		
 		var openexpand = JSON.stringify(expand);
 		
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "searchTreeids";
+		valueArr[0] = treeids;
+		nameArr[1] = "expand";
+		valueArr[1] = openexpand;
+		nameArr[2] = "searchTxt";
+		valueArr[2] = searchTxt;
+		
+		post("listSearch.do",nameArr,valueArr);
+		
+		//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
 	}
 	
 	function returnAj() {
 		var openexpand = JSON.stringify(expand);
 		var searchTreeids = '${searchTreeids}';
-		window.location.href='${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }&expand='+openexpand+'&searchTreeids='+searchTreeids;
+		
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "treeid";
+		valueArr[0] = "${selectid}";
+		nameArr[1] = "page";
+		valueArr[1] = "${page_aj}";
+		nameArr[2] = "searchTxt";
+		valueArr[2] = "${searchTxt_aj }";
+		nameArr[3] = "expand";
+		valueArr[3] = openexpand;
+		nameArr[4] = "searchTreeids";
+		valueArr[4] = searchTreeids;
+		
+		post("listSearch.do",nameArr,valueArr);
+		
+		//window.location.href='${pageContext.request.contextPath }/intelligent/list.do?'+
+		//		'treeid=${selectid}&page=${page_aj}&searchTxt=${searchTxt_aj }'
+		//		+'&expand='+openexpand+'&searchTreeids='+searchTreeids;
 	}
 	
 	function setshow(templetid,tabletype) {

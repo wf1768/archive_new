@@ -43,7 +43,7 @@ public class IndexControllerTask extends BaseConstroller{
 	 * 0 15 10 * * ? * 每天10点15分触发
 	 * @throws Exception 
 	 */
-	@Scheduled(cron = "0 0 12 * * ?")  
+//	@Scheduled(cron = "0 0 12 * * ?")  
 	//@Scheduled(fixedRate = 1000*9)  //启动出发，每隔9秒执行一次
 	public void createFilesIndexer() throws Exception{
 		//获取有没有全文浏览器，如果没有，前台不显示查看按钮

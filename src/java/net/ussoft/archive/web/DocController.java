@@ -608,7 +608,7 @@ public class DocController extends BaseConstroller {
 			File file =new File(tableIndexDir);    
 			//如果文件夹不存在则创建    
 			if(!file .exists()  && !file .isDirectory()){       
-			    file .mkdir();    
+			    file .mkdirs();
 			}
         	docConverter.setOutputPath(tableIndexDir + doc.getId());
         	boolean flag = docConverter.conver();

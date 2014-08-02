@@ -130,9 +130,34 @@
 		} else {
 			var openexpand = JSON.stringify(expand);
 			var searchTreeids = '${searchTreeids}';
-			window.location.href = "${pageContext.request.contextPath}/intelligent/list.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "searchTreeids";
+			valueArr[0] = searchTreeids;
+			nameArr[1] = "expand";
+			valueArr[1] = openexpand;
+			nameArr[2] = "treeid";
+			valueArr[2] = nodes.id;
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			//window.location.href = "${pageContext.request.contextPath}/intelligent/list.do?treeid=" + nodes.id + "&expand="+openexpand + "&searchTreeids="+searchTreeids;
 		}
 	};
+	
+	function post(URL, nameArr,valueArr) {
+	    $("body").append("<form></form>");  
+	    $("body").find("form").attr("action",URL);  
+	    $("body").find("form").attr("method","post");  
+	    $("body").find("form").attr("display","none");
+	    
+	    for (var i=0;i<nameArr.length;i++) {
+	    	$("body").find("form").append("<input type='text' name='"+nameArr[i]+"' value = '"+valueArr[i]+"'></input>");  
+	    }
+	    $("body").find("form").submit();  
+	} 
 	
 	var nodes =  ${treeList};
 	$(function() {
@@ -207,7 +232,30 @@
 		
 		var pageno = ${pagebean.pageNo };
 		if (page_index != pageno) {
-			window.location.href="${pageContext.request.contextPath }/intelligent/list.do?treeid=${selectid}&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+"&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
+			
+			var nameArr = new Array();
+			var valueArr = new Array();
+			
+			nameArr[0] = "treeid";
+			valueArr[0] = "${selectid}";
+			nameArr[1] = "tabletype";
+			valueArr[1] = "02";
+			nameArr[2] = "page";
+			valueArr[2] = page_index;
+			nameArr[3] = "searchTxt";
+			valueArr[3] = searchTxt;
+			nameArr[4] = "expand";
+			valueArr[4] = openexpand;
+			nameArr[5] = "searchTreeids";
+			valueArr[5] = searchTreeids;
+			nameArr[6] = "isSearchWj";
+			valueArr[6] = "1";
+			
+			post("listSearch.do",nameArr,valueArr);
+			
+			//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?"
+			//		+"treeid=${selectid}&tabletype=02&page="+page_index+"&searchTxt="+searchTxt+""
+			//		+"&expand="+openexpand + "&searchTreeids="+searchTreeids + "&isSearchWj=1";
 		}
 	}; 
 	
@@ -233,7 +281,19 @@
 		
 		var openexpand = JSON.stringify(expand);
 		
-		window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
+		var nameArr = new Array();
+		var valueArr = new Array();
+		
+		nameArr[0] = "searchTreeids";
+		valueArr[0] = treeids;
+		nameArr[1] = "expand";
+		valueArr[1] = openexpand;
+		nameArr[2] = "searchTxt";
+		valueArr[2] = searchTxt;
+		
+		post("listSearch.do",nameArr,valueArr);
+		
+		//window.location.href="${pageContext.request.contextPath }/intelligent/list.do?searchTreeids="+treeids+"&expand="+openexpand+"&searchTxt="+searchTxt;
 	}
 	
 	function setshow(templetid,tabletype) {
